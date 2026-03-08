@@ -38,6 +38,7 @@ interface AuthContextType {
   completedLessons: CompletedLesson[];
   savedCalmConfigs: SavedCalmConfig[];
   loading: boolean;
+  hasFullAccess: boolean;
   showAuthModal: boolean;
   setShowAuthModal: (show: boolean) => void;
   showProfileModal: boolean;
@@ -63,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [completedLessons, setCompletedLessons] = useState<CompletedLesson[]>([]);
   const [savedCalmConfigs, setSavedCalmConfigs] = useState<SavedCalmConfig[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasFullAccess, setHasFullAccess] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [localDataLoaded, setLocalDataLoaded] = useState(false);
@@ -396,6 +398,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       completedLessons,
       savedCalmConfigs,
       loading,
+      hasFullAccess,
       showAuthModal,
       setShowAuthModal,
       showProfileModal,
