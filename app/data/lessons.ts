@@ -28,6 +28,7 @@ export interface Lesson {
   steps: LessonStep[];
   senDifferentiation: string[];
   assessmentOpportunities: string[];
+  access: 'free' | 'preview' | 'paid';
 }
 
 export const LESSONS: Lesson[] = [
@@ -105,6 +106,7 @@ export const LESSONS: Lesson[] = [
       'Do they use language to express feelings?',
       'Can they recognise "too much"?',
     ],
+    access: 'free',
   },
   {
     id: 'lesson-2',
@@ -164,6 +166,7 @@ export const LESSONS: Lesson[] = [
       'Can the child identify calming items?',
       'Do they use the Calm Corner appropriately?',
     ],
+    access: 'preview',
   },
   {
     id: 'lesson-3',
@@ -213,6 +216,7 @@ export const LESSONS: Lesson[] = [
       'Can the child sort accurately?',
       'Do they remain engaged in quiet play?',
     ],
+    access: 'paid',
   },
   {
     id: 'lesson-4',
@@ -267,5 +271,6 @@ export const LESSONS: Lesson[] = [
       'Can the child identify different play styles?',
       'Do they show empathy?',
     ],
+access: 'paid',    
   },
 ];
