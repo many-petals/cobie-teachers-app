@@ -23,7 +23,7 @@ export default function LessonPlayerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { senMode } = useSEN();
-  const { markLessonComplete, isLessonCompleted, toggleFavourite, isFavourite } = useAuth();
+ const { hasFullAccess, markLessonComplete, isLessonCompleted, toggleFavourite, isFavourite } = useAuth();
   const { showToast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
   const [showSEN, setShowSEN] = useState(senMode);
@@ -33,6 +33,7 @@ export default function LessonPlayerScreen() {
 
 
   const lesson = LESSONS.find((l) => l.id === id);
+  const isLocked = lesson && lesson.access !== 'free' && !hasFullAccess;
 
   if (!lesson) {
     return (
@@ -47,7 +48,20 @@ export default function LessonPlayerScreen() {
       </SafeAreaView>
     );
   }
-
+if (isLocked) {
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.errorContainer}>
+        <Ionicons name="lock-closed" size={48} color={COLORS.error} />
+        <Text style={styles.errorText}>This content is included in Full Access.</Text>
+        <Text style={styles.errorText}>Your Free Preview includes Lesson 1 and the Free Resource Library.</Text>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Text style={styles.backButtonText}>Back to Free Preview</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
+}
   const step = lesson.steps[currentStep];
   const isFirst = currentStep === 0;
   const isLast = currentStep === lesson.steps.length - 1;
