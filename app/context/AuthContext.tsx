@@ -64,8 +64,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [completedLessons, setCompletedLessons] = useState<CompletedLesson[]>([]);
   const [savedCalmConfigs, setSavedCalmConfigs] = useState<SavedCalmConfig[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hasFullAccess, setHasFullAccess] = useState(false);
+ const testerEmails = ["caroline_marklew@hotmail.com", "mand1984@yahoo.co.uk"];
+  const [hasFullAccess, setHasFullAccess] = useState(testerEmails.includes(user?.email));
   const [showAuthModal, setShowAuthModal] = useState(false);
+  
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [localDataLoaded, setLocalDataLoaded] = useState(false);
 
