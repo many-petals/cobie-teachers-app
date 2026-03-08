@@ -65,7 +65,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [savedCalmConfigs, setSavedCalmConfigs] = useState<SavedCalmConfig[]>([]);
   const [loading, setLoading] = useState(true);
  const testerEmails = ["caroline_marklew@hotmail.com", "mand1984@yahoo.co.uk"];
-  const [hasFullAccess, setHasFullAccess] = useState(testerEmails.includes(user?.email));
+  useEffect(() => {
+  if (testerEmails.includes(user?.email)) {
+    setHasFullAccess(true);
+  }
+}, [user]);
+ const [hasFullAccess, setHasFullAccess] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   
   const [showProfileModal, setShowProfileModal] = useState(false);
