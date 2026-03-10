@@ -409,7 +409,20 @@ export default function HomeScreen() {
           </View>
         </View>
 
+{/* Cobie introduction */}
+<View style={{ paddingHorizontal: 20, paddingVertical: 16 }}>
+  <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 6 }}>
+    How Cobie Supports Your Classroom
+  </Text>
 
+  <Text style={{ fontSize: 14, lineHeight: 20 }}>
+    Cobie the Cactus is a ready-to-use emotional literacy toolkit for EYFS
+    and KS1 classrooms. Through story-based learning, practical activities,
+    and simple wellbeing tracking, Cobie helps children understand emotions,
+    build sensory awareness and develop inclusion and empathy — all with
+    no preparation required.
+  </Text>
+</View>
         {/* Welcome back / progress for logged-in users */}
         {mounted && user ? (
           <View style={styles.welcomeSection}>
