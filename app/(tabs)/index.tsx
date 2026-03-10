@@ -381,6 +381,12 @@ export default function HomeScreen() {
                     Classroom-ready resources for emotional literacy, sensory awareness, and inclusion.
                     Evidence-based. SEN-first. No preparation required.
                   </Text>
+<View style={{ marginTop: 10 }}>
+  <Text style={{ fontSize: 14 }}>• Lessons — guided emotional literacy through Cobie’s story</Text>
+  <Text style={{ fontSize: 14 }}>• Activities — calming, movement and reflection exercises</Text>
+  <Text style={{ fontSize: 14 }}>• Tracker — monitor pupil wellbeing milestones</Text>
+  <Text style={{ fontSize: 14 }}>• Printables — classroom resources and parent communication sheets</Text>
+</View>                  
                 </View>
                 <Image
                   source={{ uri: BRAND.logoUrl }}
