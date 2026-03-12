@@ -53,7 +53,7 @@ const PLANS = [
       { label: 'Save favourites & progress', included: true },
       { label: 'School-wide dashboard', included: false },
     ],
-    cta: 'Start Free Trial',
+    cta: 'Start Free 14 Day Free Trial',
     popular: true,
   },
   {
@@ -136,7 +136,7 @@ export default function PricingSection({ visible, onClose }: PricingSectionProps
             <View style={styles.valueBar}>
               <Ionicons name="shield-checkmark" size={16} color={COLORS.secondary} />
               <Text style={styles.valueText}>
-                7-day free trial on all paid plans. Cancel anytime.
+                14-day free trial on all paid plans. Cancel anytime.
               </Text>
             </View>
 
@@ -213,7 +213,7 @@ export default function PricingSection({ visible, onClose }: PricingSectionProps
                 <Text style={styles.faqQ}>Can I try before I buy?</Text>
                 <Text style={styles.faqA}>
                   Yes! The free plan gives you access to Lesson 1, sample printables, 
-                  and the emotion tools. All paid plans include a 7-day free trial.
+                  and the emotion tools. All paid plans include a 14-day free trial.
                 </Text>
               </View>
               <View style={styles.faqItem}>
