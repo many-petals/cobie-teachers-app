@@ -60,7 +60,7 @@ export default function LessonsScreen() {
                 style={[styles.lessonHeader, { borderLeftColor: lesson.color }]}
                 onPress={() => {
                   if (locked) {
-                    router.push('/guide');
+                    router.push('/upgrade');
                   } else {
                     setExpandedId(isExpanded ? null : lesson.id);
                   }
@@ -204,7 +204,7 @@ export default function LessonsScreen() {
                     style={[styles.startButton, { backgroundColor: lesson.color }]}
                     onPress={() => {
                       if (locked) {
-                        router.push('/guide');
+                        router.push('/upgrade');
                       } else {
                         router.push(`/lesson/${lesson.id}` as any);
                       }
