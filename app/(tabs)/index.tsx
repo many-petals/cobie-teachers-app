@@ -112,15 +112,15 @@ function ProfileModal({ visible, onClose }: { visible: boolean; onClose: () => v
   <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 6 }}>
     How Cobie Supports Your Classroom
   </Text>
+  </View>
+<Text style={{ fontSize: 14, lineHeight: 20 }}>
+  Cobie the Cactus is an evidence-informed emotional literacy programme designed for EYFS and Key Stage 1 classrooms. It helps children understand emotions, develop calming strategies, and build empathy through short, practical activities that fit easily into the school day.
+  
+  The programme combines four simple elements:
+Daily Emotion Check-Ins  
+Short 1–2 minute check-ins help children recognise and name their feelings. Over time this builds emotional awareness and helps teachers notice children who may need additional support.
+</Text>
 
-  <Text style={{ fontSize: 14, lineHeight: 20 }}>
-    Cobie the Cactus is a ready-to-use emotional literacy toolkit for EYFS
-    and KS1 classrooms. Through story-based learning, practical activities,
-    and simple wellbeing tracking, Cobie helps children understand emotions,
-    build sensory awareness and develop inclusion and empathy — all with
-    no preparation required.
-  </Text>
-</View>
 
             {/* Stats */}
             <View style={pStyles.statsRow}>
@@ -423,6 +423,14 @@ export default function HomeScreen() {
     build sensory awareness and develop inclusion and empathy — all with
     no preparation required.
   </Text>
+  <TouchableOpacity
+  style={{ marginTop: 12, padding: 10, backgroundColor: '#1B6B93', borderRadius: 8, alignSelf: 'flex-start' }}
+  onPress={() => router.push('/guide' as any)}
+>
+  <Text style={{ color: '#fff', fontWeight: '600' }}>
+    How to Use This Programme
+  </Text>
+</TouchableOpacity>
 </View>
         {/* Welcome back / progress for logged-in users */}
         {mounted && user ? (

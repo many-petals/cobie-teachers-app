@@ -53,7 +53,7 @@ const PLANS = [
       { label: 'Save favourites & progress', included: true },
       { label: 'School-wide dashboard', included: false },
     ],
-    cta: 'Start Free 14 Day Free Trial',
+    cta: 'Start 14-Day Trial',
     popular: true,
   },
   {

@@ -19,7 +19,7 @@ import { useAuth } from '../context/AuthContext';
 export default function LessonsScreen() {
   const router = useRouter();
   const { senMode } = useSEN();
-  const { toggleFavourite, isFavourite, isLessonCompleted } = useAuth();
+  const { toggleFavourite, isFavourite, isLessonCompleted, hasFullAccess } = useAuth();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
@@ -35,26 +35,47 @@ export default function LessonsScreen() {
         instructions, materials lists, and SEN differentiation.
       </Text>
 
+      {!hasFullAccess && (
+  <View style={styles.upgradeBanner}>
+    <Text style={styles.upgradeTitle}>Unlock all 4 emotional literacy lessons</Text>
+    <Text style={styles.upgradeText}>✔ Full lesson plans{"\n"}✔ Differentiation ideas{"\n"}✔ Printable worksheets</Text>
+    <TouchableOpacity
+      style={styles.upgradeButton}
+      onPress={() => router.push('/guide')}
+    >
+      <Text style={styles.upgradeButtonText}>Start 14-Day Trial</Text>
+    </TouchableOpacity>
+  </View>
+)}
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {LESSONS.map((lesson) => {
           const isExpanded = expandedId === lesson.id;
           const completed = isLessonCompleted(lesson.id);
+          const locked = !hasFullAccess && lesson.number > 1;
           const favourited = isFavourite('lesson', lesson.id);
 
           return (
             <View key={lesson.id} style={styles.lessonCard}>
               <TouchableOpacity
                 style={[styles.lessonHeader, { borderLeftColor: lesson.color }]}
-                onPress={() => setExpandedId(isExpanded ? null : lesson.id)}
+                onPress={() => {
+                  if (locked) {
+                    router.push('/guide');
+                  } else {
+                    setExpandedId(isExpanded ? null : lesson.id);
+                  }
+                }}
                 activeOpacity={0.7}
               >
-                <View style={[styles.lessonNumber, { backgroundColor: lesson.color }]}>
-                  {completed ? (
-                    <Ionicons name="checkmark" size={20} color={COLORS.white} />
-                  ) : (
-                    <Text style={styles.lessonNumberText}>{lesson.number}</Text>
-                  )}
-                </View>
+<View style={[styles.lessonNumber, { backgroundColor: locked ? COLORS.mediumGray : lesson.color }]}>
+  {locked ? (
+    <Ionicons name="lock-closed" size={18} color={COLORS.white} />
+  ) : completed ? (
+    <Ionicons name="checkmark" size={20} color={COLORS.white} />
+  ) : (
+    <Text style={styles.lessonNumberText}>{lesson.number}</Text>
+  )}
+</View>
                 <View style={styles.lessonInfo}>
                   <View style={styles.titleRow}>
                     <Text style={[styles.lessonTitle, senMode && styles.senTitle]} numberOfLines={2}>
@@ -181,7 +202,13 @@ export default function LessonsScreen() {
 
                   <TouchableOpacity
                     style={[styles.startButton, { backgroundColor: lesson.color }]}
-                    onPress={() => router.push(`/lesson/${lesson.id}` as any)}
+                    onPress={() => {
+                      if (locked) {
+                        router.push('/guide');
+                      } else {
+                        router.push(`/lesson/${lesson.id}` as any);
+                      }
+                    }}
                     activeOpacity={0.7}
                   >
                     <Ionicons name={completed ? 'refresh' : 'play-circle'} size={22} color={COLORS.white} />
@@ -223,6 +250,35 @@ const styles = StyleSheet.create({
   completedText: { fontSize: FONT_SIZES.xs, fontWeight: '600', color: COLORS.secondary },
   focusBadge: { paddingHorizontal: SPACING.sm, paddingVertical: 2, borderRadius: RADIUS.round },
   focusText: { fontSize: FONT_SIZES.xs, fontWeight: '600' },
+  upgradeBanner: {
+    backgroundColor: '#FFF7E6',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16
+  },
+  
+  upgradeTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 6
+  },
+  
+  upgradeText: {
+    fontSize: 14,
+    marginBottom: 10
+  },
+  
+  upgradeButton: {
+    backgroundColor: '#6B46C1',
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center'
+  },
+  
+  upgradeButtonText: {
+    color: '#fff',
+    fontWeight: '600'
+  },
   expandedContent: { padding: SPACING.lg, paddingTop: 0, borderTopWidth: 1, borderTopColor: COLORS.lightGray },
   themeText: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20, marginTop: SPACING.md, fontStyle: 'italic' },
   subSection: { marginTop: SPACING.lg },
