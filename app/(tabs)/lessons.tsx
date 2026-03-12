@@ -28,17 +28,16 @@ export default function LessonsScreen() {
         <Ionicons name="book" size={24} color={COLORS.primary} />
         <Text style={styles.headerTitle}>Core Lessons</Text>
       </View>
-      <SENBanner />
+      
 
       <Text style={styles.intro}>
-        4 complete lessons designed for immediate classroom use. Each includes step-by-step
-        instructions, materials lists, and SEN differentiation.
+      8 ready-to-teach emotional literacy lessons for EYFS and KS1.
       </Text>
 
       {!hasFullAccess && (
   <View style={styles.upgradeBanner}>
-    <Text style={styles.upgradeTitle}>Unlock all 4 emotional literacy lessons</Text>
-    <Text style={styles.upgradeText}>✔ Full lesson plans{"\n"}✔ Differentiation ideas{"\n"}✔ Printable worksheets</Text>
+    <Text style={styles.upgradeTitle}>Unlock all 8 emotional literacy lessons</Text>
+    <Text style={styles.upgradeText}>Full lesson plans • SEN differentiation • Printable resources</Text>
     <TouchableOpacity
       style={styles.upgradeButton}
       onPress={() => router.push('/guide')}
