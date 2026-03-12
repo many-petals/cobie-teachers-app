@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.bgLight },
   header: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg, paddingBottom: SPACING.sm },
   headerTitle: { fontSize: FONT_SIZES.xxl, fontWeight: '800', color: COLORS.text },
-  intro: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20, paddingHorizontal: SPACING.lg, marginTop: SPACING.sm, marginBottom: SPACING.md },
+  intro: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 18, paddingHorizontal: SPACING.lg, marginBottom: 6 },
   container: { flex: 1, paddingHorizontal: SPACING.lg },
   lessonCard: { backgroundColor: COLORS.white, borderRadius: RADIUS.xl, marginBottom: SPACING.md, overflow: 'hidden', ...SHADOWS.small },
   lessonHeader: { flexDirection: 'row', alignItems: 'center', padding: SPACING.lg, borderLeftWidth: 5 },
