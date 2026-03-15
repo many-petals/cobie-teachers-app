@@ -1,8 +1,9 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-
+import { useAuth } from './context/AuthContext';
 export default function UpgradeScreen() {
   const router = useRouter();
+  const { setHasFullAccess } = useAuth();
 
   return (
     <View style={styles.container}>
@@ -18,7 +19,10 @@ export default function UpgradeScreen() {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push('/subscribe')}
+        onPress={() => {
+          setHasFullAccess(true);
+          router.replace('/lessons');
+        }}
       >
         <Text style={styles.buttonText}>Start 14-Day Free Trial</Text>
       </TouchableOpacity>

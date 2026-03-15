@@ -127,9 +127,15 @@ export default function PrintablesScreen() {
         </TouchableOpacity>
       </View>
 
-      <SearchBar value={search} onChangeText={setSearch} placeholder="Search printables..." />
-      <FilterChips chips={CATEGORY_FILTERS} selected={categoryFilter} onSelect={setCategoryFilter} />
-      <FilterChips chips={AGE_FILTERS} selected={ageFilter} onSelect={setAgeFilter} />
+      <View style={{ marginHorizontal: 16, marginBottom: 6 }}>
+  <SearchBar value={search} onChangeText={setSearch} placeholder="Search printables..." />
+</View>
+<View style={{ marginBottom: 4 }}>
+  <FilterChips chips={CATEGORY_FILTERS} selected={categoryFilter} onSelect={setCategoryFilter} />
+</View>
+<View style={{ marginBottom: 6 }}>
+  <FilterChips chips={AGE_FILTERS} selected={ageFilter} onSelect={setAgeFilter} />
+</View>
 
       <Text style={styles.resultCount}>
         {filtered.length} resource{filtered.length !== 1 ? 's' : ''} found
@@ -223,8 +229,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: SPACING.lg },
   emptyState: { alignItems: 'center', paddingVertical: SPACING.huge },
   emptyText: { fontSize: FONT_SIZES.lg, fontWeight: '600', color: COLORS.textLight, marginTop: SPACING.md },
-  card: { backgroundColor: COLORS.white, borderRadius: RADIUS.xl, padding: SPACING.lg, marginBottom: SPACING.md, borderLeftWidth: 4, ...SHADOWS.small },
-  cardHeader: { flexDirection: 'row', alignItems: 'center' },
+  card: { backgroundColor: COLORS.white, borderRadius: RADIUS.xl, paddingVertical: 12, paddingHorizontal: 14, marginBottom: 10, borderLeftWidth: 4, ...SHADOWS.small },  cardHeader: { flexDirection: 'row', alignItems: 'center' },
   iconCircle: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginRight: SPACING.md },
   cardInfo: { flex: 1 },
   cardTitle: { fontSize: FONT_SIZES.md, fontWeight: '700', color: COLORS.text },
@@ -237,8 +242,8 @@ const styles = StyleSheet.create({
   description: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20, marginTop: SPACING.md },
   formatRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginTop: SPACING.md, flexWrap: 'wrap' },
   formatLabel: { fontSize: FONT_SIZES.xs, fontWeight: '600', color: COLORS.textMuted },
-  formatButton: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs, borderRadius: RADIUS.round, backgroundColor: COLORS.bgLight, borderWidth: 1, borderColor: COLORS.primary + '30' },
-  formatButtonActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
+  formatButton: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: COLORS.primary + '10' },
+  formatButtonActive: { backgroundColor: COLORS.primary },
   formatText: { fontSize: FONT_SIZES.xs, fontWeight: '600', color: COLORS.primary },
   formatTextActive: { color: COLORS.white },
 });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { Stack } from 'expo-router';
 import { SENProvider } from './context/SENContext';
 import { AuthProvider } from './context/AuthContext';
@@ -66,6 +66,8 @@ export default function RootLayout() {
               name="lesson/[id]"
               options={{
                 headerShown: false,
+                
+                headerTitleAlign: 'center',
                 presentation: 'modal',
               }}
             />

@@ -39,6 +39,7 @@ interface AuthContextType {
   savedCalmConfigs: SavedCalmConfig[];
   loading: boolean;
   hasFullAccess: boolean;
+  setHasFullAccess: (value: boolean) => void;
   showAuthModal: boolean;
   setShowAuthModal: (show: boolean) => void;
   showProfileModal: boolean;
@@ -406,6 +407,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       savedCalmConfigs,
       loading,
       hasFullAccess,
+      setHasFullAccess,
       showAuthModal,
       setShowAuthModal,
       showProfileModal,

@@ -12,7 +12,7 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { LESSONS } from '../data/lessons';
 import { PRINTABLES } from '../data/printables';
-import SENBanner from '../components/SENBanner';
+
 import { useSEN } from '../context/SENContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -34,17 +34,17 @@ export default function LessonsScreen() {
       8 ready-to-teach emotional literacy lessons for EYFS and KS1.
       </Text>
 
-      {!hasFullAccess && (
+      {!hasFullAccess && (  
   <View style={styles.upgradeBanner}>
     <Text style={styles.upgradeTitle}>Unlock all 8 emotional literacy lessons</Text>
     <Text style={styles.upgradeText}>Full lesson plans • SEN differentiation • Printable resources</Text>
     <TouchableOpacity
       style={styles.upgradeButton}
-      onPress={() => router.push('/guide')}
+      onPress={() => router.push('/upgrade')}
     >
       <Text style={styles.upgradeButtonText}>Start 14-Day Trial</Text>
     </TouchableOpacity>
-  </View>
+    </View>
 )}
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {LESSONS.map((lesson) => {
@@ -234,16 +234,27 @@ const styles = StyleSheet.create({
   intro: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 18, paddingHorizontal: SPACING.lg, marginBottom: 6 },
   container: { flex: 1, paddingHorizontal: SPACING.lg },
   lessonCard: { backgroundColor: COLORS.white, borderRadius: RADIUS.xl, marginBottom: SPACING.md, overflow: 'hidden', ...SHADOWS.small },
-  lessonHeader: { flexDirection: 'row', alignItems: 'center', padding: SPACING.lg, borderLeftWidth: 5 },
-  lessonNumber: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginRight: SPACING.md },
-  lessonNumberText: { fontSize: FONT_SIZES.lg, fontWeight: '800', color: COLORS.white },
+  lessonNumber: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  
+  lessonNumberText: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '800',
+    color: COLORS.white
+  },
+  lessonHeader: { flexDirection: 'row', alignItems: 'center', paddingVertical: SPACING.sm, paddingHorizontal: SPACING.md, borderLeftWidth: 5 },
   lessonInfo: { flex: 1 },
   titleRow: { flexDirection: 'row', alignItems: 'flex-start' },
   lessonTitle: { flex: 1, fontSize: FONT_SIZES.md, fontWeight: '700', color: COLORS.text, lineHeight: 22 },
   senTitle: { fontSize: FONT_SIZES.lg },
   favBtn: { padding: 4, marginLeft: SPACING.sm },
-  lessonMeta: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, marginTop: SPACING.xs, flexWrap: 'wrap' },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  lessonMeta: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginTop: 2 },
   metaText: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
   completedBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: COLORS.bgGreen, paddingHorizontal: SPACING.sm, paddingVertical: 2, borderRadius: RADIUS.round },
   completedText: { fontSize: FONT_SIZES.xs, fontWeight: '600', color: COLORS.secondary },
@@ -251,15 +262,16 @@ const styles = StyleSheet.create({
   focusText: { fontSize: FONT_SIZES.xs, fontWeight: '600' },
   upgradeBanner: {
     backgroundColor: '#FFF7E6',
-    padding: 16,
+    paddingVertical: 6,
+paddingHorizontal: 10,
     borderRadius: 12,
-    marginBottom: 16
+    marginBottom: 8
   },
   
   upgradeTitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 6
+    marginBottom: 2
   },
   
   upgradeText: {
