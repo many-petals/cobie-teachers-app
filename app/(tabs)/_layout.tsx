@@ -20,7 +20,7 @@ export default function TabLayout() {
           />
              ), 
              headerRight: () => (
-              <TouchableOpacity style={styles.senButton}>
+              <TouchableOpacity style={styles.senButton} onPress={toggleSENMode}>
                 <Text style={styles.senButtonText}>SEN</Text>
               </TouchableOpacity>
             ),        

@@ -50,7 +50,7 @@ export default function LessonsScreen() {
         {LESSONS.map((lesson) => {
           const isExpanded = expandedId === lesson.id;
           const completed = isLessonCompleted(lesson.id);
-          const locked = !hasFullAccess && lesson.number > 1;
+          const locked = !hasFullAccess && lesson.number !== 1 && lesson.number !== 5;
           const favourited = isFavourite('lesson', lesson.id);
 
           return (
@@ -80,6 +80,11 @@ export default function LessonsScreen() {
                     <Text style={[styles.lessonTitle, senMode && styles.senTitle]} numberOfLines={2}>
                       {lesson.title}
                     </Text>
+                    {locked && (
+  <Text style={{ fontSize: 12, color: COLORS.mediumGray, marginTop: 4 }}>
+    Unlock with full access
+  </Text>
+)}                 
                     <TouchableOpacity
                       onPress={() => toggleFavourite('lesson', lesson.id)}
                       style={styles.favBtn}
@@ -212,7 +217,11 @@ export default function LessonsScreen() {
                   >
                     <Ionicons name={completed ? 'refresh' : 'play-circle'} size={22} color={COLORS.white} />
                     <Text style={styles.startButtonText}>
-                      {completed ? 'Replay Lesson' : 'Start Lesson Player'}
+                    {locked
+  ? 'Unlock Lesson'
+  : completed
+  ? 'Replay Lesson'
+  : 'Start Lesson Player'}
                     </Text>
                   </TouchableOpacity>
                 </View>

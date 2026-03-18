@@ -107,7 +107,7 @@ if (isLocked) {
           </Text>
           <TouchableOpacity
             style={[styles.completionButton, { backgroundColor: lesson.color }]}
-            onPress={() => router.back()}
+            onPress={() => router.push('/lessons')}
             activeOpacity={0.7}
           >
             <Ionicons name="arrow-back" size={20} color={COLORS.white} />
