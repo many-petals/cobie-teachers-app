@@ -133,6 +133,9 @@ const styles = StyleSheet.create({
     borderColor: COLORS.accent,
     ...SHADOWS.medium,
     position: 'relative',
+    maxWidth: 900,
+    alignSelf: 'stretch',
+    width: '100%', 
   },
   dismissBtn: {
     position: 'absolute',

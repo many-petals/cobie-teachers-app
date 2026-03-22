@@ -39,18 +39,6 @@ const QUICK_TILES = [
 ];
 
 
-
-const TEACHING_FLOW = [
-  { step: 1, title: 'Read the story', icon: 'book-outline', color: '#4FC3F7' },
-  { step: 2, title: 'Choose a core lesson', icon: 'school-outline', color: '#81C784' },
-  { step: 3, title: 'Add optional activities', icon: 'add-circle-outline', color: '#FFB74D' },
-  { step: 4, title: 'Send parent letters home', icon: 'people-outline', color: '#1B6B93' },
-  { step: 5, title: 'Use printables to reinforce', icon: 'print-outline', color: '#CE93D8' },
-  { step: 6, title: 'Track pupil milestones', icon: 'analytics-outline', color: '#9C27B0' },
-];
-
-
-
 // Safe date formatter that avoids hydration mismatches
 function formatDate(dateStr: string): string {
   try {
@@ -302,6 +290,7 @@ export default function HomeScreen() {
   const { user, profile, setShowAuthModal, completedLessons, favourites } = useAuth();
   const [showProfile, setShowProfile] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
+  const [insideExpanded, setInsideExpanded] = useState(false);
   // Track client-side mount to prevent hydration mismatch from auth state
   const [mounted, setMounted] = useState(false);
 
@@ -405,33 +394,19 @@ export default function HomeScreen() {
                 >
                   <Text style={styles.heroButtonSecondaryText}>View Plans</Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.heroButtonSecondary}
+                  onPress={() => router.push('/guide' as any)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.heroButtonSecondaryText}>How to Use This Programme</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
         </View>
 
-{/* Cobie introduction */}
-<View style={{ paddingHorizontal: 20, paddingVertical: 16 }}>
-  <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 6 }}>
-    How Cobie Supports Your Classroom
-  </Text>
 
-  <Text style={{ fontSize: 14, lineHeight: 20 }}>
-    Cobie the Cactus is a ready-to-use emotional literacy toolkit for EYFS
-    and KS1 classrooms. Through story-based learning, practical activities,
-    and simple wellbeing tracking, Cobie helps children understand emotions,
-    build sensory awareness and develop inclusion and empathy — all with
-    no preparation required.
-  </Text>
-  <TouchableOpacity
-  style={{ marginTop: 12, padding: 10, backgroundColor: '#1B6B93', borderRadius: 8, alignSelf: 'flex-start' }}
-  onPress={() => router.push('/guide' as any)}
->
-  <Text style={{ color: '#fff', fontWeight: '600' }}>
-    How to Use This Programme
-  </Text>
-</TouchableOpacity>
-</View>
         {/* Welcome back / progress for logged-in users */}
         {mounted && user ? (
           <View style={styles.welcomeSection}>
@@ -484,65 +459,52 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Workbook Promo - Compact */}
-        <View style={styles.section}>
-          <WorkbookPromo compact />
-        </View>
 
         {/* Today's Activity */}
         <TodayActivity
+  style={{ marginBottom: 8 }}
           onViewActivity={(id) => router.push(`/activity/${id}` as any)}
         />
-
-        {/* Teaching Flow */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Teaching Flow</Text>
-          <Text style={styles.sectionSubtitle}>
-            Follow these steps for a complete lesson experience
-          </Text>
-          <View style={styles.flowContainer}>
-            {TEACHING_FLOW.map((item, index) => (
-              <View key={item.step} style={styles.flowItem}>
-                <View style={[styles.flowIcon, { backgroundColor: item.color + '20' }]}>
-                  <Ionicons name={item.icon as any} size={24} color={item.color} />
-                </View>
-                <View style={styles.flowContent}>
-                  <Text style={styles.flowStep}>Step {item.step}</Text>
-                  <Text style={styles.flowTitle}>{item.title}</Text>
-                </View>
-                {index < TEACHING_FLOW.length - 1 ? (
-                  <View style={styles.flowArrow}>
-                    <Ionicons name="chevron-forward" size={18} color={COLORS.mediumGray} />
-                  </View>
-                ) : null}
-              </View>
-            ))}
-          </View>
-        </View>
+ 
+          
 
         {/* Workbook Promo - Full */}
         <WorkbookPromo />
 
         {/* What's Inside */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>What's Inside</Text>
+        <View style={[styles.section, { paddingHorizontal: 0 }]}>
+        <TouchableOpacity
+  onPress={() => setInsideExpanded(!insideExpanded)}
+  style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+>
+  <Text style={styles.sectionTitle}>What's Inside</Text>
+  <Ionicons
+    name={insideExpanded ? 'chevron-up' : 'chevron-down'}
+    size={20}
+    color={COLORS.textLight}
+  />
+</TouchableOpacity>
           <View style={styles.statsRow}>
-            <View style={[styles.statCard, { backgroundColor: COLORS.bgLight }]}>
-              <Text style={[styles.statNumber, { color: COLORS.primary }]}>4</Text>
-              <Text style={styles.statLabel}>Core Lessons</Text>
-            </View>
-            <View style={[styles.statCard, { backgroundColor: COLORS.bgGreen }]}>
-              <Text style={[styles.statNumber, { color: COLORS.secondary }]}>8</Text>
-              <Text style={styles.statLabel}>Activities</Text>
-            </View>
-            <View style={[styles.statCard, { backgroundColor: COLORS.bgOrange }]}>
-              <Text style={[styles.statNumber, { color: COLORS.accentOrange }]}>18</Text>
-              <Text style={styles.statLabel}>Printables</Text>
-            </View>
-            <View style={[styles.statCard, { backgroundColor: COLORS.bgPink }]}>
-              <Text style={[styles.statNumber, { color: COLORS.pink }]}>4</Text>
-              <Text style={styles.statLabel}>Parent Letters</Text>
-            </View>
+            {insideExpanded && (
+              <>
+                <View style={[styles.statCard, { backgroundColor: COLORS.bgLight }]}>
+                  <Text style={[styles.statNumber, { color: COLORS.primary }]}>8</Text>
+                  <Text style={styles.statLabel}>Core Lessons</Text>
+                </View>
+                <View style={[styles.statCard, { backgroundColor: COLORS.bgGreen }]}>
+                  <Text style={[styles.statNumber, { color: COLORS.secondary }]}>8</Text>
+                  <Text style={styles.statLabel}>Activities</Text>
+                </View>
+                <View style={[styles.statCard, { backgroundColor: COLORS.bgOrange }]}>
+                  <Text style={[styles.statNumber, { color: COLORS.accentOrange }]}>18</Text>
+                  <Text style={styles.statLabel}>Printables</Text>
+                </View>
+                <View style={[styles.statCard, { backgroundColor: COLORS.bgPink }]}>
+                  <Text style={[styles.statNumber, { color: COLORS.pink }]}>4</Text>
+                  <Text style={styles.statLabel}>Parent Letters</Text>
+                </View>
+              </>
+            )}
           </View>
         </View>
 
@@ -823,7 +785,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.lightGray,
   },
   hero: {
-    height: 320,
+    height: 220,
     position: 'relative',
   },
   heroImage: {
@@ -834,9 +796,10 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(27, 107, 147, 0.82)',
     justifyContent: 'flex-end',
+    paddingVertical: 20,
   },
   heroContent: {
-    padding: SPACING.xl,
+    padding: SPACING.md,
   },
   heroRow: {
     flexDirection: 'row',
@@ -847,8 +810,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   heroMascot: {
-    width: 110,
-    height: 130,
+    width: 80,
+    height: 90,
     borderRadius: RADIUS.lg,
   },
   heroTitle: {
@@ -906,8 +869,7 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   section: {
-    paddingHorizontal: SPACING.lg,
-    marginTop: SPACING.xxl,
+    marginTop: SPACING.lg,
   },
   sectionTitle: {
     fontSize: FONT_SIZES.xl,

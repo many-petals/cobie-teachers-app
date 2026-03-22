@@ -9,7 +9,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: true,
+        headerShown: false,
         headerTitleAlign: 'left',  
         headerTitle: () => null,
         headerLeft: () => (
@@ -67,15 +67,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="tracker"
-        options={{
-          title: '',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="analytics" size={size} color={color} />
-          ),
-        }}
-      />
+      
       <Tabs.Screen
         name="printables"
         options={{
@@ -84,25 +76,9 @@ export default function TabLayout() {
             <Ionicons name="print" size={size} color={color} />
           ),
         }}
+     
       />
-      <Tabs.Screen
-        name="parents"
-        options={{
-          title: '',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="tools"
-        options={{
-          title: '',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="heart" size={size} color={color} />
-          ),
-        }}
-      />
+      
       <Tabs.Screen
         name="calm"
         options={{

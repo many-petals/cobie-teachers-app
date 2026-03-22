@@ -1,9 +1,58 @@
+import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from './context/AuthContext';
+
 export default function UpgradeScreen() {
   const router = useRouter();
   const { setHasFullAccess } = useAuth();
+  const handleUpgrade = () => {
+    window.location.href = 'https://buy.stripe.com/5kQcN62iV50U4Gxh10dAk00';
+  };
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: 1,
+          padding: 24,
+          justifyContent: 'center',
+          backgroundColor: '#ffffff'
+        },
+
+        title: {
+          fontSize: 24,
+          fontWeight: '700',
+          marginBottom: 24
+        },
+
+        item: {
+          fontSize: 16,
+          marginBottom: 10
+        },
+
+        button: {
+          marginTop: 30,
+          backgroundColor: '#6B46C1',
+          padding: 14,
+          borderRadius: 10,
+          alignItems: 'center'
+        },
+
+        buttonText: {
+          color: '#fff',
+          fontWeight: '600',
+          fontSize: 16
+        },
+
+        back: {
+          marginTop: 20,
+          textAlign: 'center',
+          color: '#666'
+        }
+      }),
+    []
+  );
 
   return (
     <View style={styles.container}>
@@ -19,10 +68,7 @@ export default function UpgradeScreen() {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => {
-          setHasFullAccess(true);
-          router.replace('/lessons');
-        }}
+        onPress={handleUpgrade}
       >
         <Text style={styles.buttonText}>Start 14-Day Free Trial</Text>
       </TouchableOpacity>
@@ -33,43 +79,3 @@ export default function UpgradeScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'center',
-    backgroundColor: '#ffffff'
-  },
-
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 24
-  },
-
-  item: {
-    fontSize: 16,
-    marginBottom: 10
-  },
-
-  button: {
-    marginTop: 30,
-    backgroundColor: '#6B46C1',
-    padding: 14,
-    borderRadius: 10,
-    alignItems: 'center'
-  },
-
-  buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 16
-  },
-
-  back: {
-    marginTop: 20,
-    textAlign: 'center',
-    color: '#666'
-  }
-});

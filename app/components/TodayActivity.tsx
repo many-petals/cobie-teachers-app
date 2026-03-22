@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { ACTIVITIES } from '../data/activities';
@@ -13,7 +13,12 @@ function getDeterministicIndex(): number {
   return dayOfYear % ACTIVITIES.length;
 }
 
-export default function TodayActivity({ onViewActivity }: { onViewActivity: (id: string) => void }) {
+type TodayActivityProps = {
+  onViewActivity: (id: string) => void;
+  style?: StyleProp<ViewStyle>;
+};
+
+export default function TodayActivity({ onViewActivity, style }: TodayActivityProps) {
   // Use a deterministic initial value to avoid hydration mismatch
   const [currentIndex, setCurrentIndex] = useState(0);
   const [mounted, setMounted] = useState(false);
@@ -37,7 +42,7 @@ export default function TodayActivity({ onViewActivity }: { onViewActivity: (id:
   if (!activity) return null;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Ionicons name="sparkles" size={20} color={COLORS.accent} />
