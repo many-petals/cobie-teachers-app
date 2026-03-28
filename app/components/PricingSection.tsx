@@ -100,7 +100,7 @@ export default function PricingSection({ visible, onClose }: PricingSectionProps
       return;
     }
     if (planId === 'school') {
-      window.open('mailto:info@manypetals.co.uk?subject=School%20Plan%20Enquiry');
+      window.location.href = 'mailto:info@manypetals.co.uk?subject=School%20Plan%20Enquiry';
       return;
     }
     setSelectedPlan(planId);
