@@ -101,7 +101,7 @@ export default function PricingSection({ visible, onClose }: PricingSectionProps
     }
     if (planId === 'school') {
       window.open('mailto:info@manypetals.co.uk?subject=School%20Plan%20Enquiry');
-    }
+      return;
     }
     setSelectedPlan(planId);
     showToast(
@@ -227,6 +227,7 @@ export default function PricingSection({ visible, onClose }: PricingSectionProps
   </Text>{' '}
   for multi-academy trust (MAT) pricing.
 </Text>
+              </View>
               <View style={styles.faqItem}>
                 <Text style={styles.faqQ}>Where does my money go?</Text>
                 <Text style={styles.faqA}>
