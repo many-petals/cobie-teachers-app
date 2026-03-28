@@ -99,6 +99,10 @@ export default function PricingSection({ visible, onClose }: PricingSectionProps
       onClose();
       return;
     }
+    if (planId === 'teacher') {
+      window.location.href = 'https://buy.stripe.com/5kQcN62iV50U4Gxh10dAk00';
+      return;
+    }
     if (planId === 'school') {
       showToast(
         'School Plan',
