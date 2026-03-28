@@ -100,12 +100,8 @@ export default function PricingSection({ visible, onClose }: PricingSectionProps
       return;
     }
     if (planId === 'school') {
-      showToast(
-        'School Plan',
-        'Please email schools@manypetals.co.uk for school licensing.',
-        'info'
-      );
-      return;
+      window.open('mailto:info@manypetals.co.uk?subject=School%20Plan%20Enquiry');
+    }
     }
     setSelectedPlan(planId);
     showToast(
@@ -219,10 +215,18 @@ export default function PricingSection({ visible, onClose }: PricingSectionProps
               <View style={styles.faqItem}>
                 <Text style={styles.faqQ}>How does school licensing work?</Text>
                 <Text style={styles.faqA}>
-                  The School plan covers unlimited teachers at one school. 
-                  Contact us for multi-academy trust pricing.
-                </Text>
-              </View>
+  The School plan covers unlimited teachers at one school.
+  <Text
+    style={{ color: '#2B7FFF' }}
+    onPress={() =>
+      (window.location.href =
+        'mailto:info@manypetals.co.uk?subject=School%20Plan%20Enquiry')
+    }
+  >
+    {' '}Contact us
+  </Text>{' '}
+  for multi-academy trust (MAT) pricing.
+</Text>
               <View style={styles.faqItem}>
                 <Text style={styles.faqQ}>Where does my money go?</Text>
                 <Text style={styles.faqA}>
