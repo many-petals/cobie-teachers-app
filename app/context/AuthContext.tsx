@@ -228,8 +228,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, name: string, school: string, role: string) => {
+    await supabase.auth.signOut();
+    await clearAllLocalData();
+    setUser(null);
+    setProfile(null);
+  
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) return { error: error.message };
+  
     if (data.user) {
       const { error: profileError } = await supabase.from('teachers').insert({
         user_id: data.user.id,
@@ -239,9 +245,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (profileError) return { error: profileError.message };
     }
+  
     return { error: null };
   };
-
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { error: error.message };
