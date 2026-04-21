@@ -117,6 +117,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         // User logged out — clear local data so they keep their local progress
         clearAllLocalData();
+        setCompletedLessons([]);
+setFavourites([]);
+setSavedCalmConfigs([]);
+setProfile(null);
     
       }
     });
