@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { supabase } from '@/app/lib/supabase';
 import * as LocalStorage from '@/app/lib/storage';
+import { clearAllLocalData } from '@/app/lib/storage';
 
 export interface TeacherProfile {
   id: string;
@@ -252,7 +253,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
     // Don't clear local data on sign out — keep it for offline use
     // Just reload from local storage
-    await loadLocalData();
+    await clearAllLocalData();
   };
 
   const updateProfile = async (data: Partial<TeacherProfile>) => {
