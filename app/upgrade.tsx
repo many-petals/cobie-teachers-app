@@ -7,7 +7,7 @@ export default function UpgradeScreen() {
   const router = useRouter();
   const { setHasFullAccess } = useAuth();
   const handleUpgrade = () => {
-    window.location.href = 'https://buy.stripe.com/5kQcN62iV50U4Gxh10dAk00';
+    window.location.href = 'https://buy.stripe.com/aFa14o8Hj2SM6OFeSSdAk02';
   };
 
   const styles = useMemo(

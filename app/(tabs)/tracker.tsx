@@ -21,6 +21,7 @@ import AddPupilModal from '../components/AddPupilModal';
 import QuickAssess from '../components/QuickAssess';
 import ProgressView from '../components/ProgressView';
 import EmotionLogModal from '../components/EmotionLogModal';
+import { clearAllLocalData } from '../lib/storage';
 
 interface Pupil {
   id: string;
@@ -250,6 +251,7 @@ export default function TrackerScreen() {
           setPupils([]);
           setAssessments([]);
           setEmotionLogs([]);
+          await clearAllLocalData(user.id);
           showToast('Data Deleted', 'All tracker data has been permanently removed.');
         } catch (err: any) {
           showToast('Error', err.message || 'Failed to delete data', 'error');
