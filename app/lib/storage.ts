@@ -281,7 +281,17 @@ export async function getEmotionLogsForPupil(pupilId: string, userId?: string): 
 
 export async function clearAllLocalData(userId?: string | null): Promise<void> {
   try {
-    await AsyncStorage.multiRemove(Object.values(KEYS).map((keyFactory) => keyFactory(userId ?? undefined)));
+    await AsyncStorage.multiRemove([
+      ...Object.values(KEYS).map((keyFactory) => keyFactory(userId ?? undefined)),
+      '@cobie_favourites',
+      '@cobie_completed_lessons',
+      '@cobie_calm_configs',
+      '@cobie_sen_mode',
+      '@cobie_check_in_history',
+      '@cobie_voice_notes',
+      '@cobie_weekly_plans',
+      '@cobie_emotion_logs',
+    ]);
   } catch (err) {
     console.warn('[Storage] Failed to clear data:', err);
   }
