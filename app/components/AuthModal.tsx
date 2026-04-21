@@ -85,9 +85,12 @@ export default function AuthModal() {
       if (result.error) {
         setError(result.error);
       } else {
-        setSuccess('Account created! You can now sign in.');
-        setMode('login');
+        setSuccess('Account created! Please now log in with your new account.');
+        setEmail(email.trim());
         setPassword('');
+        setName('');
+        setSchool('');
+        setRole('teacher');
       }
     }
 
