@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ─── Load local data on mount (works without auth) ──────────────
   useEffect(() => {
-    loadLocalData();
+  
   }, []);
 
   const loadLocalData = useCallback(async () => {
@@ -115,8 +115,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         loadAndMergeUserData(session.user.id);
       } else {
-        // User logged out — reload local data so they keep their local progress
-        loadLocalData();
+        // User logged out — clear local data so they keep their local progress
+        clearAllLocalData();
+    
       }
     });
 
