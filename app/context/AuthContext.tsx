@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const [localFavs, localLessons, localConfigs] = await Promise.all([
         LocalStorage.loadFavourites(),
-        LocalStorage.loadCompletedLessons(),
+        LocalStorage.loadCompletedLessons(userId),
         LocalStorage.loadCalmConfigs(),
       ]);
       setFavourites(localFavs);
@@ -221,9 +221,9 @@ setProfile(null);
 
       // Sync merged data back to local storage (so it persists if they log out)
       await Promise.all([
-        LocalStorage.saveFavourites(mergedFavs),
-        LocalStorage.saveCompletedLessons(mergedLessons),
-        LocalStorage.saveCalmConfigs(mergedConfigs),
+        LocalStorage.saveFavourites(mergedFavs, userId),
+        LocalStorage.saveCompletedLessons(mergedLessons, userId),
+        LocalStorage.saveCalmConfigs(mergedConfigs, userId),
       ]);
     } catch (err) {
       console.error('Error loading/merging user data:', err);
