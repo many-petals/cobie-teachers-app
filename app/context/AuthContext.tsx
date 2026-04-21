@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { supabase } from '@/app/lib/supabase';
 import * as LocalStorage from '@/app/lib/storage';
-import { clearAllLocalData } from '@/app/lib/storage';
 
 export interface TeacherProfile {
   id: string;
@@ -116,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loadAndMergeUserData(session.user.id);
       } else {
         // User logged out — clear local data so they keep their local progress
-        clearAllLocalData();
+        LocalStorage.clearAllLocalData();
         setCompletedLessons([]);
 setFavourites([]);
 setSavedCalmConfigs([]);
@@ -233,7 +232,7 @@ setProfile(null);
 
   const signUp = async (email: string, password: string, name: string, school: string, role: string) => {
     await supabase.auth.signOut();
-    await clearAllLocalData();
+    await LocalStorage.clearAllLocalData();
     setUser(null);
     setProfile(null);
   
@@ -260,11 +259,12 @@ setProfile(null);
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
-    // Don't clear local data on sign out — keep it for offline use
-    // Just reload from local storage
-    await clearAllLocalData();
+  setUser(null);
+  setProfile(null);
+  setCompletedLessons([]);
+  setFavourites([]);
+  setSavedCalmConfigs([]);
+    await LocalStorage.clearAllLocalData();
   };
 
   const updateProfile = async (data: Partial<TeacherProfile>) => {

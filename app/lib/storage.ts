@@ -99,11 +99,11 @@ export async function addFavourite(resourceType: 'lesson' | 'activity' | 'printa
     resource_id: resourceId,
   };
   favourites.push(newFav);
-  await saveFavourites(favourites, userId);A
+  await saveFavourites(favourites, userId);
   return newFav;
 }
 
-export async function removeFavourite(id: string): Promise<void> {
+export async function removeFavourite(id: string, userId?: string): Promise<void> {
   const favourites = await loadFavourites(userId);
   const filtered = favourites.filter(f => f.id !== id);
   await saveFavourites(filtered, userId);
@@ -121,15 +121,17 @@ export async function saveCompletedLessons(lessons: LocalCompletedLesson[], user
 
 export async function addCompletedLesson(lessonId: string, userId?: string): Promise<LocalCompletedLesson> {
   const lessons = await loadCompletedLessons(userId);
-  const existing = lessons.find(l => l.lesson_id === lessonId && l.user_id === userId);
+  const existing = lessons.find(l => l.lesson_id === lessonId);
   if (existing) return existing;
   const newLesson: LocalCompletedLesson = {
-    id: generateLocalId(),
     lesson_id: lessonId,
     completed_at: new Date().toISOString(),
-    user_id: userId,
   };
   lessons.push(newLesson);
+  await saveCompletedLessons(lessons, userId);
+  return newLesson;
+}
+
 export async function loadCalmConfigs(userId?: string): Promise<LocalCalmConfig[]> {
   return getJSON<LocalCalmConfig[]>(KEYS.CALM_CONFIGS(userId), []);
 }
@@ -279,12 +281,12 @@ export async function getEmotionLogsForPupil(pupilId: string, userId?: string): 
 
 export async function clearAllLocalData(userId?: string | null): Promise<void> {
   try {
-    await AsyncStorage.multiRemove(Object.values(KEYS).map(key => key(userId ??)));
+    await AsyncStorage.multiRemove(Object.values(KEYS).map((keyFactory) => keyFactory(userId ?? undefined)));
   } catch (err) {
     console.warn('[Storage] Failed to clear data:', err);
-    }
   }
+}
   
-  // ─── Export keys for debugging ──────────────────────────────────────
-  
-  export { KEYS as STORAGE_KEYS };
+// ─── Export keys for debugging ──────────────────────────────────────
+
+export { KEYS as STORAGE_KEYS };
