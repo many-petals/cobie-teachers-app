@@ -62,9 +62,10 @@ export default function FilterChips({ chips, selected, onSelect }: FilterChipsPr
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: SPACING.lg,
-    paddingVertical: 4,
-    gap: 8,
+    paddingVertical: 0,
+    gap: 6,
     alignItems: 'center',
+    minHeight: 40,
   },
   chip: {
     flexDirection: 'row',
@@ -72,13 +73,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     flexShrink: 0,
-    height: 38,
+    height: 40,
     paddingHorizontal: SPACING.md,
-    borderRadius: 19,
+    borderRadius: 20,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.lightGray,
-    marginRight: 8,
+    marginRight: 6,
   },
   chipSelected: {
     backgroundColor: COLORS.primary,
