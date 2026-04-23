@@ -33,6 +33,7 @@ const QUICK_TILES = [
   { title: 'Lessons', subtitle: '4 Core', icon: 'book', color: '#1B6B93', bgColor: '#E1F5FE', route: '/lessons' },
   { title: 'Activities', subtitle: '8 Optional', icon: 'color-palette', color: '#7BC67E', bgColor: '#E8F5E9', route: '/activities' },
   { title: 'Tracker', subtitle: 'Milestones', icon: 'analytics', color: '#9C27B0', bgColor: '#F3E5F5', route: '/tracker' },
+  { title: 'Voice Notes', subtitle: 'Observations', icon: 'mic', color: '#E57373', bgColor: '#FDECEC', route: '/voice-notes' },
   { title: 'Printables', subtitle: '18 Resources', icon: 'print', color: '#F4A460', bgColor: '#FFF3E0', route: '/printables' },
   { title: 'Parents', subtitle: '4 Letters', icon: 'people', color: '#1B6B93', bgColor: '#E1F5FE', route: '/parents' },
   { title: 'Emotions', subtitle: 'Interactive', icon: 'heart', color: '#F48FB1', bgColor: '#FCE4EC', route: '/tools' },
