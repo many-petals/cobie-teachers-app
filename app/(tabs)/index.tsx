@@ -413,6 +413,17 @@ export default function HomeScreen() {
             <View style={styles.heroContent}>
               <View style={styles.heroRow}>
                 <View style={styles.heroTextCol}>
+                  <View style={styles.heroBrandPill}>
+                    <Image
+                      source={{ uri: BRAND.logoUrl }}
+                      style={styles.heroBrandLogo}
+                      resizeMode="contain"
+                    />
+                    <View>
+                      <Text style={styles.heroBrandName}>{BRAND.shortName}</Text>
+                      <Text style={styles.heroBrandPack}>{BRAND.tagline}</Text>
+                    </View>
+                  </View>
                   <Text style={styles.heroTitle}>Cobie the Cactus</Text>
                   <Text style={styles.heroSubtitle}>EYFS & KS1 Teacher Pack</Text>
                   <Text style={styles.heroDescription}>
@@ -867,6 +878,36 @@ const styles = StyleSheet.create({
   },
   heroTextCol: {
     flex: 1,
+  },
+  heroBrandPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    marginBottom: SPACING.md,
+    borderRadius: RADIUS.round,
+    backgroundColor: 'rgba(255,255,255,0.88)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.65)',
+  },
+  heroBrandLogo: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+  },
+  heroBrandName: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '800',
+    color: COLORS.secondary,
+    lineHeight: 16,
+  },
+  heroBrandPack: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+    lineHeight: 12,
   },
   heroMascot: {
     width: 80,

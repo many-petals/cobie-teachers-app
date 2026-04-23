@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import { Printable } from '../data/printables';
+import { BRAND } from '../data/brand';
 
 /* ------------------------------------------------------------------ */
 /*  STYLES                                                             */
@@ -38,6 +39,17 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
         border-radius: 4px;
       }
       .header { text-align: center; margin-bottom: 8mm; padding-bottom: 6mm; border-bottom: 3px solid ${borderColor}; }
+      .brand-row {
+        display: flex; align-items: center; justify-content: center; gap: 12px;
+        margin-bottom: 4mm;
+      }
+      .brand-logo {
+        width: 44px; height: 44px; object-fit: contain; border-radius: 10px;
+        background: white; padding: 4px; border: 1px solid #eee;
+      }
+      .brand-copy { text-align: left; }
+      .brand-name { font-size: 12pt; font-weight: 800; color: ${primaryColor}; line-height: 1.2; }
+      .brand-pack { font-size: 9pt; color: #777; margin-top: 2px; }
       .header h1 { font-size: 28pt; color: ${primaryColor}; margin-bottom: 4px; font-weight: 800; }
       .header .subtitle { font-size: 11pt; color: #888; font-weight: 500; }
       .header .brand { font-size: 9pt; color: #aaa; margin-top: 6px; font-style: italic; }
@@ -650,6 +662,13 @@ function generatePrintableHTML(printable: Printable, format: string): string {
   </div>
   <div class="page">
     <div class="header">
+      <div class="brand-row">
+        <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
+        <div class="brand-copy">
+          <div class="brand-name">${BRAND.shortName}</div>
+          <div class="brand-pack">${BRAND.tagline}</div>
+        </div>
+      </div>
       <h1>${printable.title}</h1>
       <div class="subtitle">${printable.description}</div>
       <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack</div>
@@ -781,6 +800,13 @@ export async function downloadAllPrintables(
       return `
         <div class="page" style="border-left: 4px solid ${p.color};">
           <div class="header">
+            <div class="brand-row">
+              <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
+              <div class="brand-copy">
+                <div class="brand-name">${BRAND.shortName}</div>
+                <div class="brand-pack">${BRAND.tagline}</div>
+              </div>
+            </div>
             <h1 style="color:${primaryColor};">${p.title}</h1>
             <div class="subtitle">${p.description}</div>
             <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack &bull; ${format} version</div>
@@ -815,6 +841,13 @@ export async function downloadAllPrintables(
   <!-- Table of Contents -->
   <div class="page" style="min-height:auto; padding-bottom:20mm;">
     <div class="header">
+      <div class="brand-row">
+        <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
+        <div class="brand-copy">
+          <div class="brand-name">${BRAND.shortName}</div>
+          <div class="brand-pack">${BRAND.tagline}</div>
+        </div>
+      </div>
       <h1>Many Petals Learning</h1>
       <div class="subtitle">Cobie Teacher Pack - Complete Printable Resources</div>
       <div class="brand">${printables.length} printable resources included</div>
