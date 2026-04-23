@@ -39,9 +39,9 @@ export default function FilterChips({ chips, selected, onSelect }: FilterChipsPr
             {chip.icon && (
               <Ionicons
                 name={chip.icon as any}
-                size={14}
+                size={12}
                 color={isSelected ? COLORS.white : COLORS.textLight}
-                style={{ marginRight: 4 }}
+                style={styles.icon}
               />
             )}
             <Text
@@ -62,31 +62,38 @@ export default function FilterChips({ chips, selected, onSelect }: FilterChipsPr
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    gap: SPACING.sm,
+    paddingVertical: 4,
+    gap: 8,
+    alignItems: 'center',
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.round,
+    justifyContent: 'center',
+    alignSelf: 'center',
+    flexShrink: 0,
+    height: 38,
+    paddingHorizontal: SPACING.md,
+    borderRadius: 19,
     backgroundColor: COLORS.white,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: COLORS.lightGray,
-    marginRight: SPACING.sm,
+    marginRight: 8,
   },
   chipSelected: {
     backgroundColor: COLORS.primary,
     borderColor: COLORS.primary,
   },
   chipText: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: '500',
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '600',
     color: COLORS.textLight,
   },
   chipTextSelected: {
     color: COLORS.white,
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  icon: {
+    marginRight: 4,
   },
 });
