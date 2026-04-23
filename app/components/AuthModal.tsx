@@ -23,9 +23,15 @@ const ROLES = [
   { label: 'Pastoral Lead', value: 'Pastoral Lead' },
 ];
 
+type AuthMode = 'login' | 'signup' | 'forgot-password';
+
+function isValidEmail(email: string) {
+  return /\S+@\S+\.\S+/.test(email);
+}
+
 export default function AuthModal() {
-  const { showAuthModal, setShowAuthModal, signIn, signUp } = useAuth();
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const { showAuthModal, setShowAuthModal, signIn, signUp, resetPassword } = useAuth();
+  const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -44,6 +50,19 @@ export default function AuthModal() {
     setRole('EYFS Teacher');
     setError('');
     setSuccess('');
+    setShowPassword(false);
+  };
+
+  const switchMode = (nextMode: AuthMode) => {
+    setMode(nextMode);
+    setError('');
+    setSuccess('');
+    setPassword('');
+    if (nextMode !== 'signup') {
+      setName('');
+      setSchool('');
+      setRole('EYFS Teacher');
+    }
   };
 
   const handleClose = () => {
@@ -53,11 +72,23 @@ export default function AuthModal() {
   };
 
   const handleSubmit = async () => {
+    const trimmedEmail = email.trim();
+
     setError('');
     setSuccess('');
 
-    if (!email.trim() || !password.trim()) {
-      setError('Please enter your email and password.');
+    if (!trimmedEmail) {
+      setError('Please enter your email address.');
+      return;
+    }
+
+    if (!isValidEmail(trimmedEmail)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    if (mode !== 'forgot-password' && !password.trim()) {
+      setError('Please enter your password.');
       return;
     }
 
@@ -66,7 +97,7 @@ export default function AuthModal() {
       return;
     }
 
-    if (password.length < 6) {
+    if (mode !== 'forgot-password' && password.length < 6) {
       setError('Password must be at least 6 characters.');
       return;
     }
@@ -74,28 +105,50 @@ export default function AuthModal() {
     setLoading(true);
 
     if (mode === 'login') {
-      const result = await signIn(email.trim(), password);
+      const result = await signIn(trimmedEmail, password);
       if (result.error) {
         setError(result.error);
       } else {
         handleClose();
       }
-    } else {
-      const result = await signUp(email.trim(), password, name.trim(), school.trim(), role);
+    } else if (mode === 'signup') {
+      const result = await signUp(trimmedEmail, password, name.trim(), school.trim(), role);
       if (result.error) {
         setError(result.error);
       } else {
-        setSuccess('Account created! Please now log in with your new account.');
-        setEmail(email.trim());
+        setSuccess('Account created. Please now sign in with your new account.');
+        setEmail(trimmedEmail);
         setPassword('');
         setName('');
         setSchool('');
-        setRole('teacher');
+        setRole('EYFS Teacher');
+        setMode('login');
+      }
+    } else {
+      const result = await resetPassword(trimmedEmail);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setSuccess('Password reset link sent. Check your email and follow the link to choose a new password.');
       }
     }
 
     setLoading(false);
   };
+
+  const title =
+    mode === 'login'
+      ? 'Welcome Back'
+      : mode === 'signup'
+      ? 'Create Account'
+      : 'Reset Password';
+
+  const subtitle =
+    mode === 'login'
+      ? 'Sign in to save your favourites, track progress, and sync across devices.'
+      : mode === 'signup'
+      ? 'Join the Cobie Teacher Pack community to save your preferences.'
+      : 'Enter your email address and we will send you a secure password reset link.';
 
   return (
     <Modal visible={showAuthModal} animationType="slide" transparent>
@@ -104,13 +157,10 @@ export default function AuthModal() {
         style={styles.overlay}
       >
         <View style={styles.modalContainer}>
-          {/* Header */}
           <View style={styles.modalHeader}>
             <View style={styles.headerLeft}>
               <Ionicons name="flower" size={24} color={COLORS.secondary} />
-              <Text style={styles.modalTitle}>
-                {mode === 'login' ? 'Welcome Back' : 'Create Account'}
-              </Text>
+              <Text style={styles.modalTitle}>{title}</Text>
             </View>
             <TouchableOpacity onPress={handleClose} style={styles.closeBtn} activeOpacity={0.7}>
               <Ionicons name="close" size={24} color={COLORS.text} />
@@ -118,11 +168,7 @@ export default function AuthModal() {
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-            <Text style={styles.subtitle}>
-              {mode === 'login'
-                ? 'Sign in to save your favourites, track progress, and sync across devices.'
-                : 'Join the Cobie Teacher Pack community to save your preferences.'}
-            </Text>
+            <Text style={styles.subtitle}>{subtitle}</Text>
 
             {error ? (
               <View style={styles.errorBanner}>
@@ -138,7 +184,6 @@ export default function AuthModal() {
               </View>
             ) : null}
 
-            {/* Email */}
             <Text style={styles.label}>Email</Text>
             <View style={styles.inputContainer}>
               <Ionicons name="mail-outline" size={20} color={COLORS.mediumGray} />
@@ -154,30 +199,32 @@ export default function AuthModal() {
               />
             </View>
 
-            {/* Password */}
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color={COLORS.mediumGray} />
-              <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Min. 6 characters"
-                placeholderTextColor={COLORS.mediumGray}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-              />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <Ionicons
-                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                  size={20}
-                  color={COLORS.mediumGray}
-                />
-              </TouchableOpacity>
-            </View>
+            {mode !== 'forgot-password' ? (
+              <>
+                <Text style={styles.label}>Password</Text>
+                <View style={styles.inputContainer}>
+                  <Ionicons name="lock-closed-outline" size={20} color={COLORS.mediumGray} />
+                  <TextInput
+                    style={styles.input}
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder="Min. 6 characters"
+                    placeholderTextColor={COLORS.mediumGray}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <Ionicons
+                      name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                      size={20}
+                      color={COLORS.mediumGray}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : null}
 
-            {/* Signup fields */}
-            {mode === 'signup' && (
+            {mode === 'signup' ? (
               <>
                 <Text style={styles.label}>Full Name</Text>
                 <View style={styles.inputContainer}>
@@ -205,23 +252,30 @@ export default function AuthModal() {
 
                 <Text style={styles.label}>Your Role</Text>
                 <View style={styles.roleGrid}>
-                  {ROLES.map((r) => (
+                  {ROLES.map((roleOption) => (
                     <TouchableOpacity
-                      key={r.value}
-                      style={[styles.roleChip, role === r.value && styles.roleChipActive]}
-                      onPress={() => setRole(r.value)}
+                      key={roleOption.value}
+                      style={[
+                        styles.roleChip,
+                        role === roleOption.value && styles.roleChipActive,
+                      ]}
+                      onPress={() => setRole(roleOption.value)}
                       activeOpacity={0.7}
                     >
-                      <Text style={[styles.roleText, role === r.value && styles.roleTextActive]}>
-                        {r.label}
+                      <Text
+                        style={[
+                          styles.roleText,
+                          role === roleOption.value && styles.roleTextActive,
+                        ]}
+                      >
+                        {roleOption.label}
                       </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
               </>
-            )}
+            ) : null}
 
-            {/* Submit Button */}
             <TouchableOpacity
               style={[styles.submitButton, loading && styles.submitButtonDisabled]}
               onPress={handleSubmit}
@@ -233,38 +287,65 @@ export default function AuthModal() {
               ) : (
                 <>
                   <Ionicons
-                    name={mode === 'login' ? 'log-in-outline' : 'person-add-outline'}
+                    name={
+                      mode === 'login'
+                        ? 'log-in-outline'
+                        : mode === 'signup'
+                        ? 'person-add-outline'
+                        : 'mail-open-outline'
+                    }
                     size={20}
                     color={COLORS.white}
                   />
                   <Text style={styles.submitText}>
-                    {mode === 'login' ? 'Sign In' : 'Create Account'}
+                    {mode === 'login'
+                      ? 'Sign In'
+                      : mode === 'signup'
+                      ? 'Create Account'
+                      : 'Send Reset Link'}
                   </Text>
                 </>
               )}
             </TouchableOpacity>
 
-            {/* Toggle mode */}
-            <TouchableOpacity
-              style={styles.toggleMode}
-              onPress={() => {
-                setMode(mode === 'login' ? 'signup' : 'login');
-                setError('');
-                setSuccess('');
-              }}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.toggleText}>
-                {mode === 'login'
-                  ? "Don't have an account? "
-                  : 'Already have an account? '}
-                <Text style={styles.toggleLink}>
-                  {mode === 'login' ? 'Sign Up' : 'Sign In'}
-                </Text>
-              </Text>
-            </TouchableOpacity>
+            {mode === 'login' ? (
+              <TouchableOpacity
+                style={styles.forgotPasswordButton}
+                onPress={() => switchMode('forgot-password')}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="help-circle-outline" size={16} color={COLORS.primary} />
+                <Text style={styles.forgotPasswordText}>Forgot your password? Reset it here</Text>
+              </TouchableOpacity>
+            ) : null}
 
-            {/* GDPR notice */}
+            {mode === 'forgot-password' ? (
+              <TouchableOpacity
+                style={styles.toggleMode}
+                onPress={() => switchMode('login')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.toggleText}>
+                  Back to <Text style={styles.toggleLink}>Sign In</Text>
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.toggleMode}
+                onPress={() => switchMode(mode === 'login' ? 'signup' : 'login')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.toggleText}>
+                  {mode === 'login'
+                    ? "Don't have an account? "
+                    : 'Already have an account? '}
+                  <Text style={styles.toggleLink}>
+                    {mode === 'login' ? 'Sign Up' : 'Sign In'}
+                  </Text>
+                </Text>
+              </TouchableOpacity>
+            )}
+
             <View style={styles.gdprNotice}>
               <Ionicons name="shield-checkmark-outline" size={16} color={COLORS.textMuted} />
               <Text style={styles.gdprText}>
@@ -406,6 +487,18 @@ const styles = StyleSheet.create({
   roleTextActive: {
     color: COLORS.white,
     fontWeight: '700',
+  },
+  forgotPasswordButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    marginTop: SPACING.md,
+  },
+  forgotPasswordText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '700',
+    color: COLORS.primary,
   },
   submitButton: {
     flexDirection: 'row',

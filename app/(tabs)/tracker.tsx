@@ -21,6 +21,7 @@ import AddPupilModal from '../components/AddPupilModal';
 import QuickAssess from '../components/QuickAssess';
 import ProgressView from '../components/ProgressView';
 import EmotionLogModal from '../components/EmotionLogModal';
+import RequireAuth from '../components/RequireAuth';
 import { clearAllLocalData } from '../lib/storage';
 
 interface Pupil {
@@ -54,7 +55,7 @@ interface EmotionLog {
 }
 
 export default function TrackerScreen() {
-  const { user, setShowAuthModal } = useAuth();
+  const { user, clearUserData } = useAuth();
   const { showToast, showConfirm } = useToast();
   const { senMode } = useSEN();
   const [mounted, setMounted] = useState(false);
@@ -239,20 +240,23 @@ export default function TrackerScreen() {
 
   const handleDeleteAllData = () => {
     showConfirm({
-      title: 'Delete All Tracker Data',
-      message: 'This will permanently delete all pupils, assessments, and emotion logs. This action cannot be undone. Are you sure?',
+      title: 'Delete All My Data',
+      message: 'This will permanently delete your tracker records, favourites, completed lessons, saved calm plans, and profile data, then sign you out. This action cannot be undone. Are you sure?',
       confirmText: 'Delete All',
       onConfirm: async () => {
         if (!user) return;
         try {
-          await supabase.from('tracker_emotion_logs').delete().eq('user_id', user.id);
-          await supabase.from('tracker_assessments').delete().eq('user_id', user.id);
-          await supabase.from('tracker_pupils').delete().eq('user_id', user.id);
+          const result = await clearUserData();
+          if (result.error) {
+            showToast('Error', result.error, 'error');
+            return;
+          }
+
           setPupils([]);
           setAssessments([]);
           setEmotionLogs([]);
           await clearAllLocalData(user.id);
-          showToast('Data Deleted', 'All tracker data has been permanently removed.');
+          showToast('Data Deleted', 'Your app data has been permanently removed and you have been signed out.');
         } catch (err: any) {
           showToast('Error', err.message || 'Failed to delete data', 'error');
         }
@@ -322,45 +326,12 @@ export default function TrackerScreen() {
     );
 
   }
-  if (!user) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.screenHeader}>
-          <Ionicons name="analytics" size={24} color={COLORS.primary} />
-          <Text style={styles.screenTitle}>Pupil Tracker</Text>
-        </View>
-        <View style={styles.authPrompt}>
-          <View style={styles.authIcon}>
-            <Ionicons name="lock-closed" size={48} color={COLORS.primary} />
-          </View>
-          <Text style={styles.authTitle}>Sign In Required</Text>
-          <Text style={styles.authText}>
-            The Pupil Tracker stores assessment data securely in your teacher account. Sign in to start tracking pupil progress against EYFS and KS1 milestones.
-          </Text>
-          <TouchableOpacity
-            style={styles.authBtn}
-            onPress={() => setShowAuthModal(true)}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="log-in-outline" size={20} color={COLORS.white} />
-            <Text style={styles.authBtnText}>Sign In to Continue</Text>
-          </TouchableOpacity>
-          <View style={styles.gdprBox}>
-            <Ionicons name="shield-checkmark" size={18} color={COLORS.secondary} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.gdprTitle}>GDPR Compliant</Text>
-              <Text style={styles.gdprText}>
-                No child names or identifiable data is collected. All pupils are tracked using anonymous codes only. Data is stored securely and can be deleted at any time.
-              </Text>
-            </View>
-          </View>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <RequireAuth
+      title="Sign In Required"
+      message="The Pupil Tracker stores assessment data securely in your teacher account. Sign in to track progress, emotion logs, and class milestones."
+    >
+      <SafeAreaView style={styles.safeArea}>
 
 
       {/* Header */}
@@ -712,7 +683,8 @@ export default function TrackerScreen() {
           onDeleteEmotionLog={handleDeleteEmotionLog}
         />
       ) : null}
-    </SafeAreaView>
+      </SafeAreaView>
+    </RequireAuth>
   );
 }
 

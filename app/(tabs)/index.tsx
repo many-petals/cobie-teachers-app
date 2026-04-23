@@ -20,6 +20,7 @@ import WorkbookPromo from '../components/WorkbookPromo';
 import EvidenceBanner from '../components/EvidenceBanner';
 import PricingSection from '../components/PricingSection';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { LESSONS } from '../data/lessons';
 import { ACTIVITIES } from '../data/activities';
 import { PRINTABLES } from '../data/printables';
@@ -56,8 +57,9 @@ function formatDate(dateStr: string): string {
 function ProfileModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const {
     user, profile, favourites, completedLessons, savedCalmConfigs,
-    signOut, updateProfile, deleteCalmConfig,
+    signOut, clearUserData, updateProfile, deleteCalmConfig,
   } = useAuth();
+  const { showToast, showConfirm } = useToast();
   const router = useRouter();
 
   const favLessons = favourites.filter(f => f.resource_type === 'lesson');
@@ -65,6 +67,24 @@ function ProfileModal({ visible, onClose }: { visible: boolean; onClose: () => v
   const favPrintables = favourites.filter(f => f.resource_type === 'printable');
 
   if (!user) return null;
+
+  const handleDeleteMyData = () => {
+    showConfirm({
+      title: 'Delete My Data',
+      message: 'This will permanently delete your tracker records, favourites, completed lessons, saved calm plans, and profile data, then sign you out. This action cannot be undone.',
+      confirmText: 'Delete Data',
+      onConfirm: async () => {
+        const result = await clearUserData();
+        if (result.error) {
+          showToast('Error', result.error, 'error');
+          return;
+        }
+
+        onClose();
+        showToast('Data Deleted', 'Your app data has been permanently removed.');
+      },
+    });
+  };
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -247,6 +267,11 @@ Short 1–2 minute check-ins help children recognise and name their feelings. Ov
               <Text style={pStyles.signOutText}>Sign Out</Text>
             </TouchableOpacity>
 
+            <TouchableOpacity style={pStyles.deleteDataBtn} onPress={handleDeleteMyData} activeOpacity={0.7}>
+              <Ionicons name="trash-outline" size={20} color={COLORS.white} />
+              <Text style={pStyles.deleteDataText}>Delete My Data</Text>
+            </TouchableOpacity>
+
             <View style={{ height: 40 }} />
           </ScrollView>
         </View>
@@ -283,6 +308,8 @@ const pStyles = StyleSheet.create({
   emptyText: { fontSize: FONT_SIZES.sm, color: COLORS.textMuted, textAlign: 'center', marginTop: SPACING.sm, paddingHorizontal: SPACING.xl },
   signOutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: SPACING.sm, paddingVertical: SPACING.lg, borderRadius: RADIUS.lg, backgroundColor: '#FFEBEE', marginTop: SPACING.xl },
   signOutText: { fontSize: FONT_SIZES.md, fontWeight: '600', color: COLORS.error },
+  deleteDataBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: SPACING.sm, paddingVertical: SPACING.lg, borderRadius: RADIUS.lg, backgroundColor: COLORS.error, marginTop: SPACING.md },
+  deleteDataText: { fontSize: FONT_SIZES.md, fontWeight: '700', color: COLORS.white },
 });
 
 export default function HomeScreen() {
@@ -1111,4 +1138,3 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
 });
-

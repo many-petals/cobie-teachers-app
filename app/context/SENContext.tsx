@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import * as LocalStorage from '@/app/lib/storage';
+import { useAuth } from '@/app/context/AuthContext';
 
 interface SENContextType {
   senMode: boolean;
@@ -12,25 +13,34 @@ const SENContext = createContext<SENContextType>({
 });
 
 export function SENProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [senMode, setSenMode] = useState(false);
-  const [loaded, setLoaded] = useState(false);
 
-  // Load persisted SEN mode on mount
   useEffect(() => {
-    LocalStorage.loadSENMode().then((savedMode) => {
-      setSenMode(savedMode);
-      setLoaded(true);
-    }).catch(() => {
-      setLoaded(true);
-    });
-  }, []);
+    let active = true;
+
+    LocalStorage.loadSENMode(user?.id)
+      .then((savedMode) => {
+        if (active) {
+          setSenMode(savedMode);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setSenMode(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [user?.id]);
 
   const toggleSENMode = () => {
-    setSenMode(prev => {
-      const newValue = !prev;
-      // Persist to local storage
-      LocalStorage.saveSENMode(newValue);
-      return newValue;
+    setSenMode((previousValue) => {
+      const nextValue = !previousValue;
+      LocalStorage.saveSENMode(nextValue, user?.id);
+      return nextValue;
     });
   };
 
