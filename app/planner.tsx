@@ -15,6 +15,8 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from './data/theme';
 import { supabase } from './lib/supabase';
 import { SavedWeeklyPlan, loadWeeklyPlans, addWeeklyPlan, removeWeeklyPlan } from './lib/storage';
+import { useAuth } from './context/AuthContext';
+import RequireAuth from './components/RequireAuth';
 
 const FOCUS_AREAS = [
   { id: 'emotional', label: 'Emotional Literacy', icon: 'heart', color: '#F48FB1' },
@@ -35,6 +37,7 @@ const DAY_COLORS: Record<string, string> = {
 
 export default function PlannerScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const [step, setStep] = useState<'config' | 'loading' | 'plan' | 'saved'>('config');
   const [ageGroup, setAgeGroup] = useState<'EYFS' | 'KS1'>('EYFS');
   const [classSize, setClassSize] = useState('30');
@@ -48,11 +51,18 @@ export default function PlannerScreen() {
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
   useEffect(() => {
-    loadSaved();
-  }, []);
+    if (user) {
+      loadSaved();
+    } else {
+      setSavedPlans([]);
+      setPlan(null);
+      setStep('config');
+    }
+  }, [user]);
 
   const loadSaved = async () => {
-    const plans = await loadWeeklyPlans();
+    if (!user) return;
+    const plans = await loadWeeklyPlans(user.id);
     setSavedPlans(plans);
   };
 
@@ -104,12 +114,12 @@ export default function PlannerScreen() {
   };
 
   const savePlan = async () => {
-    if (!plan) return;
+    if (!plan || !user) return;
     const saved = await addWeeklyPlan({
       name: plan.weekTitle || `Week ${weekNumber} Plan`,
       ageGroup,
       plan,
-    });
+    }, user.id);
     setSavedPlans(prev => [saved, ...prev]);
     Alert.alert('Saved', 'Weekly plan saved to your device.');
   };
@@ -121,7 +131,8 @@ export default function PlannerScreen() {
         text: 'Delete',
         style: 'destructive',
         onPress: async () => {
-          await removeWeeklyPlan(id);
+          if (!user) return;
+          await removeWeeklyPlan(id, user.id);
           setSavedPlans(prev => prev.filter(p => p.id !== id));
         },
       },
@@ -135,7 +146,11 @@ export default function PlannerScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <RequireAuth
+      title="Sign in to use the weekly planner"
+      message="Your planner is linked to your teacher account so saved weekly plans stay private and synced to the right user."
+    >
+      <SafeAreaView style={styles.safeArea}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
@@ -542,7 +557,8 @@ export default function PlannerScreen() {
           <View style={{ height: 40 }} />
         </ScrollView>
       )}
-    </SafeAreaView>
+      </SafeAreaView>
+    </RequireAuth>
   );
 }
 

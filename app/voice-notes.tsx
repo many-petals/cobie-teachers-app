@@ -15,6 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from './data/theme';
 import { VoiceNote, loadVoiceNotes, addVoiceNote, updateVoiceNote, removeVoiceNote } from './lib/storage';
+import { useAuth } from './context/AuthContext';
+import RequireAuth from './components/RequireAuth';
 
 // Tags for categorising voice notes
 const TAGS = [
@@ -48,6 +50,7 @@ function formatDate(dateStr: string): string {
 
 export default function VoiceNotesScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const [notes, setNotes] = useState<VoiceNote[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -67,12 +70,17 @@ export default function VoiceNotesScreen() {
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    loadNotes();
+    if (user) {
+      loadNotes();
+    } else {
+      setNotes([]);
+    }
+
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       stopPlayback();
     };
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (isRecording) {
@@ -88,7 +96,8 @@ export default function VoiceNotesScreen() {
   }, [isRecording]);
 
   const loadNotes = async () => {
-    const loaded = await loadVoiceNotes();
+    if (!user) return;
+    const loaded = await loadVoiceNotes(user.id);
     setNotes(loaded);
   };
 
@@ -164,6 +173,7 @@ export default function VoiceNotesScreen() {
   };
 
   const saveNewNote = async () => {
+    if (!user) return;
     const data = recordingRef.current || { uri: '', duration: recordingDuration };
     const note = await addVoiceNote({
       title: newTitle || `Note ${notes.length + 1}`,
@@ -171,7 +181,7 @@ export default function VoiceNotesScreen() {
       duration: data.duration || recordingDuration,
       pupilCode: newPupilCode || undefined,
       tags: newTags,
-    });
+    }, user.id);
 
     setNotes(prev => [note, ...prev]);
     setShowNewNoteForm(false);
@@ -239,7 +249,8 @@ export default function VoiceNotesScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            await removeVoiceNote(note.id);
+            if (!user) return;
+            await removeVoiceNote(note.id, user.id);
             setNotes(prev => prev.filter(n => n.id !== note.id));
           },
         },
@@ -255,12 +266,12 @@ export default function VoiceNotesScreen() {
   };
 
   const saveEdit = async () => {
-    if (!editingNote) return;
+    if (!editingNote || !user) return;
     await updateVoiceNote(editingNote, {
       title: editTitle,
       pupilCode: editPupilCode || undefined,
       tags: editTags,
-    });
+    }, user.id);
     setNotes(prev => prev.map(n =>
       n.id === editingNote
         ? { ...n, title: editTitle, pupilCode: editPupilCode || undefined, tags: editTags }
@@ -282,7 +293,11 @@ export default function VoiceNotesScreen() {
     : notes;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <RequireAuth
+      title="Sign in to use voice notes"
+      message="Voice notes are kept inside your teacher account so observations stay private and cannot be reopened after logout."
+    >
+      <SafeAreaView style={styles.safeArea}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
@@ -585,7 +600,8 @@ export default function VoiceNotesScreen() {
 
         <View style={{ height: 40 }} />
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </RequireAuth>
   );
 }
 
