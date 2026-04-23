@@ -54,6 +54,25 @@ export default function ActivitiesScreen() {
       </View>
       <SENBanner />
 
+      <Text style={styles.intro}>
+        Choose a short activity to extend a lesson, reinforce a feeling, or respond to what your class needs in the moment.
+      </Text>
+
+      <View style={styles.summaryRow}>
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryNumber}>{filtered.length}</Text>
+          <Text style={styles.summaryLabel}>Showing</Text>
+        </View>
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryNumber}>{ACTIVITIES.length}</Text>
+          <Text style={styles.summaryLabel}>Total Activities</Text>
+        </View>
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryNumber}>{SKILL_FILTERS.length - 1}</Text>
+          <Text style={styles.summaryLabel}>Skill Types</Text>
+        </View>
+      </View>
+
       <SearchBar value={search} onChangeText={setSearch} placeholder="Search activities..." />
       <FilterChips chips={SKILL_FILTERS} selected={skillFilter} onSelect={setSkillFilter} />
 
@@ -104,6 +123,13 @@ export default function ActivitiesScreen() {
                   {activity.purpose}
                 </Text>
 
+                <View style={styles.linkedRow}>
+                  <Ionicons name="link-outline" size={14} color={COLORS.primary} />
+                  <Text style={styles.linkedText} numberOfLines={2}>
+                    Linked to: {activity.linkedTo}
+                  </Text>
+                </View>
+
                 <View style={styles.cardMeta}>
                   <View style={styles.metaItem}>
                     <Ionicons name="time-outline" size={14} color={COLORS.textMuted} />
@@ -128,6 +154,16 @@ export default function ActivitiesScreen() {
                     </Text>
                   </View>
                 )}
+
+                <View style={styles.cardFooter}>
+                  <Text style={styles.footerHint}>
+                    Open to see instructions, materials, SEN support, and assessment ideas.
+                  </Text>
+                  <View style={styles.openActivityBtn}>
+                    <Text style={styles.openActivityText}>Open Activity</Text>
+                    <Ionicons name="arrow-forward" size={16} color={COLORS.primary} />
+                  </View>
+                </View>
               </TouchableOpacity>
             );
           })
@@ -143,6 +179,11 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.bgLight },
   header: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg, paddingBottom: SPACING.sm },
   headerTitle: { fontSize: FONT_SIZES.xxl, fontWeight: '800', color: COLORS.text },
+  intro: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20, paddingHorizontal: SPACING.lg },
+  summaryRow: { flexDirection: 'row', gap: SPACING.sm, paddingHorizontal: SPACING.lg, marginTop: SPACING.md, marginBottom: SPACING.md },
+  summaryCard: { flex: 1, backgroundColor: COLORS.white, borderRadius: RADIUS.lg, paddingVertical: SPACING.md, alignItems: 'center', ...SHADOWS.small },
+  summaryNumber: { fontSize: FONT_SIZES.xl, fontWeight: '800', color: COLORS.secondary },
+  summaryLabel: { fontSize: FONT_SIZES.xs, fontWeight: '600', color: COLORS.textMuted, marginTop: 2 },
   container: { flex: 1, paddingHorizontal: SPACING.lg },
   emptyState: { alignItems: 'center', paddingVertical: SPACING.huge },
   emptyText: { fontSize: FONT_SIZES.lg, fontWeight: '600', color: COLORS.textLight, marginTop: SPACING.md },
@@ -156,6 +197,8 @@ const styles = StyleSheet.create({
   activityType: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, marginTop: 2 },
   favBtn: { padding: 6 },
   purpose: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20, marginTop: SPACING.md },
+  linkedRow: { flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.xs, marginTop: SPACING.sm },
+  linkedText: { flex: 1, fontSize: FONT_SIZES.xs, color: COLORS.textMuted, lineHeight: 18 },
   cardMeta: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, marginTop: SPACING.md, flexWrap: 'wrap' },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   metaText: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
@@ -163,4 +206,8 @@ const styles = StyleSheet.create({
   skillText: { fontSize: FONT_SIZES.xs, fontWeight: '600', textTransform: 'capitalize' },
   senAdaptations: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs, marginTop: SPACING.sm, backgroundColor: COLORS.bgPurple, padding: SPACING.sm, borderRadius: RADIUS.md },
   senText: { flex: 1, fontSize: FONT_SIZES.xs, color: COLORS.purple, fontWeight: '500' },
+  cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: SPACING.md, marginTop: SPACING.md, borderTopWidth: 1, borderTopColor: COLORS.lightGray, paddingTop: SPACING.md },
+  footerHint: { flex: 1, fontSize: FONT_SIZES.xs, color: COLORS.textMuted, lineHeight: 18 },
+  openActivityBtn: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs, backgroundColor: COLORS.bgLight, paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: RADIUS.round },
+  openActivityText: { fontSize: FONT_SIZES.xs, fontWeight: '700', color: COLORS.primary },
 });
