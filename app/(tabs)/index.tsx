@@ -315,7 +315,8 @@ const pStyles = StyleSheet.create({
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { user, profile, setShowAuthModal, completedLessons, favourites } = useAuth();
+  const { user, profile, setShowAuthModal, signOut, completedLessons, favourites } = useAuth();
+  const { showConfirm } = useToast();
   const [showProfile, setShowProfile] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [insideExpanded, setInsideExpanded] = useState(false);
@@ -325,6 +326,17 @@ export default function HomeScreen() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleHeaderSignOut = () => {
+    showConfirm({
+      title: 'Sign Out',
+      message: 'Sign out of your teacher account on this device now?',
+      confirmText: 'Sign Out',
+      onConfirm: async () => {
+        await signOut();
+      },
+    });
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -353,18 +365,27 @@ export default function HomeScreen() {
             <Ionicons name="diamond-outline" size={16} color={COLORS.accentOrange} />
           </TouchableOpacity>
           {mounted && user ? (
-            <TouchableOpacity
-              style={styles.profileBtn}
-              onPress={() => setShowProfile(true)}
-              activeOpacity={0.7}
-            >
-              <View style={styles.profileAvatar}>
-                <Ionicons name="person" size={16} color={COLORS.primary} />
-              </View>
-              <Text style={styles.profileName} numberOfLines={1}>
-                {profile?.name?.split(' ')[0] || 'Profile'}
-              </Text>
-            </TouchableOpacity>
+            <>
+              <TouchableOpacity
+                style={styles.headerLogoutBtn}
+                onPress={handleHeaderSignOut}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="log-out-outline" size={16} color={COLORS.error} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.profileBtn}
+                onPress={() => setShowProfile(true)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.profileAvatar}>
+                  <Ionicons name="person" size={16} color={COLORS.primary} />
+                </View>
+                <Text style={styles.profileName} numberOfLines={1}>
+                  {profile?.name?.split(' ')[0] || 'Profile'}
+                </Text>
+              </TouchableOpacity>
+            </>
           ) : mounted ? (
             <TouchableOpacity
               style={styles.signInBtn}
@@ -716,6 +737,16 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
     backgroundColor: COLORS.bgWarm,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerLogoutBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FFEBEE',
+    borderWidth: 1,
+    borderColor: '#F7CACA',
     justifyContent: 'center',
     alignItems: 'center',
   },
