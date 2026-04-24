@@ -387,12 +387,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     const currentUserId = getStorageUserId();
     setLoading(true);
+    resetAuthState();
+    setShowAuthModal(false);
 
     try {
-      await supabase.auth.signOut({ scope: 'global' });
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.warn('Sign out failed:', error);
     } finally {
-      resetAuthState();
-      setShowAuthModal(false);
       await LocalStorage.clearAllLocalData(currentUserId);
       await LocalStorage.clearAllLocalData(null);
       setLoading(false);
@@ -425,13 +427,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: firstError.message };
       }
 
-      resetAuthState();
-      setShowAuthModal(false);
-      await LocalStorage.clearAllLocalData(currentUserId);
-      await LocalStorage.clearAllLocalData(null);
-      await supabase.auth.signOut({ scope: 'global' });
+        resetAuthState();
+        setShowAuthModal(false);
+        await LocalStorage.clearAllLocalData(currentUserId);
+        await LocalStorage.clearAllLocalData(null);
+        await supabase.auth.signOut();
 
-      return { error: null };
+        return { error: null };
     } catch (error: any) {
       return { error: error?.message || 'Failed to delete your data.' };
     } finally {

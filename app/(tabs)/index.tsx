@@ -87,6 +87,19 @@ function ProfileModal({ visible, onClose }: { visible: boolean; onClose: () => v
     });
   };
 
+  const handleProfileSignOut = () => {
+    showConfirm({
+      title: 'Sign Out',
+      message: 'Sign out of your teacher account on this device now?',
+      confirmText: 'Sign Out',
+      onConfirm: async () => {
+        onClose();
+        await signOut();
+        showToast('Signed Out', 'You have been signed out on this device.', 'info');
+      },
+    });
+  };
+
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={pStyles.overlay}>
@@ -263,7 +276,7 @@ Short 1–2 minute check-ins help children recognise and name their feelings. Ov
             ) : null}
 
             {/* Sign Out */}
-            <TouchableOpacity style={pStyles.signOutBtn} onPress={() => { signOut(); onClose(); }} activeOpacity={0.7}>
+            <TouchableOpacity style={pStyles.signOutBtn} onPress={handleProfileSignOut} activeOpacity={0.7}>
               <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
               <Text style={pStyles.signOutText}>Sign Out</Text>
             </TouchableOpacity>
@@ -316,7 +329,7 @@ const pStyles = StyleSheet.create({
 export default function HomeScreen() {
   const router = useRouter();
   const { user, profile, setShowAuthModal, signOut, completedLessons, favourites } = useAuth();
-  const { showConfirm } = useToast();
+  const { showConfirm, showToast } = useToast();
   const [showProfile, setShowProfile] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [insideExpanded, setInsideExpanded] = useState(false);
@@ -334,6 +347,7 @@ export default function HomeScreen() {
       confirmText: 'Sign Out',
       onConfirm: async () => {
         await signOut();
+        showToast('Signed Out', 'You have been signed out on this device.', 'info');
       },
     });
   };
