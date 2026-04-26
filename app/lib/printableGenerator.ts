@@ -43,7 +43,12 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
         display: flex; justify-content: space-between; align-items: center;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       }
+      .toolbar-info { display: flex; flex-direction: column; gap: 4px; }
       .toolbar h3 { font-size: 16px; font-weight: 600; }
+      .toolbar-note {
+        font-size: 12px;
+        opacity: 0.9;
+      }
       .toolbar-buttons { display: flex; gap: 10px; }
       .toolbar button {
         background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
@@ -111,6 +116,11 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
       .script-text { font-size: 13px; line-height: 1.7; color: #444; }
       .circle-area { display: flex; flex-wrap: wrap; gap: 6mm; justify-content: center; margin: 5mm 0; }
       .circle-item { width: 28mm; height: 28mm; border-radius: 50%; border: 2px dashed ${borderColor}; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #666; text-align: center; padding: 4px; }
+      .manual-page-break {
+        break-before: page;
+        page-break-before: always;
+        padding-top: 8mm;
+      }
       .name-field { display: flex; align-items: center; gap: 8px; margin-bottom: 5mm; }
       .name-field label { font-size: 13px; font-weight: 600; color: #555; }
       .name-field .line { flex: 1; border-bottom: 2px solid ${borderColor}; height: 1px; }
@@ -272,17 +282,25 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
         </div>
       `;
 
-    case 'p-5': // Sensory Preferences Worksheet
+    case 'p-5': { // Sensory Preferences Worksheet
+      const sensorySections = [
+        { sense: 'Things I Can See', items: ['Bright lights', 'Dim lights', 'Colours', 'Patterns', 'Screens', 'Sparkly things'] },
+        { sense: 'Things I Can Hear', items: ['Loud music', 'Quiet sounds', 'Singing', 'Clapping', 'Silence', 'Nature sounds'] },
+        { sense: 'Things I Can Touch', items: ['Soft things', 'Rough things', 'Squishy things', 'Cold things', 'Warm things', 'Sticky things'] },
+        { sense: 'Things I Can Smell', items: ['Flowers', 'Food cooking', 'Fresh air', 'Paint', 'Perfume', 'Grass'] },
+      ];
       return `
         <div class="content">
           ${nameDate}
           <div class="instruction">Circle the things you like. Cross out the things you don't like. Draw a line under things you're not sure about.</div>
-          ${[
-            { sense: 'Things I Can See', items: ['Bright lights', 'Dim lights', 'Colours', 'Patterns', 'Screens', 'Sparkly things'] },
-            { sense: 'Things I Can Hear', items: ['Loud music', 'Quiet sounds', 'Singing', 'Clapping', 'Silence', 'Nature sounds'] },
-            { sense: 'Things I Can Touch', items: ['Soft things', 'Rough things', 'Squishy things', 'Cold things', 'Warm things', 'Sticky things'] },
-            { sense: 'Things I Can Smell', items: ['Flowers', 'Food cooking', 'Fresh air', 'Paint', 'Perfume', 'Grass'] },
-          ].map(section => `
+          ${sensorySections.slice(0, 2).map(section => `
+            <div class="section-title">${section.sense}</div>
+            <div class="circle-area">
+              ${section.items.map(item => `<div class="circle-item">${item}</div>`).join('')}
+            </div>
+          `).join('')}
+          <div class="manual-page-break"></div>
+          ${sensorySections.slice(2).map(section => `
             <div class="section-title">${section.sense}</div>
             <div class="circle-area">
               ${section.items.map(item => `<div class="circle-item">${item}</div>`).join('')}
@@ -294,6 +312,7 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
           <div class="writing-lines"><div class="writing-line"></div></div>
         </div>
       `;
+    }
 
     case 'p-6': // Kindness Cards
       return `
@@ -680,13 +699,22 @@ function generatePrintableHTML(printable: Printable, format: string): string {
   ${styles}
 </head>
 <body>
+  <script>
+    function handlePrint() {
+      alert('For best results, print on A4 with Margins set to Minimal.');
+      window.print();
+    }
+  </script>
   <div class="toolbar no-print">
-    <h3>${printable.title} (${format})</h3>
-    <div class="toolbar-buttons">
-      <button onclick="window.print()" class="primary">Print / Save as PDF</button>
-      <button onclick="window.close()">Close</button>
+      <div class="toolbar-info">
+        <h3>${printable.title} (${format})</h3>
+        <div class="toolbar-note">Best results: A4 paper | Margins set to Minimal</div>
+      </div>
+      <div class="toolbar-buttons">
+        <button onclick="handlePrint()" class="primary">Print / Save as PDF</button>
+        <button onclick="window.close()">Close</button>
+      </div>
     </div>
-  </div>
   <div class="page">
     <div class="header">
       <div class="brand-row">
@@ -862,13 +890,22 @@ export async function downloadAllPrintables(
   ${masterStyles}
 </head>
 <body>
+  <script>
+    function handlePrint() {
+      alert('For best results, print on A4 with Margins set to Minimal.');
+      window.print();
+    }
+  </script>
   <div class="toolbar no-print">
-    <h3>All Printables - Many Petals Learning (${printables.length} resources)</h3>
-    <div class="toolbar-buttons">
-      <button onclick="window.print()" class="primary">Print All / Save as PDF</button>
-      <button onclick="window.close()">Close</button>
+      <div class="toolbar-info">
+        <h3>All Printables - Many Petals Learning (${printables.length} resources)</h3>
+        <div class="toolbar-note">Best results: A4 paper | Margins set to Minimal</div>
+      </div>
+      <div class="toolbar-buttons">
+        <button onclick="handlePrint()" class="primary">Print All / Save as PDF</button>
+        <button onclick="window.close()">Close</button>
+      </div>
     </div>
-  </div>
 
   <!-- Table of Contents -->
   <div class="page" style="min-height:auto; padding-bottom:20mm;">
