@@ -345,8 +345,8 @@ export default function HomeScreen() {
 
   const freeLesson = LESSONS.find((lesson) => lesson.number === 1) ?? LESSONS[0];
   const featuredPrintable = PRINTABLES[0];
-  const compactHero = width < 1500;
-  const narrowHero = width < 1180;
+  const compactHero = width < 1760;
+  const narrowHero = width < 1480;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -414,7 +414,7 @@ export default function HomeScreen() {
             resizeMode="cover"
           />
           <View style={styles.heroOverlay}>
-            <View style={styles.heroContent}>
+            <View style={[styles.heroContent, compactHero && styles.heroContentCompact]}>
               <View style={[styles.heroRow, compactHero && styles.heroRowCompact]}>
                 <View style={[styles.heroTextCol, compactHero && styles.heroTextColCompact]}>
                   <View style={styles.heroBrandPill}>
@@ -911,6 +911,10 @@ const styles = StyleSheet.create({
   },
   heroContent: {
     padding: SPACING.md,
+    overflow: 'hidden',
+  },
+  heroContentCompact: {
+    paddingHorizontal: SPACING.sm,
   },
   heroRow: {
     flexDirection: 'row',
@@ -920,6 +924,7 @@ const styles = StyleSheet.create({
   },
   heroRowCompact: {
     flexDirection: 'column',
+    alignItems: 'stretch',
   },
   heroTextCol: {
     flex: 1,
@@ -927,6 +932,7 @@ const styles = StyleSheet.create({
   },
   heroTextColCompact: {
     minWidth: 0,
+    width: '100%',
   },
   heroPreviewCol: {
     flex: 0.9,
@@ -980,12 +986,12 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
   heroTitleCompact: {
-    fontSize: 34,
-    lineHeight: 40,
+    fontSize: 30,
+    lineHeight: 36,
   },
   heroTitleNarrow: {
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 26,
+    lineHeight: 32,
   },
   heroSubtitle: {
     fontSize: FONT_SIZES.md,
