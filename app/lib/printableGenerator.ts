@@ -32,7 +32,7 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
       @media print {
         html, body { margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         .no-print { display: none !important; }
-        .page { box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; min-height: auto !important; page-break-after: always; }
+        .page { box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; min-height: auto !important; page-break-after: always; padding: 15mm 18mm 14mm !important; }
         .page:last-child { page-break-after: auto; }
       }
       * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -55,10 +55,10 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
       .page {
         max-width: 210mm; margin: 70px auto 20px; background: white;
         box-shadow: 0 4px 20px rgba(0,0,0,0.12); position: relative;
-        min-height: 297mm; padding: 18mm 20mm 25mm;
+        min-height: 297mm; padding: 16mm 18mm 18mm;
         border-radius: 4px;
       }
-      .header { text-align: center; margin-bottom: 8mm; padding-bottom: 6mm; border-bottom: 3px solid ${borderColor}; }
+      .header { text-align: center; margin-bottom: 6mm; padding-bottom: 5mm; border-bottom: 3px solid ${borderColor}; }
       .brand-row {
         display: flex; align-items: center; justify-content: center; gap: 12px;
         margin-bottom: 4mm;
@@ -82,9 +82,9 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
       .header .a4-note { font-size: 8.5pt; color: #999; margin-top: 5px; font-weight: 600; }
       .content { margin-top: 6mm; }
       .footer {
-        position: absolute; bottom: 12mm; left: 20mm; right: 20mm;
-        text-align: center; font-size: 8pt; color: #bbb;
-        border-top: 1px solid #eee; padding-top: 3mm;
+        position: absolute; bottom: 8mm; left: 18mm; right: 18mm;
+        text-align: center; font-size: 7pt; color: #bbb;
+        border-top: 1px solid #eee; padding-top: 2mm;
       }
       .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
       .grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
@@ -102,7 +102,7 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
       .writing-lines { margin-top: 5mm; }
       .writing-line { border-bottom: 1px solid #ccc; height: 12mm; margin-bottom: 2mm; }
       .section-title { font-size: 16px; font-weight: 700; color: ${primaryColor}; margin: 6mm 0 3mm; padding-bottom: 2mm; border-bottom: 2px solid ${borderColor}30; }
-      .instruction { background: ${bgColor}; padding: 12px 16px; border-radius: 8px; font-size: 12px; color: #555; line-height: 1.6; margin-bottom: 5mm; border-left: 4px solid ${borderColor}; }
+      .instruction { background: ${bgColor}; padding: 10px 12px; border-radius: 8px; font-size: 11px; color: #555; line-height: 1.5; margin-bottom: 4mm; border-left: 4px solid ${borderColor}; }
       .thermo-level { width: 100%; padding: 14px 20px; text-align: center; font-weight: 700; font-size: 15px; color: white; border: 2px solid rgba(255,255,255,0.3); }
       .poster-content { text-align: center; padding: 5mm; }
       .poster-content h2 { font-size: 28pt; color: ${primaryColor}; margin-bottom: 8mm; font-weight: 800; }
@@ -148,10 +148,10 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
       const defaultEyes = '<circle cx="28" cy="32" r="4" fill="#333"/><circle cx="52" cy="32" r="4" fill="#333"/>';
       const faceCards = faces.map(f => {
         const needsDefaultEyes = !f.mouth.includes('cx="28" cy="3') || f.label === 'Happy' || f.label === 'Sad' || f.label === 'Calm';
-        const svg = `<svg viewBox="0 0 80 80" width="60" height="60"><circle cx="40" cy="40" r="36" fill="${f.fill}" stroke="${primaryColor}" stroke-width="3"/>${needsDefaultEyes ? defaultEyes : ''}${f.mouth}</svg>`;
+        const svg = `<svg viewBox="0 0 80 80" width="54" height="54"><circle cx="40" cy="40" r="36" fill="${f.fill}" stroke="${primaryColor}" stroke-width="3"/>${needsDefaultEyes ? defaultEyes : ''}${f.mouth}</svg>`;
         return `
-          <div class="card-item" style="min-height:110px; padding:12px 8px;">
-            <div style="margin-bottom:6px;">${svg}</div>
+          <div class="card-item" style="min-height:96px; padding:10px 8px;">
+            <div style="margin-bottom:4px;">${svg}</div>
             <div class="label">${f.label}</div>
             <div class="desc">${f.desc}</div>
           </div>
@@ -161,7 +161,7 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
         <div class="content">
           <div class="instruction">Cut out each card along the border. Use for matching games, emotion check-ins, circle time discussions, or display on your feelings board.</div>
           <div class="grid-4">${faceCards}</div>
-          <div style="margin-top:8mm; text-align:center; font-size:10px; color:#aaa;">
+          <div style="margin-top:5mm; text-align:center; font-size:9px; color:#aaa;">
             <p>Tip: Print on card stock and laminate for durability. Cut along the card borders.</p>
           </div>
         </div>
