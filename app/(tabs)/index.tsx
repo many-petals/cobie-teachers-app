@@ -409,13 +409,13 @@ export default function HomeScreen() {
 
       <ScrollView ref={scrollRef} style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
-        <View style={styles.hero}>
+        <View style={[styles.hero, compactHero && styles.heroCompact, narrowHero && styles.heroNarrow]}>
           <Image
             source={HERO_BOOK_COVER}
             style={styles.heroImage}
             resizeMode="cover"
           />
-          <View style={styles.heroOverlay}>
+          <View style={[styles.heroOverlay, compactHero && styles.heroOverlayCompact]}>
             <View style={[styles.heroContent, compactHero && styles.heroContentCompact]}>
               <View style={[styles.heroRow, compactHero && styles.heroRowCompact]}>
                 <View style={[styles.heroTextCol, compactHero && styles.heroTextColCompact]}>
@@ -916,6 +916,12 @@ const styles = StyleSheet.create({
     minHeight: 320,
     position: 'relative',
   },
+  heroCompact: {
+    minHeight: 520,
+  },
+  heroNarrow: {
+    minHeight: 560,
+  },
   heroImage: {
     width: '100%',
     height: '100%',
@@ -928,9 +934,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     paddingVertical: 20,
   },
+  heroOverlayCompact: {
+    justifyContent: 'flex-start',
+    paddingTop: 18,
+  },
   heroContent: {
     padding: SPACING.md,
-    overflow: 'hidden',
   },
   heroContentCompact: {
     paddingHorizontal: SPACING.sm,
