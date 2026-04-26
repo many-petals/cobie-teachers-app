@@ -419,50 +419,11 @@ export default function HomeScreen() {
             <View style={[styles.heroContent, compactHero && styles.heroContentCompact]}>
               <View style={[styles.heroRow, compactHero && styles.heroRowCompact]}>
                 <View style={[styles.heroTextCol, compactHero && styles.heroTextColCompact]}>
-                  <View style={styles.heroBrandPill}>
-                    <Image
-                      source={{ uri: BRAND.logoUrl }}
-                      style={styles.heroBrandLogo}
-                      resizeMode="contain"
-                    />
-                    <View>
-                      <Text style={styles.heroBrandName}>{BRAND.shortName}</Text>
-                      <Text style={styles.heroBrandPack}>{BRAND.tagline}</Text>
-                    </View>
-                  </View>
                   <Text style={[styles.heroTitle, compactHero && styles.heroTitleCompact, narrowHero && styles.heroTitleNarrow]}>Plan your week&apos;s PSHE lessons in 5 minutes - ready to teach, no prep needed.</Text>
                   <Text style={styles.heroSubtitle}>EYFS and KS1 emotional literacy lessons + printables</Text>
                   <Text style={styles.heroDescription}>
                     Built for teachers who need tomorrow&apos;s emotional literacy lesson ready today.
                   </Text>
-                </View>
-                <View style={[styles.heroPreviewCol, compactHero && styles.heroPreviewColCompact]}>
-                  <View style={styles.heroPreviewCard}>
-                    <View style={styles.heroPreviewTop}>
-                      <View style={[styles.heroPreviewIcon, { backgroundColor: freeLesson.color + '20' }]}>
-                        <Ionicons name="book-outline" size={18} color={freeLesson.color} />
-                      </View>
-                      <View style={styles.heroPreviewCopy}>
-                        <Text style={styles.heroPreviewEyebrow}>Free lesson preview</Text>
-                        <Text style={styles.heroPreviewTitle}>{freeLesson.title}</Text>
-                      </View>
-                    </View>
-                    <View style={styles.heroPreviewMeta}>
-                      <Text style={styles.heroPreviewMetaText}>{freeLesson.duration}</Text>
-                      <Text style={styles.heroPreviewMetaDot}>-</Text>
-                      <Text style={styles.heroPreviewMetaText}>{freeLesson.ageRange}</Text>
-                    </View>
-                    <View style={styles.heroPreviewFeatureList}>
-                      <View style={styles.heroPreviewFeatureRow}>
-                        <Ionicons name="bulb-outline" size={15} color={COLORS.primary} />
-                        <Text style={styles.heroPreviewBody}><Text style={styles.heroPreviewBodyLabel}>Objective:</Text> {freeLesson.focus}</Text>
-                      </View>
-                      <View style={styles.heroPreviewFeatureRow}>
-                        <Ionicons name="layers-outline" size={15} color={COLORS.primary} />
-                        <Text style={styles.heroPreviewBody}><Text style={styles.heroPreviewBodyLabel}>Includes:</Text> Story + Activity + Discussion</Text>
-                      </View>
-                    </View>
-                  </View>
                 </View>
               </View>
               <View style={[styles.heroButtons, compactHero && styles.heroButtonsCompact]}>
@@ -495,22 +456,34 @@ export default function HomeScreen() {
                   </View>
                 ))}
               </View>
-              <TouchableOpacity
-                style={styles.heroBookLink}
-                onPress={() => scrollRef.current?.scrollTo({ y: Math.max(workbookY - 24, 0), animated: true })}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="book-outline" size={14} color={COLORS.white} />
-                <Text style={styles.heroBookLinkText}>See the Cobie companion book</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.heroTextLink}
-                onPress={() => router.push('/guide' as any)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.heroTextLinkText}>How it works</Text>
-                <Ionicons name="arrow-forward" size={14} color={COLORS.white} />
-              </TouchableOpacity>
+              <View style={[styles.heroPreviewInline, compactHero && styles.heroPreviewInlineCompact]}>
+                <View style={[styles.heroPreviewCard, styles.heroPreviewCardCompact]}>
+                  <View style={styles.heroPreviewTop}>
+                    <View style={[styles.heroPreviewIcon, { backgroundColor: freeLesson.color + '20' }]}>
+                      <Ionicons name="book-outline" size={18} color={freeLesson.color} />
+                    </View>
+                    <View style={styles.heroPreviewCopy}>
+                      <Text style={styles.heroPreviewEyebrow}>Free lesson preview</Text>
+                      <Text style={styles.heroPreviewTitle}>{freeLesson.title}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.heroPreviewMeta}>
+                    <Text style={styles.heroPreviewMetaText}>{freeLesson.duration}</Text>
+                    <Text style={styles.heroPreviewMetaDot}>-</Text>
+                    <Text style={styles.heroPreviewMetaText}>{freeLesson.ageRange}</Text>
+                  </View>
+                  <View style={styles.heroPreviewFeatureList}>
+                    <View style={styles.heroPreviewFeatureRow}>
+                      <Ionicons name="bulb-outline" size={15} color={COLORS.primary} />
+                      <Text style={styles.heroPreviewBody}><Text style={styles.heroPreviewBodyLabel}>Objective:</Text> {freeLesson.focus}</Text>
+                    </View>
+                    <View style={styles.heroPreviewFeatureRow}>
+                      <Ionicons name="layers-outline" size={15} color={COLORS.primary} />
+                      <Text style={styles.heroPreviewBody}><Text style={styles.heroPreviewBodyLabel}>Includes:</Text> Story + Activity + Discussion</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
             </View>
           </View>
         </View>
@@ -534,6 +507,24 @@ export default function HomeScreen() {
                 />
               </View>
             ))}
+          </View>
+          <View style={styles.heroSupportLinks}>
+            <TouchableOpacity
+              style={styles.heroSupportLink}
+              onPress={() => scrollRef.current?.scrollTo({ y: Math.max(workbookY - 24, 0), animated: true })}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="book-outline" size={14} color={COLORS.primary} />
+              <Text style={styles.heroSupportLinkText}>See the Cobie companion book</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.heroSupportLink}
+              onPress={() => router.push('/guide' as any)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="information-circle-outline" size={14} color={COLORS.primary} />
+              <Text style={styles.heroSupportLinkText}>How it works</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -962,48 +953,6 @@ const styles = StyleSheet.create({
     minWidth: 0,
     width: '100%',
   },
-  heroPreviewCol: {
-    flex: 0.9,
-    minWidth: 240,
-    maxWidth: 320,
-    gap: SPACING.sm,
-    justifyContent: 'flex-end',
-  },
-  heroPreviewColCompact: {
-    width: '100%',
-    maxWidth: '100%',
-    minWidth: 0,
-  },
-  heroBrandPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    marginBottom: SPACING.md,
-    borderRadius: RADIUS.round,
-    backgroundColor: 'rgba(255,255,255,0.88)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.65)',
-  },
-  heroBrandLogo: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-  },
-  heroBrandName: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: '800',
-    color: COLORS.secondary,
-    lineHeight: 16,
-  },
-  heroBrandPack: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: COLORS.textMuted,
-    lineHeight: 12,
-  },
   heroTitle: {
     fontSize: 40,
     fontWeight: '800',
@@ -1093,48 +1042,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.white,
   },
-  heroTextLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-    marginTop: SPACING.sm,
-  },
-  heroBookLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-    marginTop: SPACING.sm,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 6,
-    borderRadius: RADIUS.round,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.22)',
-  },
-  heroBookLinkText: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: '700',
-    color: COLORS.white,
-  },
   heroUrgency: {
     fontSize: FONT_SIZES.sm,
     fontWeight: '700',
     color: 'rgba(255,255,255,0.92)',
     marginTop: SPACING.sm,
   },
-  heroTextLinkText: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: '700',
-    color: COLORS.white,
-    textDecorationLine: 'underline',
+  heroPreviewInline: {
+    marginTop: SPACING.md,
+    width: '100%',
+    maxWidth: 420,
+  },
+  heroPreviewInlineCompact: {
+    maxWidth: 360,
   },
   heroPreviewCard: {
     backgroundColor: 'rgba(255,255,255,0.96)',
     borderRadius: RADIUS.xl,
     padding: SPACING.md,
     ...SHADOWS.medium,
+  },
+  heroPreviewCardCompact: {
+    padding: SPACING.sm + 2,
   },
   heroPreviewCardSecondary: {
     backgroundColor: 'rgba(246, 250, 255, 0.95)',
@@ -1204,6 +1133,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: SPACING.xs,
+  },
+  heroSupportLinks: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
+  },
+  heroSupportLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 8,
+    borderRadius: RADIUS.round,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
+  },
+  heroSupportLinkText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
+    color: COLORS.primary,
   },
   promiseBannerSection: {
     marginHorizontal: SPACING.lg,
