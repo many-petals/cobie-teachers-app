@@ -29,6 +29,8 @@ import { PRINTABLES } from '../data/printables';
 import { BRAND } from '../data/brand';
 
 const HERO_IMAGE = 'https://d64gsuwffb70l.cloudfront.net/69357762fff8f7f4abcd8985_1771287970946_68002315.png';
+const COMPANION_BOOK_IMAGE = 'https://d64gsuwffb70l.cloudfront.net/6993b5b66d45d72ccfd31c24_1771291498634_bbc463f2.jpg';
+const PROMISE_BANNER = require('../assets/images/many-petals-promise-banner.png');
 
 
 const QUICK_TILES = [
@@ -344,7 +346,6 @@ export default function HomeScreen() {
   }, []);
 
   const freeLesson = LESSONS.find((lesson) => lesson.number === 1) ?? LESSONS[0];
-  const featuredPrintable = PRINTABLES[0];
   const compactHero = width < 1760;
   const narrowHero = width < 1480;
 
@@ -463,16 +464,24 @@ export default function HomeScreen() {
                   </View>
 
                   <View style={styles.heroPreviewCardSecondary}>
-                    <View style={styles.heroPreviewTop}>
-                      <View style={[styles.heroPreviewIcon, { backgroundColor: featuredPrintable.color + '20' }]}>
-                        <Ionicons name="print-outline" size={18} color={featuredPrintable.color} />
-                      </View>
-                      <View style={styles.heroPreviewCopy}>
-                        <Text style={styles.heroPreviewEyebrow}>Printable included</Text>
-                        <Text style={styles.heroPreviewTitle}>{featuredPrintable.title}</Text>
+                    <Text style={styles.heroPreviewEyebrow}>Companion book</Text>
+                    <View style={styles.heroBookRow}>
+                      <Image
+                        source={{ uri: COMPANION_BOOK_IMAGE }}
+                        style={styles.heroBookImage}
+                        resizeMode="cover"
+                      />
+                      <View style={styles.heroBookCopy}>
+                        <Text style={styles.heroPreviewTitle}>Cobie Activity Workbook</Text>
+                        <Text style={styles.heroPreviewBody}>
+                          Show the story-led print companion teachers can use alongside the app for classroom follow-up and home links.
+                        </Text>
+                        <View style={styles.heroBookTag}>
+                          <Ionicons name="book-outline" size={14} color={COLORS.secondary} />
+                          <Text style={styles.heroBookTagText}>Official Many Petals companion</Text>
+                        </View>
                       </View>
                     </View>
-                    <Text style={styles.heroPreviewBody}>Use tomorrow for calm discussion, follow-up, or independent work.</Text>
                   </View>
                 </View>
               </View>
@@ -516,6 +525,14 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
           </View>
+        </View>
+
+        <View style={styles.promiseBannerSection}>
+          <Image
+            source={PROMISE_BANNER}
+            style={styles.promiseBannerImage}
+            resizeMode="contain"
+          />
         </View>
 
         {/* SEN Mode Toggle */}
@@ -1168,6 +1185,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: SPACING.xs,
+  },
+  heroBookRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  heroBookImage: {
+    width: 78,
+    height: 108,
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.bgLight,
+  },
+  heroBookCopy: {
+    flex: 1,
+    gap: SPACING.xs,
+  },
+  heroBookTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: SPACING.xs,
+    alignSelf: 'flex-start',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 6,
+    borderRadius: RADIUS.round,
+    backgroundColor: COLORS.bgGreen,
+  },
+  heroBookTagText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
+    color: COLORS.secondary,
+  },
+  promiseBannerSection: {
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.md,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.xl,
+    overflow: 'hidden',
+    ...SHADOWS.medium,
+  },
+  promiseBannerImage: {
+    width: '100%',
+    height: 160,
   },
   section: {
     marginTop: SPACING.lg,
