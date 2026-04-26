@@ -2,6 +2,26 @@ import { Platform } from 'react-native';
 import { Printable } from '../data/printables';
 import { BRAND } from '../data/brand';
 
+function getStageMeta(ageRange: Printable['ageRange']) {
+  switch (ageRange) {
+    case 'EYFS':
+      return {
+        badge: 'EYFS Teacher Pack',
+        footer: 'EYFS classroom printable',
+      };
+    case 'KS1':
+      return {
+        badge: 'KS1 Teacher Pack',
+        footer: 'KS1 classroom printable',
+      };
+    default:
+      return {
+        badge: 'EYFS & KS1 Teacher Pack',
+        footer: 'EYFS & KS1 classroom printable',
+      };
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /*  STYLES                                                             */
 /* ------------------------------------------------------------------ */
@@ -50,9 +70,16 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
       .brand-copy { text-align: left; }
       .brand-name { font-size: 12pt; font-weight: 800; color: ${primaryColor}; line-height: 1.2; }
       .brand-pack { font-size: 9pt; color: #777; margin-top: 2px; }
+      .stage-pill {
+        display: inline-flex; align-items: center; justify-content: center;
+        margin-top: 3mm; padding: 7px 16px; border-radius: 999px;
+        background: ${bgColor}; color: ${primaryColor}; border: 1px solid ${borderColor}55;
+        font-size: 9pt; font-weight: 800; letter-spacing: 0.4px;
+      }
       .header h1 { font-size: 28pt; color: ${primaryColor}; margin-bottom: 4px; font-weight: 800; }
       .header .subtitle { font-size: 11pt; color: #888; font-weight: 500; }
       .header .brand { font-size: 9pt; color: #aaa; margin-top: 6px; font-style: italic; }
+      .header .a4-note { font-size: 8.5pt; color: #999; margin-top: 5px; font-weight: 600; }
       .content { margin-top: 6mm; }
       .footer {
         position: absolute; bottom: 12mm; left: 20mm; right: 20mm;
@@ -634,7 +661,7 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
 function generatePrintableHTML(printable: Printable, format: string): string {
   const isColor = format === 'Colour';
   const isBW = format === 'B&W';
-
+  const stageMeta = getStageMeta(printable.ageRange);
 
   const primaryColor = isColor ? printable.color : isBW ? '#333333' : '#666666';
   const bgColor = isColor ? printable.color + '15' : isBW ? '#ffffff' : '#f5f5f5';
@@ -665,17 +692,19 @@ function generatePrintableHTML(printable: Printable, format: string): string {
       <div class="brand-row">
         <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
         <div class="brand-copy">
-          <div class="brand-name">${BRAND.shortName}</div>
-          <div class="brand-pack">${BRAND.tagline}</div>
+          <div class="brand-name">${BRAND.name}</div>
+          <div class="brand-pack">${BRAND.storyTitle}</div>
         </div>
       </div>
+      <div class="stage-pill">${stageMeta.badge}</div>
       <h1>${printable.title}</h1>
       <div class="subtitle">${printable.description}</div>
-      <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack</div>
+      <div class="brand">${BRAND.name} &bull; ${BRAND.packDescription}</div>
+      <div class="a4-note">A4-ready classroom printable &bull; ${format} version</div>
     </div>
     ${content}
     <div class="footer">
-      Many Petals Learning &bull; Cobie Teacher Pack &bull; ${printable.title} &bull; ${format} version
+      ${BRAND.name} &bull; ${stageMeta.footer} &bull; ${printable.title} &bull; A4 ${format} version
     </div>
   </div>
 </body>
@@ -791,6 +820,7 @@ export async function downloadAllPrintables(
       const format = p.formats[0]; // Use first available format
       const isColor = format === 'Colour';
       const isBW = format === 'B&W';
+      const stageMeta = getStageMeta(p.ageRange);
       const primaryColor = isColor ? p.color : isBW ? '#333333' : '#666666';
       const bgColor = isColor ? p.color + '15' : isBW ? '#ffffff' : '#f5f5f5';
       const borderColor = isColor ? p.color : '#999999';
@@ -803,17 +833,19 @@ export async function downloadAllPrintables(
             <div class="brand-row">
               <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
               <div class="brand-copy">
-                <div class="brand-name">${BRAND.shortName}</div>
-                <div class="brand-pack">${BRAND.tagline}</div>
+                <div class="brand-name">${BRAND.name}</div>
+                <div class="brand-pack">${BRAND.storyTitle}</div>
               </div>
             </div>
+            <div class="stage-pill">${stageMeta.badge}</div>
             <h1 style="color:${primaryColor};">${p.title}</h1>
             <div class="subtitle">${p.description}</div>
-            <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack &bull; ${format} version</div>
+            <div class="brand">${BRAND.name} &bull; ${BRAND.packDescription}</div>
+            <div class="a4-note">A4-ready classroom printable &bull; ${format} version</div>
           </div>
           ${content}
           <div class="footer">
-            Many Petals Learning &bull; Cobie Teacher Pack &bull; ${p.title}
+            ${BRAND.name} &bull; ${stageMeta.footer} &bull; ${p.title}
           </div>
         </div>
       `;
@@ -844,13 +876,15 @@ export async function downloadAllPrintables(
       <div class="brand-row">
         <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
         <div class="brand-copy">
-          <div class="brand-name">${BRAND.shortName}</div>
-          <div class="brand-pack">${BRAND.tagline}</div>
+          <div class="brand-name">${BRAND.name}</div>
+          <div class="brand-pack">${BRAND.storyTitle}</div>
         </div>
       </div>
+      <div class="stage-pill">EYFS &amp; KS1 Teacher Pack</div>
       <h1>Many Petals Learning</h1>
       <div class="subtitle">Cobie Teacher Pack - Complete Printable Resources</div>
       <div class="brand">${printables.length} printable resources included</div>
+      <div class="a4-note">A4-ready printable collection</div>
     </div>
     <div class="content">
       <div class="section-title">Contents</div>

@@ -7,6 +7,7 @@ export interface ParentLetter {
   color: string;
   pages: number;
   category: 'letter' | 'sheet' | 'questionnaire' | 'report';
+  ageRange: 'EYFS' | 'KS1' | 'Both';
 }
 
 export const PARENT_LETTERS: ParentLetter[] = [
@@ -20,6 +21,7 @@ export const PARENT_LETTERS: ParentLetter[] = [
     color: '#1B6B93',
     pages: 1,
     category: 'letter',
+    ageRange: 'Both',
   },
   {
     id: 'pl-2',
@@ -31,6 +33,7 @@ export const PARENT_LETTERS: ParentLetter[] = [
     color: '#81C784',
     pages: 2,
     category: 'sheet',
+    ageRange: 'Both',
   },
   {
     id: 'pl-3',
@@ -42,6 +45,7 @@ export const PARENT_LETTERS: ParentLetter[] = [
     color: '#FF8A65',
     pages: 2,
     category: 'questionnaire',
+    ageRange: 'Both',
   },
   {
     id: 'pl-4',
@@ -53,5 +57,6 @@ export const PARENT_LETTERS: ParentLetter[] = [
     color: '#B39DDB',
     pages: 2,
     category: 'report',
+    ageRange: 'Both',
   },
 ];

@@ -1,5 +1,26 @@
 import { Platform } from 'react-native';
 import { ParentLetter } from '../data/parentLetters';
+import { BRAND } from '../data/brand';
+
+function getLetterStageMeta(ageRange: ParentLetter['ageRange']) {
+  switch (ageRange) {
+    case 'EYFS':
+      return {
+        badge: 'EYFS Teacher Pack',
+        footer: 'EYFS parent communication',
+      };
+    case 'KS1':
+      return {
+        badge: 'KS1 Teacher Pack',
+        footer: 'KS1 parent communication',
+      };
+    default:
+      return {
+        badge: 'EYFS & KS1 Teacher Pack',
+        footer: 'EYFS & KS1 parent communication',
+      };
+  }
+}
 
 /* ------------------------------------------------------------------ */
 /*  STYLES                                                             */
@@ -41,9 +62,27 @@ function getLetterStyles(primaryColor: string): string {
         text-align: center; margin-bottom: 8mm; padding-bottom: 6mm;
         border-bottom: 3px solid ${primaryColor};
       }
+      .brand-row {
+        display: flex; align-items: center; justify-content: center; gap: 12px;
+        margin-bottom: 4mm;
+      }
+      .brand-logo {
+        width: 44px; height: 44px; object-fit: contain; border-radius: 10px;
+        background: white; padding: 4px; border: 1px solid #eee;
+      }
+      .brand-copy { text-align: left; }
+      .brand-name { font-size: 12pt; font-weight: 800; color: ${primaryColor}; line-height: 1.2; }
+      .brand-pack { font-size: 9pt; color: #777; margin-top: 2px; }
+      .stage-pill {
+        display: inline-flex; align-items: center; justify-content: center;
+        margin-top: 3mm; padding: 7px 16px; border-radius: 999px;
+        background: ${primaryColor}10; color: ${primaryColor}; border: 1px solid ${primaryColor}35;
+        font-size: 9pt; font-weight: 800; letter-spacing: 0.4px;
+      }
       .letter-header h1 { font-size: 22pt; color: ${primaryColor}; margin-bottom: 4px; font-weight: 800; }
       .letter-header .subtitle { font-size: 12pt; color: #666; font-weight: 500; margin-top: 4px; }
       .letter-header .brand { font-size: 9pt; color: #aaa; margin-top: 8px; font-style: italic; }
+      .letter-header .a4-note { font-size: 8.5pt; color: #999; margin-top: 5px; font-weight: 600; }
       .letter-header .school-info { font-size: 11pt; color: #444; margin-top: 8px; font-weight: 600; }
       .letter-body { margin-top: 6mm; font-size: 11.5pt; line-height: 1.7; color: #333; }
       .letter-body p { margin-bottom: 4mm; }
@@ -515,6 +554,7 @@ function getLetterContent(letter: ParentLetter, schoolName: string, teacherName:
 /* ------------------------------------------------------------------ */
 function generateLetterHTML(letter: ParentLetter, schoolName: string, teacherName: string): string {
   const primaryColor = letter.color;
+  const stageMeta = getLetterStageMeta(letter.ageRange);
   const styles = getLetterStyles(primaryColor);
   const content = getLetterContent(letter, schoolName, teacherName, primaryColor);
 
@@ -536,14 +576,23 @@ function generateLetterHTML(letter: ParentLetter, schoolName: string, teacherNam
   </div>
   <div class="page">
     <div class="letter-header">
+      <div class="brand-row">
+        <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
+        <div class="brand-copy">
+          <div class="brand-name">${BRAND.name}</div>
+          <div class="brand-pack">${BRAND.storyTitle}</div>
+        </div>
+      </div>
+      <div class="stage-pill">${stageMeta.badge}</div>
       <div class="school-info">${schoolName || ''}</div>
       <h1>${letter.title}</h1>
       <div class="subtitle">${letter.subtitle}</div>
-      <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack</div>
+      <div class="brand">${BRAND.name} &bull; ${BRAND.packDescription}</div>
+      <div class="a4-note">A4-ready parent document</div>
     </div>
     ${content}
     <div class="footer">
-      Many Petals Learning &bull; Cobie Teacher Pack &bull; ${letter.title} &bull; Parent Communication
+      ${BRAND.name} &bull; ${stageMeta.footer} &bull; ${letter.title} &bull; A4 document
     </div>
   </div>
 </body>
@@ -647,17 +696,27 @@ export function downloadAllParentLetters(
 
       const allPages = letters.map((letter) => {
         const content = getLetterContent(letter, schoolName, teacherName, letter.color);
+        const stageMeta = getLetterStageMeta(letter.ageRange);
         return `
           <div class="page" style="border-left: 4px solid ${letter.color};">
             <div class="letter-header">
+              <div class="brand-row">
+                <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
+                <div class="brand-copy">
+                  <div class="brand-name">${BRAND.name}</div>
+                  <div class="brand-pack">${BRAND.storyTitle}</div>
+                </div>
+              </div>
+              <div class="stage-pill">${stageMeta.badge}</div>
               <div class="school-info">${schoolName || ''}</div>
               <h1 style="color:${letter.color};">${letter.title}</h1>
               <div class="subtitle">${letter.subtitle}</div>
-              <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack</div>
+              <div class="brand">${BRAND.name} &bull; ${BRAND.packDescription}</div>
+              <div class="a4-note">A4-ready parent document</div>
             </div>
             ${content}
             <div class="footer">
-              Many Petals Learning &bull; Cobie Teacher Pack &bull; ${letter.title}
+              ${BRAND.name} &bull; ${stageMeta.footer} &bull; ${letter.title}
             </div>
           </div>
         `;
@@ -681,10 +740,19 @@ export function downloadAllParentLetters(
   </div>
   <div class="page" style="min-height:auto; padding-bottom:20mm;">
     <div class="letter-header">
+      <div class="brand-row">
+        <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
+        <div class="brand-copy">
+          <div class="brand-name">${BRAND.name}</div>
+          <div class="brand-pack">${BRAND.storyTitle}</div>
+        </div>
+      </div>
+      <div class="stage-pill">EYFS &amp; KS1 Teacher Pack</div>
       <div class="school-info">${schoolName || ''}</div>
       <h1>Parent Communication Pack</h1>
       <div class="subtitle">Cobie Emotional Literacy Programme</div>
-      <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack</div>
+      <div class="brand">${BRAND.name} &bull; ${BRAND.packDescription}</div>
+      <div class="a4-note">A4-ready parent pack</div>
     </div>
     <div class="letter-body">
       <h2>Contents</h2>
