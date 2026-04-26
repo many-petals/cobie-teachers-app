@@ -463,7 +463,7 @@ export default function HomeScreen() {
                       <Ionicons name="book-outline" size={18} color={freeLesson.color} />
                     </View>
                     <View style={styles.heroPreviewCopy}>
-                      <Text style={styles.heroPreviewEyebrow}>Free lesson preview</Text>
+                      <Text style={styles.heroPreviewEyebrow}>Inside lesson 1</Text>
                       <Text style={styles.heroPreviewTitle}>{freeLesson.title}</Text>
                     </View>
                   </View>
@@ -476,10 +476,6 @@ export default function HomeScreen() {
                     <View style={styles.heroPreviewFeatureRow}>
                       <Ionicons name="bulb-outline" size={15} color={COLORS.primary} />
                       <Text style={styles.heroPreviewBody}><Text style={styles.heroPreviewBodyLabel}>Objective:</Text> {freeLesson.focus}</Text>
-                    </View>
-                    <View style={styles.heroPreviewFeatureRow}>
-                      <Ionicons name="layers-outline" size={15} color={COLORS.primary} />
-                      <Text style={styles.heroPreviewBody}><Text style={styles.heroPreviewBodyLabel}>Includes:</Text> Story + Activity + Discussion</Text>
                     </View>
                   </View>
                 </View>
@@ -904,14 +900,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.lightGray,
   },
   hero: {
-    minHeight: 320,
+    minHeight: 280,
     position: 'relative',
   },
   heroCompact: {
-    minHeight: 520,
+    minHeight: 420,
   },
   heroNarrow: {
-    minHeight: 560,
+    minHeight: 460,
   },
   heroImage: {
     width: '100%',
@@ -923,17 +919,19 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(18, 74, 103, 0.9)',
     justifyContent: 'flex-end',
-    paddingVertical: 20,
+    paddingVertical: 14,
   },
   heroOverlayCompact: {
     justifyContent: 'flex-start',
-    paddingTop: 18,
+    paddingTop: 12,
   },
   heroContent: {
-    padding: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
   },
   heroContentCompact: {
     paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.sm,
   },
   heroRow: {
     flexDirection: 'row',
@@ -979,14 +977,14 @@ const styles = StyleSheet.create({
   heroDescription: {
     fontSize: FONT_SIZES.sm,
     color: 'rgba(255,255,255,0.88)',
-    marginTop: SPACING.sm,
-    lineHeight: 22,
+    marginTop: 6,
+    lineHeight: 20,
   },
   heroProofRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.sm,
-    marginTop: SPACING.sm,
+    gap: SPACING.xs,
+    marginTop: 6,
   },
   heroProofItem: {
     flexDirection: 'row',
@@ -1002,7 +1000,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
     flexWrap: 'wrap',
   },
   heroButtonsCompact: {
@@ -1046,15 +1044,15 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     fontWeight: '700',
     color: 'rgba(255,255,255,0.92)',
-    marginTop: SPACING.sm,
+    marginTop: 6,
   },
   heroPreviewInline: {
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
     width: '100%',
-    maxWidth: 420,
+    maxWidth: 340,
   },
   heroPreviewInlineCompact: {
-    maxWidth: 360,
+    maxWidth: 320,
   },
   heroPreviewCard: {
     backgroundColor: 'rgba(255,255,255,0.96)',
@@ -1063,7 +1061,8 @@ const styles = StyleSheet.create({
     ...SHADOWS.medium,
   },
   heroPreviewCardCompact: {
-    padding: SPACING.sm + 2,
+    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: SPACING.sm,
   },
   heroPreviewCardSecondary: {
     backgroundColor: 'rgba(246, 250, 255, 0.95)',
@@ -1104,7 +1103,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginTop: SPACING.sm,
+    marginTop: 6,
   },
   heroPreviewMetaText: {
     fontSize: 11,
@@ -1126,8 +1125,8 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   heroPreviewFeatureList: {
-    marginTop: SPACING.sm,
-    gap: SPACING.xs,
+    marginTop: 6,
+    gap: 4,
   },
   heroPreviewFeatureRow: {
     flexDirection: 'row',
