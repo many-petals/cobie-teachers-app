@@ -8,6 +8,7 @@ import {
   StyleSheet,
   SafeAreaView,
   Modal,
+  useWindowDimensions,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -328,6 +329,7 @@ const pStyles = StyleSheet.create({
 });
 
 export default function HomeScreen() {
+  const { width } = useWindowDimensions();
   const router = useRouter();
   const { user, profile, setShowAuthModal, completedLessons, favourites } = useAuth();
   const { showConfirm } = useToast();
@@ -343,6 +345,8 @@ export default function HomeScreen() {
 
   const freeLesson = LESSONS.find((lesson) => lesson.number === 1) ?? LESSONS[0];
   const featuredPrintable = PRINTABLES[0];
+  const compactHero = width < 1500;
+  const narrowHero = width < 1180;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -411,8 +415,8 @@ export default function HomeScreen() {
           />
           <View style={styles.heroOverlay}>
             <View style={styles.heroContent}>
-              <View style={styles.heroRow}>
-                <View style={styles.heroTextCol}>
+              <View style={[styles.heroRow, compactHero && styles.heroRowCompact]}>
+                <View style={[styles.heroTextCol, compactHero && styles.heroTextColCompact]}>
                   <View style={styles.heroBrandPill}>
                     <Image
                       source={{ uri: BRAND.logoUrl }}
@@ -424,7 +428,7 @@ export default function HomeScreen() {
                       <Text style={styles.heroBrandPack}>{BRAND.tagline}</Text>
                     </View>
                   </View>
-                  <Text style={styles.heroTitle}>Plan your week&apos;s PSHE lessons in 5 minutes — ready to teach, no prep needed.</Text>
+                  <Text style={[styles.heroTitle, compactHero && styles.heroTitleCompact, narrowHero && styles.heroTitleNarrow]}>Plan your week's PSHE lessons in 5 minutes - ready to teach, no prep needed.</Text>
                   <Text style={styles.heroSubtitle}>Built for EYFS and KS1 teachers who need tomorrow&apos;s emotional literacy lesson ready today.</Text>
                   <Text style={styles.heroDescription}>
                     Companion teaching resources for Cobie the Cactus, with practical lesson structure, printable support, and SEN-aware guidance.
@@ -442,7 +446,7 @@ export default function HomeScreen() {
                     ))}
                   </View>
                 </View>
-                <View style={styles.heroPreviewCol}>
+                <View style={[styles.heroPreviewCol, compactHero && styles.heroPreviewColCompact]}>
                   <View style={styles.heroPreviewCard}>
                     <View style={styles.heroPreviewTop}>
                       <View style={[styles.heroPreviewIcon, { backgroundColor: freeLesson.color + '20' }]}>
@@ -455,7 +459,7 @@ export default function HomeScreen() {
                     </View>
                     <View style={styles.heroPreviewMeta}>
                       <Text style={styles.heroPreviewMetaText}>{freeLesson.duration}</Text>
-                      <Text style={styles.heroPreviewMetaDot}>•</Text>
+                      <Text style={styles.heroPreviewMetaDot}>-</Text>
                       <Text style={styles.heroPreviewMetaText}>{freeLesson.ageRange}</Text>
                     </View>
                     <Text style={styles.heroPreviewBody}>Objective: {freeLesson.focus}</Text>
@@ -475,14 +479,14 @@ export default function HomeScreen() {
                   </View>
                 </View>
               </View>
-              <View style={styles.heroButtons}>
+              <View style={[styles.heroButtons, compactHero && styles.heroButtonsCompact]}>
                 <TouchableOpacity
-                  style={styles.heroButton}
+                  style={[styles.heroButton, compactHero && styles.heroButtonCompact]}
                   onPress={() => setShowPricing(true)}
                   activeOpacity={0.7}
                 >
                   <Ionicons name="rocket-outline" size={20} color={COLORS.white} />
-                  <Text style={styles.heroButtonText}>Start 14-Day Free Trial — No Planning Needed This Week</Text>
+                  <Text style={styles.heroButtonText}>Start 14-Day Free Trial - No Planning Needed This Week</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.heroButtonSecondary}
@@ -914,9 +918,15 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: SPACING.md,
   },
+  heroRowCompact: {
+    flexDirection: 'column',
+  },
   heroTextCol: {
     flex: 1,
     minWidth: 280,
+  },
+  heroTextColCompact: {
+    minWidth: 0,
   },
   heroPreviewCol: {
     flex: 0.9,
@@ -924,6 +934,11 @@ const styles = StyleSheet.create({
     maxWidth: 320,
     gap: SPACING.sm,
     justifyContent: 'flex-end',
+  },
+  heroPreviewColCompact: {
+    width: '100%',
+    maxWidth: '100%',
+    minWidth: 0,
   },
   heroBrandPill: {
     flexDirection: 'row',
@@ -964,6 +979,14 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
   },
+  heroTitleCompact: {
+    fontSize: 34,
+    lineHeight: 40,
+  },
+  heroTitleNarrow: {
+    fontSize: 28,
+    lineHeight: 34,
+  },
   heroSubtitle: {
     fontSize: FONT_SIZES.md,
     fontWeight: '700',
@@ -999,6 +1022,9 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     flexWrap: 'wrap',
   },
+  heroButtonsCompact: {
+    gap: SPACING.sm,
+  },
   heroButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1010,10 +1036,15 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.round,
     ...SHADOWS.medium,
   },
+  heroButtonCompact: {
+    paddingHorizontal: SPACING.md,
+  },
   heroButtonText: {
     fontSize: FONT_SIZES.sm,
     fontWeight: '700',
     color: COLORS.white,
+    flexShrink: 1,
+    textAlign: 'center',
   },
   heroButtonSecondary: {
     paddingHorizontal: SPACING.md,
