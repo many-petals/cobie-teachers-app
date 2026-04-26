@@ -876,14 +876,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.lightGray,
   },
   hero: {
-    minHeight: 250,
+    minHeight: 220,
     position: 'relative',
   },
   heroCompact: {
-    minHeight: 320,
+    minHeight: 280,
   },
   heroNarrow: {
-    minHeight: 360,
+    minHeight: 320,
   },
   heroImage: {
     width: '100%',
@@ -895,19 +895,19 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(18, 74, 103, 0.9)',
     justifyContent: 'flex-end',
-    paddingVertical: 10,
+    paddingVertical: 8,
   },
   heroOverlayCompact: {
     justifyContent: 'flex-start',
-    paddingTop: 10,
+    paddingTop: 8,
   },
   heroContent: {
     paddingHorizontal: SPACING.md,
-    paddingVertical: 8,
+    paddingVertical: 6,
   },
   heroContentCompact: {
     paddingHorizontal: SPACING.sm,
-    paddingVertical: 8,
+    paddingVertical: 6,
   },
   heroRow: {
     flexDirection: 'row',
@@ -928,10 +928,10 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   heroTitle: {
-    fontSize: 40,
+    fontSize: 38,
     fontWeight: '800',
     color: COLORS.white,
-    lineHeight: 46,
+    lineHeight: 44,
     textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
@@ -976,7 +976,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
-    marginTop: 8,
+    marginTop: 6,
     flexWrap: 'wrap',
   },
   heroButtonsCompact: {
@@ -988,13 +988,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: SPACING.sm,
     backgroundColor: COLORS.secondary,
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md + 2,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm + 2,
     borderRadius: RADIUS.round,
     ...SHADOWS.medium,
   },
   heroButtonCompact: {
     paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
   },
   heroButtonText: {
     fontSize: FONT_SIZES.md,
