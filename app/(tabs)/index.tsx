@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -29,7 +29,6 @@ import { PRINTABLES } from '../data/printables';
 import { BRAND } from '../data/brand';
 
 const HERO_BOOK_COVER = require('../assets/images/book-cover-updated.png');
-const COMPANION_BOOK_IMAGE = 'https://d64gsuwffb70l.cloudfront.net/6993b5b66d45d72ccfd31c24_1771291498634_bbc463f2.jpg';
 const PROMISE_BANNER = require('../assets/images/many-petals-promise-banner.png');
 
 
@@ -338,8 +337,10 @@ export default function HomeScreen() {
   const [showProfile, setShowProfile] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [insideExpanded, setInsideExpanded] = useState(false);
+  const [workbookY, setWorkbookY] = useState(0);
   // Track client-side mount to prevent hydration mismatch from auth state
   const [mounted, setMounted] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -406,7 +407,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={scrollRef} style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
         <View style={styles.hero}>
           <Image
@@ -462,27 +463,6 @@ export default function HomeScreen() {
                       </View>
                     </View>
                   </View>
-
-                  <View style={styles.heroPreviewCardSecondary}>
-                    <Text style={styles.heroPreviewEyebrow}>Companion book</Text>
-                    <View style={styles.heroBookRow}>
-                      <Image
-                        source={{ uri: COMPANION_BOOK_IMAGE }}
-                        style={styles.heroBookImage}
-                        resizeMode="cover"
-                      />
-                      <View style={styles.heroBookCopy}>
-                        <Text style={styles.heroPreviewTitle}>Cobie Activity Workbook</Text>
-                        <Text style={styles.heroPreviewBody}>
-                          Show the story-led print companion teachers can use alongside the app for classroom follow-up and home links.
-                        </Text>
-                        <View style={styles.heroBookTag}>
-                          <Ionicons name="book-outline" size={14} color={COLORS.secondary} />
-                          <Text style={styles.heroBookTagText}>Official Many Petals companion</Text>
-                        </View>
-                      </View>
-                    </View>
-                  </View>
                 </View>
               </View>
               <View style={[styles.heroButtons, compactHero && styles.heroButtonsCompact]}>
@@ -516,6 +496,14 @@ export default function HomeScreen() {
                 ))}
               </View>
               <TouchableOpacity
+                style={styles.heroBookLink}
+                onPress={() => scrollRef.current?.scrollTo({ y: Math.max(workbookY - 24, 0), animated: true })}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="book-outline" size={14} color={COLORS.white} />
+                <Text style={styles.heroBookLinkText}>See the Cobie companion book</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
                 style={styles.heroTextLink}
                 onPress={() => router.push('/guide' as any)}
                 activeOpacity={0.7}
@@ -525,14 +513,6 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-
-        <View style={styles.promiseBannerSection}>
-          <Image
-            source={PROMISE_BANNER}
-            style={styles.promiseBannerImage}
-            resizeMode="contain"
-          />
         </View>
 
         {/* SEN Mode Toggle */}
@@ -597,7 +577,9 @@ export default function HomeScreen() {
           
 
         {/* Workbook Promo - Full */}
-        <WorkbookPromo />
+        <View onLayout={(event) => setWorkbookY(event.nativeEvent.layout.y)}>
+          <WorkbookPromo />
+        </View>
 
         {/* What's Inside */}
         <View style={[styles.section, { paddingHorizontal: 0 }]}>
@@ -706,6 +688,14 @@ export default function HomeScreen() {
         </View>
 
         {/* Footer */}
+        <View style={styles.promiseBannerSection}>
+          <Image
+            source={PROMISE_BANNER}
+            style={styles.promiseBannerImage}
+            resizeMode="contain"
+          />
+        </View>
+
         <View style={styles.footer}>
           <Image
             source={{ uri: BRAND.logoUrl }}
@@ -1101,6 +1091,24 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginTop: SPACING.sm,
   },
+  heroBookLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    marginTop: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 6,
+    borderRadius: RADIUS.round,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.22)',
+  },
+  heroBookLinkText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
+    color: COLORS.white,
+  },
   heroUrgency: {
     fontSize: FONT_SIZES.sm,
     fontWeight: '700',
@@ -1187,38 +1195,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: SPACING.xs,
-  },
-  heroBookRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: SPACING.md,
-    marginTop: SPACING.sm,
-  },
-  heroBookImage: {
-    width: 78,
-    height: 108,
-    borderRadius: RADIUS.md,
-    backgroundColor: COLORS.bgLight,
-  },
-  heroBookCopy: {
-    flex: 1,
-    gap: SPACING.xs,
-  },
-  heroBookTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: SPACING.xs,
-    alignSelf: 'flex-start',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 6,
-    borderRadius: RADIUS.round,
-    backgroundColor: COLORS.bgGreen,
-  },
-  heroBookTagText: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: '700',
-    color: COLORS.secondary,
   },
   promiseBannerSection: {
     marginHorizontal: SPACING.lg,
