@@ -29,8 +29,6 @@ import { PRINTABLES } from '../data/printables';
 import { BRAND } from '../data/brand';
 
 const HERO_BOOK_COVER = require('../assets/images/book-cover-updated.png');
-const PROMISE_BANNER = require('../assets/images/many-petals-promise-banner.png');
-
 
 const QUICK_TILES = [
   { title: 'Lessons', subtitle: '8 Core', icon: 'book', color: '#1B6B93', bgColor: '#E1F5FE', route: '/lessons' },
@@ -362,9 +360,9 @@ export default function HomeScreen() {
             style={styles.logoImage}
             resizeMode="contain"
           />
-          <View>
-            <Text style={styles.appHeaderTitle}>{BRAND.shortName}</Text>
-            <Text style={styles.appHeaderSub}>{BRAND.tagline}</Text>
+          <View style={styles.appHeaderCopy}>
+            <Text style={styles.appHeaderTitle}>{BRAND.name}</Text>
+            <Text style={styles.appHeaderSub}>Cobie the Cactus Teacher Pack</Text>
           </View>
 
         </View>
@@ -652,11 +650,11 @@ export default function HomeScreen() {
 
         {/* Footer */}
         <View style={styles.promiseBannerSection}>
-          <Image
-            source={PROMISE_BANNER}
-            style={styles.promiseBannerImage}
-            resizeMode="contain"
-          />
+          <Text style={styles.promiseEyebrow}>The Many Petals Promise</Text>
+          <Text style={styles.promiseTitle}>Every child belongs in this garden, exactly as they are.</Text>
+          <Text style={styles.promiseBody}>
+            Calm, inclusive emotional literacy support for EYFS and KS1 classrooms.
+          </Text>
         </View>
 
         <View style={styles.footer}>
@@ -741,10 +739,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
   },
+  appHeaderCopy: {
+    justifyContent: 'center',
+  },
   logoImage: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     backgroundColor: COLORS.white,
   },
 
@@ -755,8 +756,8 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   appHeaderSub: {
-    fontSize: 10,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
     color: COLORS.textMuted,
   },
   headerActions: {
@@ -1046,16 +1047,40 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   promiseBannerSection: {
-    marginHorizontal: SPACING.lg,
-    marginTop: SPACING.md,
+    marginHorizontal: SPACING.xl,
+    marginTop: SPACING.lg,
     backgroundColor: COLORS.white,
     borderRadius: RADIUS.xl,
-    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.lg,
+    alignItems: 'center',
     ...SHADOWS.medium,
   },
-  promiseBannerImage: {
-    width: '100%',
-    height: 160,
+  promiseEyebrow: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
+    color: COLORS.secondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: SPACING.xs,
+  },
+  promiseTitle: {
+    fontSize: FONT_SIZES.xxl,
+    fontWeight: '800',
+    color: COLORS.text,
+    textAlign: 'center',
+    lineHeight: 34,
+    maxWidth: 760,
+  },
+  promiseBody: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    marginTop: SPACING.sm,
+    maxWidth: 620,
+    lineHeight: 22,
   },
   section: {
     marginTop: SPACING.lg,
@@ -1229,7 +1254,7 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
   },
   footer: {
-    marginTop: SPACING.huge,
+    marginTop: SPACING.xl,
     padding: SPACING.xl,
     backgroundColor: COLORS.white,
     borderTopWidth: 1,
