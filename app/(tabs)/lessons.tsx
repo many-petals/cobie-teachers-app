@@ -31,14 +31,14 @@ export default function LessonsScreen() {
 
   const lessonStats = useMemo(() => {
     const completedCount = LESSONS.filter((lesson) => isLessonCompleted(lesson.id)).length;
-    const availableCount = LESSONS.filter((lesson) => !getLessonAvailability(lesson, hasFullAccess).locked).length;
-    const lockedCount = LESSONS.length - availableCount;
+    const freeCount = LESSONS.filter((lesson) => lesson.number === 1).length;
+    const lockedCount = LESSONS.filter((lesson) => lesson.number !== 1).length;
     const nextLessonId =
       LESSONS.find((lesson) => !getLessonAvailability(lesson, hasFullAccess).locked && !isLessonCompleted(lesson.id))?.id ?? null;
 
     return {
       completedCount,
-      availableCount,
+      freeCount,
       lockedCount,
       nextLessonId,
     };
@@ -69,8 +69,8 @@ export default function LessonsScreen() {
 
       <View style={styles.summaryRow}>
         <View style={styles.summaryCard}>
-          <Text style={styles.summaryNumber}>{lessonStats.availableCount}</Text>
-          <Text style={styles.summaryLabel}>Free Now</Text>
+          <Text style={styles.summaryNumber}>{lessonStats.freeCount}</Text>
+          <Text style={styles.summaryLabel}>Free Lesson</Text>
         </View>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryNumber}>{lessonStats.completedCount}</Text>
@@ -78,7 +78,7 @@ export default function LessonsScreen() {
         </View>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryNumber}>{lessonStats.lockedCount}</Text>
-          <Text style={styles.summaryLabel}>Locked</Text>
+          <Text style={styles.summaryLabel}>Trial Unlocks</Text>
         </View>
       </View>
 
@@ -128,7 +128,9 @@ export default function LessonsScreen() {
 
                 <View style={styles.lessonInfo}>
                   <View style={styles.lessonTopRow}>
-                    <Text style={styles.lessonKicker}>Lesson {lesson.number}</Text>
+                    <View style={styles.lessonKickerWrap}>
+                      <Text style={styles.lessonKicker}>Lesson {lesson.number}</Text>
+                    </View>
                     <View style={styles.lessonChips}>
                       <View
                         style={[
@@ -139,7 +141,7 @@ export default function LessonsScreen() {
                             ? styles.statusChipLocked
                             : isRecommended
                             ? styles.statusChipNext
-                            : styles.statusChipReady,
+                            : styles.statusChipFree,
                         ]}
                       >
                         <Text
@@ -151,10 +153,10 @@ export default function LessonsScreen() {
                               ? styles.statusChipTextLocked
                               : isRecommended
                               ? styles.statusChipTextNext
-                              : styles.statusChipTextReady,
+                              : styles.statusChipTextFree,
                           ]}
                         >
-                          {completed ? 'Completed' : locked ? 'Locked' : isRecommended ? 'Start Here' : 'Ready'}
+                          {completed ? 'Completed' : locked ? 'Trial Unlock' : isRecommended ? 'Start Here' : 'Free Preview'}
                         </Text>
                       </View>
                       <View style={[styles.accessChip, locked ? styles.accessChipLocked : styles.accessChipFree]}>
@@ -186,28 +188,45 @@ export default function LessonsScreen() {
                     </TouchableOpacity>
                   </View>
 
-                  <View style={styles.lessonMeta}>
-                    <View style={styles.metaItem}>
-                      <Ionicons name="time-outline" size={14} color={COLORS.textMuted} />
-                      <Text style={styles.metaText}>{lesson.duration}</Text>
-                    </View>
-                    <View style={styles.metaItem}>
-                      <Ionicons name="school-outline" size={14} color={COLORS.textMuted} />
-                      <Text style={styles.metaText}>{lesson.ageRange}</Text>
-                    </View>
-                    <View style={[styles.focusBadge, { backgroundColor: lesson.color + '18' }]}>
-                      <Text style={[styles.focusText, { color: lesson.color }]}>{lesson.focus}</Text>
-                    </View>
-                  </View>
+                  <View style={styles.lessonBodyRow}>
+                    <View style={styles.lessonContentCol}>
+                      <View style={styles.lessonMeta}>
+                        <View style={styles.metaItem}>
+                          <Ionicons name="time-outline" size={14} color={COLORS.textMuted} />
+                          <Text style={styles.metaText}>{lesson.duration}</Text>
+                        </View>
+                        <View style={styles.metaItem}>
+                          <Ionicons name="school-outline" size={14} color={COLORS.textMuted} />
+                          <Text style={styles.metaText}>{lesson.ageRange}</Text>
+                        </View>
+                        <View style={[styles.focusBadge, { backgroundColor: lesson.color + '18' }]}>
+                          <Text style={[styles.focusText, { color: lesson.color }]}>{lesson.focus}</Text>
+                        </View>
+                      </View>
 
-                  <View style={styles.lessonEssentials}>
-                    <View style={styles.lessonEssentialRow}>
-                      <Text style={styles.lessonEssentialLabel}>Objective</Text>
-                      <Text style={styles.lessonEssentialText}>{lesson.focus}</Text>
+                      <View style={styles.lessonEssentials}>
+                        <View style={styles.lessonEssentialRow}>
+                          <Text style={styles.lessonEssentialLabel}>Objective</Text>
+                          <Text style={styles.lessonEssentialText}>{lesson.focus}</Text>
+                        </View>
+                        <View style={styles.lessonEssentialRow}>
+                          <Text style={styles.lessonEssentialLabel}>Outcome</Text>
+                          <Text style={styles.lessonEssentialText}>{lesson.objectives[0]}</Text>
+                        </View>
+                      </View>
                     </View>
-                    <View style={styles.lessonEssentialRow}>
-                      <Text style={styles.lessonEssentialLabel}>Outcome</Text>
-                      <Text style={styles.lessonEssentialText}>{lesson.objectives[0]}</Text>
+
+                    <View style={styles.lessonActionRail}>
+                      <Text style={styles.lessonActionLabel}>
+                        {locked ? 'Unlock with trial' : completed ? 'Replay now' : 'Ready to teach'}
+                      </Text>
+                      <Text style={styles.lessonActionText}>
+                        {locked
+                          ? 'Open all remaining lessons, printables, and SEN support.'
+                          : completed
+                          ? 'Return to the full lesson steps whenever you need them.'
+                          : 'Open the full lesson flow and use it tomorrow without extra prep.'}
+                      </Text>
                     </View>
                   </View>
                 </View>
@@ -461,6 +480,9 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     marginBottom: 4,
   },
+  lessonKickerWrap: {
+    flexShrink: 0,
+  },
   lessonKicker: {
     fontSize: FONT_SIZES.xs,
     fontWeight: '700',
@@ -480,12 +502,12 @@ const styles = StyleSheet.create({
   },
   statusChipDone: { backgroundColor: COLORS.bgGreen },
   statusChipLocked: { backgroundColor: '#F3F4F6' },
-  statusChipReady: { backgroundColor: COLORS.bgLight },
+  statusChipFree: { backgroundColor: COLORS.bgLight },
   statusChipNext: { backgroundColor: '#E8F5E9' },
   statusChipText: { fontSize: 11, fontWeight: '700' },
   statusChipTextDone: { color: COLORS.secondary },
   statusChipTextLocked: { color: COLORS.mediumGray },
-  statusChipTextReady: { color: COLORS.primary },
+  statusChipTextFree: { color: COLORS.primary },
   statusChipTextNext: { color: '#2E7D32' },
   accessChip: {
     paddingHorizontal: SPACING.sm,
@@ -520,12 +542,21 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   favBtn: { padding: 4, marginLeft: SPACING.sm },
+  lessonBodyRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  lessonContentCol: {
+    flex: 1,
+    minWidth: 0,
+  },
   lessonMeta: {
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: SPACING.sm,
-    marginTop: SPACING.sm,
   },
   lessonEssentials: {
     marginTop: SPACING.sm,
@@ -537,7 +568,7 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   lessonEssentialLabel: {
-    width: 62,
+    width: 82,
     fontSize: FONT_SIZES.xs,
     fontWeight: '800',
     color: COLORS.textMuted,
@@ -549,6 +580,27 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.xs,
     color: COLORS.textLight,
     lineHeight: 18,
+  },
+  lessonActionRail: {
+    width: 220,
+    minWidth: 180,
+    backgroundColor: COLORS.bgLight,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    justifyContent: 'center',
+  },
+  lessonActionLabel: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
+    color: COLORS.text,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  lessonActionText: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textLight,
+    lineHeight: 18,
+    marginTop: 6,
   },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   metaText: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
