@@ -456,30 +456,6 @@ export default function HomeScreen() {
                   </View>
                 ))}
               </View>
-              <View style={[styles.heroPreviewInline, compactHero && styles.heroPreviewInlineCompact]}>
-                <View style={[styles.heroPreviewCard, styles.heroPreviewCardCompact]}>
-                  <View style={styles.heroPreviewTop}>
-                    <View style={[styles.heroPreviewIcon, { backgroundColor: freeLesson.color + '20' }]}>
-                      <Ionicons name="book-outline" size={18} color={freeLesson.color} />
-                    </View>
-                    <View style={styles.heroPreviewCopy}>
-                      <Text style={styles.heroPreviewEyebrow}>Inside lesson 1</Text>
-                      <Text style={styles.heroPreviewTitle}>{freeLesson.title}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.heroPreviewMeta}>
-                    <Text style={styles.heroPreviewMetaText}>{freeLesson.duration}</Text>
-                    <Text style={styles.heroPreviewMetaDot}>-</Text>
-                    <Text style={styles.heroPreviewMetaText}>{freeLesson.ageRange}</Text>
-                  </View>
-                  <View style={styles.heroPreviewFeatureList}>
-                    <View style={styles.heroPreviewFeatureRow}>
-                      <Ionicons name="bulb-outline" size={15} color={COLORS.primary} />
-                      <Text style={styles.heroPreviewBody}><Text style={styles.heroPreviewBodyLabel}>Objective:</Text> {freeLesson.focus}</Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
             </View>
           </View>
         </View>
@@ -900,14 +876,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.lightGray,
   },
   hero: {
-    minHeight: 280,
+    minHeight: 250,
     position: 'relative',
   },
   heroCompact: {
-    minHeight: 420,
+    minHeight: 320,
   },
   heroNarrow: {
-    minHeight: 460,
+    minHeight: 360,
   },
   heroImage: {
     width: '100%',
@@ -919,19 +895,19 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(18, 74, 103, 0.9)',
     justifyContent: 'flex-end',
-    paddingVertical: 14,
+    paddingVertical: 10,
   },
   heroOverlayCompact: {
     justifyContent: 'flex-start',
-    paddingTop: 12,
+    paddingTop: 10,
   },
   heroContent: {
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
+    paddingVertical: 8,
   },
   heroContentCompact: {
     paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.sm,
+    paddingVertical: 8,
   },
   heroRow: {
     flexDirection: 'row',
@@ -972,7 +948,7 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.md,
     fontWeight: '700',
     color: 'rgba(255,255,255,0.96)',
-    marginTop: SPACING.sm,
+    marginTop: 6,
   },
   heroDescription: {
     fontSize: FONT_SIZES.sm,
@@ -1000,7 +976,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
-    marginTop: SPACING.sm,
+    marginTop: 8,
     flexWrap: 'wrap',
   },
   heroButtonsCompact: {
@@ -1044,94 +1020,7 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     fontWeight: '700',
     color: 'rgba(255,255,255,0.92)',
-    marginTop: 6,
-  },
-  heroPreviewInline: {
-    marginTop: SPACING.sm,
-    width: '100%',
-    maxWidth: 340,
-  },
-  heroPreviewInlineCompact: {
-    maxWidth: 320,
-  },
-  heroPreviewCard: {
-    backgroundColor: 'rgba(255,255,255,0.96)',
-    borderRadius: RADIUS.xl,
-    padding: SPACING.md,
-    ...SHADOWS.medium,
-  },
-  heroPreviewCardCompact: {
-    paddingHorizontal: SPACING.sm + 2,
-    paddingVertical: SPACING.sm,
-  },
-  heroPreviewCardSecondary: {
-    backgroundColor: 'rgba(246, 250, 255, 0.95)',
-    borderRadius: RADIUS.xl,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.5)',
-  },
-  heroPreviewTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  heroPreviewIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  heroPreviewCopy: {
-    flex: 1,
-  },
-  heroPreviewEyebrow: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: COLORS.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  heroPreviewTitle: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: '800',
-    color: COLORS.text,
-    marginTop: 2,
-  },
-  heroPreviewMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 6,
-  },
-  heroPreviewMetaText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: COLORS.textMuted,
-  },
-  heroPreviewMetaDot: {
-    fontSize: 11,
-    color: COLORS.mediumGray,
-  },
-  heroPreviewBody: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.textLight,
-    lineHeight: 18,
-    flex: 1,
-  },
-  heroPreviewBodyLabel: {
-    fontWeight: '800',
-    color: COLORS.text,
-  },
-  heroPreviewFeatureList: {
-    marginTop: 6,
-    gap: 4,
-  },
-  heroPreviewFeatureRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: SPACING.xs,
+    marginTop: 4,
   },
   heroSupportLinks: {
     flexDirection: 'row',
