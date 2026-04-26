@@ -31,7 +31,7 @@ const HERO_IMAGE = 'https://d64gsuwffb70l.cloudfront.net/69357762fff8f7f4abcd898
 
 
 const QUICK_TILES = [
-  { title: 'Lessons', subtitle: '4 Core', icon: 'book', color: '#1B6B93', bgColor: '#E1F5FE', route: '/lessons' },
+  { title: 'Lessons', subtitle: '8 Core', icon: 'book', color: '#1B6B93', bgColor: '#E1F5FE', route: '/lessons' },
   { title: 'Activities', subtitle: '8 Optional', icon: 'color-palette', color: '#7BC67E', bgColor: '#E8F5E9', route: '/activities' },
   { title: 'Tracker', subtitle: 'Milestones', icon: 'analytics', color: '#9C27B0', bgColor: '#F3E5F5', route: '/tracker' },
   { title: 'Voice Notes', subtitle: 'Observations', icon: 'mic', color: '#E57373', bgColor: '#FDECEC', route: '/voice-notes' },
@@ -424,10 +424,18 @@ export default function HomeScreen() {
                   <Text style={styles.heroTitle}>Cobie the Cactus</Text>
                   <Text style={styles.heroSubtitle}>EYFS & KS1 Teacher Pack</Text>
                   <Text style={styles.heroDescription}>
-                    Classroom-ready resources for emotional literacy, sensory awareness, and inclusion.
-                    Evidence-based. SEN-first. No preparation required.
+                    Ready-made emotional literacy lessons and printables for EYFS and KS1 teachers that save planning time.
                   </Text>
-       
+                  <View style={styles.heroHookRow}>
+                    <View style={styles.heroHookPill}>
+                      <Ionicons name="time-outline" size={14} color={COLORS.secondary} />
+                      <Text style={styles.heroHookText}>Plan your week in 5 minutes</Text>
+                    </View>
+                    <View style={styles.heroHookPill}>
+                      <Ionicons name="document-text-outline" size={14} color={COLORS.secondary} />
+                      <Text style={styles.heroHookText}>Ready-made lessons + printables instantly</Text>
+                    </View>
+                  </View>
                 </View>
                 <Image
                   source={{ uri: BRAND.logoUrl }}
@@ -442,21 +450,21 @@ export default function HomeScreen() {
                   activeOpacity={0.7}
                 >
                   <Ionicons name="play-circle" size={22} color={COLORS.white} />
-                  <Text style={styles.heroButtonText}>Start Teaching</Text>
+                  <Text style={styles.heroButtonText}>Open Free Lesson</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.heroButtonSecondary}
                   onPress={() => setShowPricing(true)}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.heroButtonSecondaryText}>View Plans</Text>
+                  <Text style={styles.heroButtonSecondaryText}>Start 14-Day Trial</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.heroButtonSecondary}
                   onPress={() => router.push('/guide' as any)}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.heroButtonSecondaryText}>How to Use This Programme</Text>
+                  <Text style={styles.heroButtonSecondaryText}>How It Works</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -476,7 +484,7 @@ export default function HomeScreen() {
               </View>
               <View style={styles.progressRow}>
                 <View style={styles.progressItem}>
-                  <Text style={styles.progressNum}>{completedLessons.length}/4</Text>
+                  <Text style={styles.progressNum}>{completedLessons.length}/8</Text>
                   <Text style={styles.progressLabel}>Lessons Done</Text>
                 </View>
                 <View style={styles.progressDivider} />
@@ -931,7 +939,28 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     lineHeight: 20,
   },
-
+  heroHookRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
+  },
+  heroHookPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.round,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.65)',
+  },
+  heroHookText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
+    color: COLORS.secondary,
+  },
   heroButtons: {
     flexDirection: 'row',
     alignItems: 'center',

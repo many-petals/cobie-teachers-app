@@ -17,9 +17,8 @@ import { useSEN } from '../context/SENContext';
 import { useAuth } from '../context/AuthContext';
 
 function getLessonAvailability(lesson: Lesson, hasFullAccess: boolean) {
-  const locked = lesson.access === 'paid' && !hasFullAccess;
-  const accessLabel =
-    lesson.access === 'free' ? 'Free' : lesson.access === 'preview' ? 'Preview' : 'Premium';
+  const locked = lesson.number !== 1 && !hasFullAccess;
+  const accessLabel = lesson.number === 1 ? 'Free Lesson' : 'Locked';
 
   return { locked, accessLabel };
 }
@@ -59,19 +58,19 @@ export default function LessonsScreen() {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Ionicons name="book" size={24} color={COLORS.primary} />
-          <Text style={styles.headerTitle}>Core Lessons</Text>
+          <Text style={styles.headerTitle}>8 Core Lessons</Text>
         </View>
         <AppSignOutButton />
       </View>
 
       <Text style={styles.intro}>
-        Teach in a simple flow: choose a lesson, follow the steps, then open the matching resources.
+        Lesson 1 is free. Lessons 2 to 8 unlock with your trial. Each lesson shows the stage, time, objective, and outcome at a glance.
       </Text>
 
       <View style={styles.summaryRow}>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryNumber}>{lessonStats.availableCount}</Text>
-          <Text style={styles.summaryLabel}>Available Now</Text>
+          <Text style={styles.summaryLabel}>Free Now</Text>
         </View>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryNumber}>{lessonStats.completedCount}</Text>
@@ -86,9 +85,9 @@ export default function LessonsScreen() {
       {!hasFullAccess ? (
         <View style={styles.upgradeBanner}>
           <View style={styles.upgradeCopy}>
-            <Text style={styles.upgradeTitle}>Unlock the full lesson journey</Text>
+            <Text style={styles.upgradeTitle}>Lesson 1 is free. Everything else is locked.</Text>
             <Text style={styles.upgradeText}>
-              Premium lessons include the full step flow, SEN support, and linked printable resources.
+              Start your 14-day trial to open all 8 core lessons, ready-made printables, and SEN support.
             </Text>
           </View>
           <TouchableOpacity
@@ -158,8 +157,10 @@ export default function LessonsScreen() {
                           {completed ? 'Completed' : locked ? 'Locked' : isRecommended ? 'Start Here' : 'Ready'}
                         </Text>
                       </View>
-                      <View style={styles.accessChip}>
-                        <Text style={styles.accessChipText}>{accessLabel}</Text>
+                      <View style={[styles.accessChip, locked ? styles.accessChipLocked : styles.accessChipFree]}>
+                        <Text style={[styles.accessChipText, locked ? styles.accessChipTextLocked : styles.accessChipTextFree]}>
+                          {accessLabel}
+                        </Text>
                       </View>
                     </View>
                   </View>
@@ -196,6 +197,17 @@ export default function LessonsScreen() {
                     </View>
                     <View style={[styles.focusBadge, { backgroundColor: lesson.color + '18' }]}>
                       <Text style={[styles.focusText, { color: lesson.color }]}>{lesson.focus}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.lessonEssentials}>
+                    <View style={styles.lessonEssentialRow}>
+                      <Text style={styles.lessonEssentialLabel}>Objective</Text>
+                      <Text style={styles.lessonEssentialText}>{lesson.focus}</Text>
+                    </View>
+                    <View style={styles.lessonEssentialRow}>
+                      <Text style={styles.lessonEssentialLabel}>Outcome</Text>
+                      <Text style={styles.lessonEssentialText}>{lesson.objectives[0]}</Text>
                     </View>
                   </View>
                 </View>
@@ -476,16 +488,18 @@ const styles = StyleSheet.create({
   statusChipTextReady: { color: COLORS.primary },
   statusChipTextNext: { color: '#2E7D32' },
   accessChip: {
-    backgroundColor: COLORS.bgWarm,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
     borderRadius: RADIUS.round,
   },
+  accessChipFree: { backgroundColor: '#E8F5E9' },
+  accessChipLocked: { backgroundColor: '#F3F4F6' },
   accessChipText: {
     fontSize: 11,
     fontWeight: '700',
-    color: COLORS.accentOrange,
   },
+  accessChipTextFree: { color: '#2E7D32' },
+  accessChipTextLocked: { color: COLORS.mediumGray },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -512,6 +526,29 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: SPACING.sm,
     marginTop: SPACING.sm,
+  },
+  lessonEssentials: {
+    marginTop: SPACING.sm,
+    gap: 6,
+  },
+  lessonEssentialRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.xs,
+  },
+  lessonEssentialLabel: {
+    width: 62,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  lessonEssentialText: {
+    flex: 1,
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textLight,
+    lineHeight: 18,
   },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   metaText: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
