@@ -28,7 +28,7 @@ import { ACTIVITIES } from '../data/activities';
 import { PRINTABLES } from '../data/printables';
 import { BRAND } from '../data/brand';
 
-const HERO_IMAGE = 'https://d64gsuwffb70l.cloudfront.net/69357762fff8f7f4abcd8985_1771287970946_68002315.png';
+const HERO_BOOK_COVER = require('../assets/images/book-cover-updated.png');
 const COMPANION_BOOK_IMAGE = 'https://d64gsuwffb70l.cloudfront.net/6993b5b66d45d72ccfd31c24_1771291498634_bbc463f2.jpg';
 const PROMISE_BANNER = require('../assets/images/many-petals-promise-banner.png');
 
@@ -410,7 +410,7 @@ export default function HomeScreen() {
         {/* Hero Section */}
         <View style={styles.hero}>
           <Image
-            source={{ uri: HERO_IMAGE }}
+            source={HERO_BOOK_COVER}
             style={styles.heroImage}
             resizeMode="cover"
           />
@@ -929,6 +929,8 @@ const styles = StyleSheet.create({
   heroImage: {
     width: '100%',
     height: '100%',
+    opacity: 0.42,
+    transform: [{ scale: 1.02 }],
   },
   heroOverlay: {
     ...StyleSheet.absoluteFillObject,
