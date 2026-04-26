@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { EMOTIONS } from '../data/emotions';
+import AppSignOutButton from '../components/AppSignOutButton';
 import EmotionCard from '../components/EmotionCard';
 import CheckInScreen from '../components/CheckInScreen';
 import EmotionHistory from '../components/EmotionHistory';
@@ -44,8 +45,11 @@ export default function ToolsScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Ionicons name="heart" size={24} color={COLORS.pink} />
-        <Text style={styles.headerTitle}>Emotion Tools</Text>
+        <View style={styles.headerLeft}>
+          <Ionicons name="heart" size={24} color={COLORS.pink} />
+          <Text style={styles.headerTitle}>Emotion Tools</Text>
+        </View>
+        <AppSignOutButton />
       </View>
       <SENBanner />
 
@@ -173,10 +177,16 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.md,
+    justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.lg,
     paddingBottom: SPACING.sm,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    flex: 1,
   },
   headerTitle: {
     fontSize: FONT_SIZES.xxl,

@@ -12,6 +12,7 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { LESSONS, type Lesson } from '../data/lessons';
 import { PRINTABLES } from '../data/printables';
+import AppSignOutButton from '../components/AppSignOutButton';
 import { useSEN } from '../context/SENContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -56,8 +57,11 @@ export default function LessonsScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Ionicons name="book" size={24} color={COLORS.primary} />
-        <Text style={styles.headerTitle}>Core Lessons</Text>
+        <View style={styles.headerLeft}>
+          <Ionicons name="book" size={24} color={COLORS.primary} />
+          <Text style={styles.headerTitle}>Core Lessons</Text>
+        </View>
+        <AppSignOutButton />
       </View>
 
       <Text style={styles.intro}>
@@ -334,11 +338,12 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.md,
+    justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.lg,
     paddingBottom: SPACING.sm,
   },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, flex: 1 },
   headerTitle: { fontSize: FONT_SIZES.xxl, fontWeight: '800', color: COLORS.text },
   intro: {
     fontSize: FONT_SIZES.sm,

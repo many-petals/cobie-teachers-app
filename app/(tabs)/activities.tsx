@@ -14,6 +14,7 @@ import { ACTIVITIES } from '../data/activities';
 import SearchBar from '../components/SearchBar';
 import FilterChips from '../components/FilterChips';
 import SENBanner from '../components/SENBanner';
+import AppSignOutButton from '../components/AppSignOutButton';
 import { useSEN } from '../context/SENContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -49,8 +50,11 @@ export default function ActivitiesScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Ionicons name="color-palette" size={24} color={COLORS.secondary} />
-        <Text style={styles.headerTitle}>Optional Activities</Text>
+        <View style={styles.headerLeft}>
+          <Ionicons name="color-palette" size={24} color={COLORS.secondary} />
+          <Text style={styles.headerTitle}>Optional Activities</Text>
+        </View>
+        <AppSignOutButton />
       </View>
       <SENBanner />
 
@@ -177,7 +181,8 @@ export default function ActivitiesScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.bgLight },
-  header: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg, paddingBottom: SPACING.sm },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg, paddingBottom: SPACING.sm, gap: SPACING.md },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, flex: 1 },
   headerTitle: { fontSize: FONT_SIZES.xxl, fontWeight: '800', color: COLORS.text },
   intro: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20, paddingHorizontal: SPACING.lg },
   summaryRow: { flexDirection: 'row', gap: SPACING.sm, paddingHorizontal: SPACING.lg, marginTop: SPACING.md, marginBottom: SPACING.md },

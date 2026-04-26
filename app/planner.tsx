@@ -16,6 +16,7 @@ import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from './data/theme';
 import { supabase } from './lib/supabase';
 import { SavedWeeklyPlan, loadWeeklyPlans, addWeeklyPlan, removeWeeklyPlan } from './lib/storage';
 import { useAuth } from './context/AuthContext';
+import AppSignOutButton from './components/AppSignOutButton';
 import RequireAuth from './components/RequireAuth';
 
 const FOCUS_AREAS = [
@@ -160,16 +161,19 @@ export default function PlannerScreen() {
           <Text style={styles.headerTitle}>Weekly Planner</Text>
           <Text style={styles.headerSub}>AI-powered lesson planning</Text>
         </View>
-        {savedPlans.length > 0 && step !== 'saved' && (
-          <TouchableOpacity
-            style={styles.savedBtn}
-            onPress={() => setStep('saved')}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="folder" size={18} color={COLORS.primary} />
-            <Text style={styles.savedBtnText}>{savedPlans.length}</Text>
-          </TouchableOpacity>
-        )}
+        <View style={styles.headerActions}>
+          {savedPlans.length > 0 && step !== 'saved' ? (
+            <TouchableOpacity
+              style={styles.savedBtn}
+              onPress={() => setStep('saved')}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="folder" size={18} color={COLORS.primary} />
+              <Text style={styles.savedBtnText}>{savedPlans.length}</Text>
+            </TouchableOpacity>
+          ) : null}
+          <AppSignOutButton />
+        </View>
       </View>
 
       {/* Config Step */}
@@ -568,6 +572,7 @@ const styles = StyleSheet.create({
   backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.bgLight, justifyContent: 'center', alignItems: 'center' },
   headerTitle: { fontSize: FONT_SIZES.lg, fontWeight: '800', color: COLORS.text },
   headerSub: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   savedBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.bgLight, paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: RADIUS.round, borderWidth: 1.5, borderColor: COLORS.primary + '30' },
   savedBtnText: { fontSize: FONT_SIZES.sm, fontWeight: '700', color: COLORS.primary },
   container: { flex: 1, paddingHorizontal: SPACING.lg },

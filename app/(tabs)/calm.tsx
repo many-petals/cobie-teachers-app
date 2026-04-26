@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { CALMING_ACTIVITIES, GROUNDING_PROMPTS, REGULATION_TOOLS } from '../data/emotions';
+import AppSignOutButton from '../components/AppSignOutButton';
 import SENBanner from '../components/SENBanner';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -115,15 +116,20 @@ export default function CalmScreen() {
           <Text style={styles.headerTitle}>Calm Corner</Text>
         </View>
         {savedCalmConfigs.length > 0 ? (
-          <TouchableOpacity
-            style={styles.savedBtn}
-            onPress={() => setShowSaved(!showSaved)}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="bookmarks" size={16} color={COLORS.primary} />
-            <Text style={styles.savedBtnText}>Saved ({savedCalmConfigs.length})</Text>
-          </TouchableOpacity>
-        ) : null}
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={styles.savedBtn}
+              onPress={() => setShowSaved(!showSaved)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="bookmarks" size={16} color={COLORS.primary} />
+              <Text style={styles.savedBtnText}>Saved ({savedCalmConfigs.length})</Text>
+            </TouchableOpacity>
+            <AppSignOutButton />
+          </View>
+        ) : (
+          <AppSignOutButton />
+        )}
       </View>
       <SENBanner />
 
@@ -287,6 +293,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.bgLight },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg, paddingBottom: SPACING.sm },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   headerTitle: { fontSize: FONT_SIZES.xxl, fontWeight: '800', color: COLORS.text },
   savedBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.bgLight, paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: RADIUS.round, borderWidth: 1, borderColor: COLORS.primary + '30' },
   savedBtnText: { fontSize: FONT_SIZES.xs, fontWeight: '600', color: COLORS.primary },

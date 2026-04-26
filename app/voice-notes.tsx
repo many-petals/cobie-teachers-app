@@ -16,6 +16,7 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from './data/theme';
 import { VoiceNote, loadVoiceNotes, addVoiceNote, updateVoiceNote, removeVoiceNote } from './lib/storage';
 import { useAuth } from './context/AuthContext';
+import AppSignOutButton from './components/AppSignOutButton';
 import RequireAuth from './components/RequireAuth';
 
 // Tags for categorising voice notes
@@ -307,8 +308,11 @@ export default function VoiceNotesScreen() {
           <Text style={styles.headerTitle}>Voice Notes</Text>
           <Text style={styles.headerSub}>{notes.length} recording{notes.length !== 1 ? 's' : ''}</Text>
         </View>
-        <View style={styles.headerIcon}>
-          <Ionicons name="mic" size={20} color={COLORS.error} />
+        <View style={styles.headerActions}>
+          <View style={styles.headerIcon}>
+            <Ionicons name="mic" size={20} color={COLORS.error} />
+          </View>
+          <AppSignOutButton />
         </View>
       </View>
 
@@ -611,6 +615,7 @@ const styles = StyleSheet.create({
   backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.bgLight, justifyContent: 'center', alignItems: 'center' },
   headerTitle: { fontSize: FONT_SIZES.lg, fontWeight: '800', color: COLORS.text },
   headerSub: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   headerIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFEBEE', justifyContent: 'center', alignItems: 'center' },
   container: { flex: 1 },
   infoBanner: { flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.sm, marginHorizontal: SPACING.lg, marginTop: SPACING.md, padding: SPACING.md, backgroundColor: COLORS.bgLight, borderRadius: RADIUS.md, borderLeftWidth: 3, borderLeftColor: COLORS.primary },

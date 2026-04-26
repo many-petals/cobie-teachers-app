@@ -13,6 +13,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { LESSONS, LessonMaterial } from '../data/lessons';
 import { PRINTABLES } from '../data/printables';
+import AppSignOutButton from '../components/AppSignOutButton';
 import Timer from '../components/Timer';
 import { useSEN } from '../context/SENContext';
 import { useAuth } from '../context/AuthContext';
@@ -156,6 +157,7 @@ if (isLocked) {
               color={showSEN ? COLORS.white : COLORS.purple}
             />
           </TouchableOpacity>
+          <AppSignOutButton />
         </View>
       </View>
 

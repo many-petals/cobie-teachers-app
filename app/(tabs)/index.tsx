@@ -19,6 +19,7 @@ import TodayActivity from '../components/TodayActivity';
 import WorkbookPromo from '../components/WorkbookPromo';
 import EvidenceBanner from '../components/EvidenceBanner';
 import PricingSection from '../components/PricingSection';
+import AppSignOutButton from '../components/AppSignOutButton';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { LESSONS } from '../data/lessons';
@@ -328,8 +329,8 @@ const pStyles = StyleSheet.create({
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { user, profile, setShowAuthModal, signOut, completedLessons, favourites } = useAuth();
-  const { showConfirm, showToast } = useToast();
+  const { user, profile, setShowAuthModal, completedLessons, favourites } = useAuth();
+  const { showConfirm } = useToast();
   const [showProfile, setShowProfile] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [insideExpanded, setInsideExpanded] = useState(false);
@@ -339,18 +340,6 @@ export default function HomeScreen() {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const handleHeaderSignOut = () => {
-    showConfirm({
-      title: 'Sign Out',
-      message: 'Sign out of your teacher account on this device now?',
-      confirmText: 'Sign Out',
-      onConfirm: async () => {
-        await signOut();
-        showToast('Signed Out', 'You have been signed out on this device.', 'info');
-      },
-    });
-  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -380,13 +369,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
           {mounted && user ? (
             <>
-              <TouchableOpacity
-                style={styles.headerLogoutBtn}
-                onPress={handleHeaderSignOut}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="log-out-outline" size={16} color={COLORS.error} />
-              </TouchableOpacity>
+              <AppSignOutButton />
               <TouchableOpacity
                 style={styles.profileBtn}
                 onPress={() => setShowProfile(true)}
