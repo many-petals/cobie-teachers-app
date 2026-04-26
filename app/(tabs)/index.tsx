@@ -452,10 +452,6 @@ export default function HomeScreen() {
                     </View>
                     <View style={styles.heroPreviewFeatureList}>
                       <View style={styles.heroPreviewFeatureRow}>
-                        <Ionicons name="time-outline" size={15} color={COLORS.primary} />
-                        <Text style={styles.heroPreviewBody}><Text style={styles.heroPreviewBodyLabel}>20-30 min</Text> lesson length</Text>
-                      </View>
-                      <View style={styles.heroPreviewFeatureRow}>
                         <Ionicons name="bulb-outline" size={15} color={COLORS.primary} />
                         <Text style={styles.heroPreviewBody}><Text style={styles.heroPreviewBodyLabel}>Objective:</Text> {freeLesson.focus}</Text>
                       </View>
@@ -483,7 +479,7 @@ export default function HomeScreen() {
               <View style={[styles.heroButtons, compactHero && styles.heroButtonsCompact]}>
                 <TouchableOpacity
                   style={[styles.heroButton, compactHero && styles.heroButtonCompact]}
-                  onPress={() => setShowPricing(true)}
+                  onPress={() => router.push('/upgrade')}
                   activeOpacity={0.7}
                 >
                   <Ionicons name="rocket-outline" size={20} color={COLORS.white} />
@@ -491,7 +487,7 @@ export default function HomeScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.heroButtonSecondary}
-                  onPress={() => router.push('/lessons')}
+                  onPress={() => router.push(`/lesson/${freeLesson.id}` as any)}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.heroButtonSecondaryText}>Open Free Lesson</Text>
