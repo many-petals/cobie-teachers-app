@@ -241,7 +241,7 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
         <div class="content" style="text-align:center;">
           ${nameDate}
           <div class="instruction" style="text-align:left;">Point to or colour the level that shows how you feel right now. Use throughout the day to track changes in how you feel.</div>
-          <div style="display:flex; flex-direction:column; align-items:center; gap:0; margin:8mm auto; max-width:130mm;">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:0; margin:6mm auto; max-width:124mm;">
             ${[
               { label: 'OVERWHELMED', desc: 'I can\'t cope right now', color: '#D32F2F' },
               { label: 'VERY UPSET', desc: 'I feel really bad', color: '#E53935' },
@@ -253,20 +253,20 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
             ].map((level, i) => `
               <div class="thermo-level" style="background:${isColor ? level.color : 'hsl(0,0%,' + (30 + i * 10) + '%)'};
                 ${i === 0 ? 'border-radius:12px 12px 0 0;' : ''} ${i === 6 ? 'border-radius:0 0 12px 12px;' : ''}
-                display:flex; justify-content:space-between; align-items:center;">
+                display:flex; justify-content:space-between; align-items:center; padding:12px 16px; font-size:14px;">
                 <span>${level.label}</span>
                 <span style="font-size:11px; font-weight:400; opacity:0.9;">${level.desc}</span>
               </div>
             `).join('')}
           </div>
-          <div style="margin-top:5mm; text-align:left;">
-            <div class="section-title">How I feel right now:</div>
+          <div style="margin-top:4mm; text-align:left;">
+            <div class="section-title" style="margin:4mm 0 2mm; font-size:14px;">How I feel right now:</div>
             <div class="writing-lines">
-              <div class="writing-line"></div><div class="writing-line"></div><div class="writing-line"></div>
+              <div class="writing-line" style="height:10mm;"></div><div class="writing-line" style="height:10mm;"></div>
             </div>
-            <div class="section-title" style="margin-top:5mm;">What happened to make me feel this way:</div>
+            <div class="section-title" style="margin:4mm 0 2mm; font-size:14px;">What happened to make me feel this way:</div>
             <div class="writing-lines">
-              <div class="writing-line"></div><div class="writing-line"></div><div class="writing-line"></div>
+              <div class="writing-line" style="height:10mm;"></div><div class="writing-line" style="height:10mm;"></div>
             </div>
           </div>
         </div>
