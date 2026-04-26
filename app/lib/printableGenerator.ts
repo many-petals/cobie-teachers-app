@@ -172,9 +172,9 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
     case 'p-2': // Calm Corner Poster
       return `
         <div class="poster-content">
-          <div style="border:3px solid ${borderColor}; border-radius:20px; padding:20mm 15mm; background:${bgColor};">
-            <h2 style="font-size:36pt; margin-bottom:5mm;">Our Calm Corner</h2>
-            <p style="font-size:13px; color:#888; margin-bottom:10mm;">When you need a moment, come here and try one of these:</p>
+          <div style="border:3px solid ${borderColor}; border-radius:20px; padding:14mm 12mm; background:${bgColor};">
+            <h2 style="font-size:30pt; margin-bottom:4mm;">Our Calm Corner</h2>
+            <p style="font-size:12px; color:#888; margin-bottom:6mm;">When you need a moment, come here and try one of these:</p>
             ${[
               { num: 1, text: 'Take 3 deep breaths', icon: '&#x1F32C;' },
               { num: 2, text: 'Squeeze a soft toy', icon: '&#x1F9F8;' },
@@ -183,13 +183,13 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
               { num: 5, text: 'Use a fidget tool', icon: '&#x1F9E9;' },
               { num: 6, text: 'Tell a grown-up how you feel', icon: '&#x1F5E3;' },
             ].map(item => `
-              <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; margin:4mm 0; background:white; border-radius:12px; border:2px solid ${borderColor}40;">
-                <div style="width:40px; height:40px; border-radius:50%; background:${primaryColor}; color:white; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; flex-shrink:0;">${item.num}</div>
-                <div style="font-size:18px; font-weight:700; color:#444;">${item.text}</div>
+              <div style="display:flex; align-items:center; gap:10px; padding:11px 14px; margin:3mm 0; background:white; border-radius:12px; border:2px solid ${borderColor}40;">
+                <div style="width:34px; height:34px; border-radius:50%; background:${primaryColor}; color:white; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; flex-shrink:0;">${item.num}</div>
+                <div style="font-size:16px; font-weight:700; color:#444;">${item.text}</div>
               </div>
             `).join('')}
-            <div style="margin-top:10mm; padding:12px; background:white; border-radius:12px; border:2px dashed ${borderColor};">
-              <p style="font-size:16px; font-style:italic; color:${primaryColor}; font-weight:600; text-align:center;">
+            <div style="margin-top:6mm; padding:10px; background:white; border-radius:12px; border:2px dashed ${borderColor};">
+              <p style="font-size:14px; font-style:italic; color:${primaryColor}; font-weight:600; text-align:center;">
                 "It's okay to need a moment. This is your safe space."
               </p>
             </div>
