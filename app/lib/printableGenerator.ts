@@ -200,9 +200,9 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
     case 'p-3': // Cobie Breathing Visual
       return `
         <div class="poster-content">
-          <div style="border:3px solid ${borderColor}; border-radius:20px; padding:15mm; background:${bgColor};">
-            <h2 style="font-size:32pt; margin-bottom:3mm;">Breathe with Cobie</h2>
-            <p style="font-size:12px; color:#888; margin-bottom:8mm;">Follow these steps when you need to feel calm</p>
+          <div style="border:3px solid ${borderColor}; border-radius:20px; padding:12mm; background:${bgColor};">
+            <h2 style="font-size:27pt; margin-bottom:2mm;">Breathe with Cobie</h2>
+            <p style="font-size:11px; color:#888; margin-bottom:5mm;">Follow these steps when you need to feel calm</p>
             <div style="max-width:160mm; margin:0 auto;">
               ${[
                 { step: '1', title: 'Sit Comfortably', desc: 'Find a quiet spot and sit down gently. Put your hands on your tummy.', color: '#81C784' },
@@ -211,24 +211,24 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
                 { step: '4', title: 'Breathe Out', desc: 'Breathe out slowly through your mouth for 4 counts. Like blowing out a candle.', color: '#43A047' },
                 { step: '5', title: 'Repeat', desc: 'Do this 3 more times. Notice how your body feels calmer each time.', color: '#388E3C' },
               ].map(s => `
-                <div class="step-row" style="padding:14px 0;">
-                  <div class="step-num" style="background:${isColor ? s.color : '#888'}; width:50px; height:50px; font-size:22px;">${s.step}</div>
+                <div class="step-row" style="padding:10px 0;">
+                  <div class="step-num" style="background:${isColor ? s.color : '#888'}; width:42px; height:42px; font-size:18px;">${s.step}</div>
                   <div style="flex:1;">
-                    <div class="step-title" style="color:${isColor ? s.color : '#444'}; font-size:17px;">${s.title}</div>
-                    <div class="step-desc" style="font-size:13px; margin-top:3px;">${s.desc}</div>
+                    <div class="step-title" style="color:${isColor ? s.color : '#444'}; font-size:15px;">${s.title}</div>
+                    <div class="step-desc" style="font-size:12px; margin-top:2px;">${s.desc}</div>
                   </div>
                 </div>
               `).join('')}
             </div>
-            <div style="margin-top:10mm; display:flex; justify-content:center; gap:8mm;">
+            <div style="margin-top:6mm; display:flex; justify-content:center; gap:6mm;">
               ${[
                 { label: 'IN', sub: '1...2...3...4', bg: '#E8F5E9' },
                 { label: 'HOLD', sub: '1...2', bg: '#FFF8E1' },
                 { label: 'OUT', sub: '1...2...3...4', bg: '#E3F2FD' },
               ].map(b => `
-                <div style="width:50mm; padding:12px; border-radius:16px; border:3px solid ${borderColor}; background:${isColor ? b.bg : '#f5f5f5'}; text-align:center;">
-                  <div style="font-size:24px; font-weight:800; color:${primaryColor};">${b.label}</div>
-                  <div style="font-size:14px; color:#888; margin-top:4px;">${b.sub}</div>
+                <div style="width:44mm; padding:10px; border-radius:16px; border:3px solid ${borderColor}; background:${isColor ? b.bg : '#f5f5f5'}; text-align:center;">
+                  <div style="font-size:20px; font-weight:800; color:${primaryColor};">${b.label}</div>
+                  <div style="font-size:12px; color:#888; margin-top:3px;">${b.sub}</div>
                 </div>
               `).join('')}
             </div>
