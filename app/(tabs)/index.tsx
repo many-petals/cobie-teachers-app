@@ -341,6 +341,9 @@ export default function HomeScreen() {
     setMounted(true);
   }, []);
 
+  const freeLesson = LESSONS.find((lesson) => lesson.number === 1) ?? LESSONS[0];
+  const featuredPrintable = PRINTABLES[0];
+
   return (
     <SafeAreaView style={styles.safeArea}>
 
@@ -421,56 +424,107 @@ export default function HomeScreen() {
                       <Text style={styles.heroBrandPack}>{BRAND.tagline}</Text>
                     </View>
                   </View>
-                  <Text style={styles.heroTitle}>Cobie the Cactus</Text>
-                  <Text style={styles.heroSubtitle}>EYFS & KS1 Teacher Pack</Text>
+                  <Text style={styles.heroTitle}>Plan your week&apos;s PSHE lessons in 5 minutes — ready to teach, no prep needed.</Text>
+                  <Text style={styles.heroSubtitle}>Built for EYFS and KS1 teachers who need tomorrow&apos;s emotional literacy lesson ready today.</Text>
                   <Text style={styles.heroDescription}>
-                    Ready-made emotional literacy lessons and printables for EYFS and KS1 teachers that save planning time.
+                    Companion teaching resources for Cobie the Cactus, with practical lesson structure, printable support, and SEN-aware guidance.
                   </Text>
-                  <View style={styles.heroHookRow}>
-                    <View style={styles.heroHookPill}>
-                      <Ionicons name="time-outline" size={14} color={COLORS.secondary} />
-                      <Text style={styles.heroHookText}>Plan your week in 5 minutes</Text>
-                    </View>
-                    <View style={styles.heroHookPill}>
-                      <Ionicons name="document-text-outline" size={14} color={COLORS.secondary} />
-                      <Text style={styles.heroHookText}>Ready-made lessons + printables instantly</Text>
-                    </View>
+                  <View style={styles.heroProofRow}>
+                    {[
+                      '8 ready-made lessons',
+                      'Printables included',
+                      'Supports SEN learners',
+                    ].map((item) => (
+                      <View key={item} style={styles.heroProofItem}>
+                        <Ionicons name="checkmark-circle" size={15} color={COLORS.secondary} />
+                        <Text style={styles.heroProofText}>{item}</Text>
+                      </View>
+                    ))}
                   </View>
                 </View>
-                <Image
-                  source={{ uri: BRAND.logoUrl }}
-                  style={styles.heroMascot}
-                  resizeMode="contain"
-                />
+                <View style={styles.heroPreviewCol}>
+                  <View style={styles.heroPreviewCard}>
+                    <View style={styles.heroPreviewTop}>
+                      <View style={[styles.heroPreviewIcon, { backgroundColor: freeLesson.color + '20' }]}>
+                        <Ionicons name="book-outline" size={18} color={freeLesson.color} />
+                      </View>
+                      <View style={styles.heroPreviewCopy}>
+                        <Text style={styles.heroPreviewEyebrow}>Free lesson preview</Text>
+                        <Text style={styles.heroPreviewTitle}>{freeLesson.title}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.heroPreviewMeta}>
+                      <Text style={styles.heroPreviewMetaText}>{freeLesson.duration}</Text>
+                      <Text style={styles.heroPreviewMetaDot}>•</Text>
+                      <Text style={styles.heroPreviewMetaText}>{freeLesson.ageRange}</Text>
+                    </View>
+                    <Text style={styles.heroPreviewBody}>Objective: {freeLesson.focus}</Text>
+                  </View>
+
+                  <View style={styles.heroPreviewCardSecondary}>
+                    <View style={styles.heroPreviewTop}>
+                      <View style={[styles.heroPreviewIcon, { backgroundColor: featuredPrintable.color + '20' }]}>
+                        <Ionicons name="print-outline" size={18} color={featuredPrintable.color} />
+                      </View>
+                      <View style={styles.heroPreviewCopy}>
+                        <Text style={styles.heroPreviewEyebrow}>Printable included</Text>
+                        <Text style={styles.heroPreviewTitle}>{featuredPrintable.title}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.heroPreviewBody}>Use tomorrow for calm discussion, follow-up, or independent work.</Text>
+                  </View>
+                </View>
               </View>
               <View style={styles.heroButtons}>
                 <TouchableOpacity
                   style={styles.heroButton}
-                  onPress={() => router.push('/lessons')}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="play-circle" size={22} color={COLORS.white} />
-                  <Text style={styles.heroButtonText}>Open Free Lesson</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.heroButtonSecondary}
                   onPress={() => setShowPricing(true)}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.heroButtonSecondaryText}>Start 14-Day Trial</Text>
+                  <Ionicons name="rocket-outline" size={20} color={COLORS.white} />
+                  <Text style={styles.heroButtonText}>Start 14-Day Free Trial — No Planning Needed This Week</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.heroButtonSecondary}
-                  onPress={() => router.push('/guide' as any)}
+                  onPress={() => router.push('/lessons')}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.heroButtonSecondaryText}>How It Works</Text>
+                  <Text style={styles.heroButtonSecondaryText}>Open Free Lesson</Text>
                 </TouchableOpacity>
               </View>
+              <TouchableOpacity
+                style={styles.heroTextLink}
+                onPress={() => router.push('/guide' as any)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.heroTextLinkText}>How it works</Text>
+                <Ionicons name="arrow-forward" size={14} color={COLORS.white} />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
 
+        {/* SEN Mode Toggle */}
+        <SENBanner />
+
+        {/* Quick Access Grid */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Quick Access</Text>
+          <View style={styles.tileGrid}>
+            {QUICK_TILES.map((tile) => (
+              <View key={tile.title} style={styles.tileWrapper}>
+                <QuickTile
+                  title={tile.title}
+                  subtitle={tile.subtitle}
+                  icon={tile.icon}
+                  color={tile.color}
+                  bgColor={tile.bgColor}
+                  onPress={() => router.push(tile.route as any)}
+                />
+              </View>
+            ))}
+          </View>
+        </View>
 
         {/* Welcome back / progress for logged-in users */}
         {mounted && user ? (
@@ -501,28 +555,6 @@ export default function HomeScreen() {
             </View>
           </View>
         ) : null}
-
-        {/* SEN Mode Toggle */}
-        <SENBanner />
-
-        {/* Quick Access Grid */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Access</Text>
-          <View style={styles.tileGrid}>
-            {QUICK_TILES.map((tile) => (
-              <View key={tile.title} style={styles.tileWrapper}>
-                <QuickTile
-                  title={tile.title}
-                  subtitle={tile.subtitle}
-                  icon={tile.icon}
-                  color={tile.color}
-                  bgColor={tile.bgColor}
-                  onPress={() => router.push(tile.route as any)}
-                />
-              </View>
-            ))}
-          </View>
-        </View>
 
 
         {/* Today's Activity */}
@@ -860,7 +892,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.lightGray,
   },
   hero: {
-    height: 220,
+    minHeight: 320,
     position: 'relative',
   },
   heroImage: {
@@ -869,7 +901,7 @@ const styles = StyleSheet.create({
   },
   heroOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(27, 107, 147, 0.82)',
+    backgroundColor: 'rgba(18, 74, 103, 0.9)',
     justifyContent: 'flex-end',
     paddingVertical: 20,
   },
@@ -878,11 +910,20 @@ const styles = StyleSheet.create({
   },
   heroRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
+    flexWrap: 'wrap',
     gap: SPACING.md,
   },
   heroTextCol: {
     flex: 1,
+    minWidth: 280,
+  },
+  heroPreviewCol: {
+    flex: 0.9,
+    minWidth: 240,
+    maxWidth: 320,
+    gap: SPACING.sm,
+    justifyContent: 'flex-end',
   },
   heroBrandPill: {
     flexDirection: 'row',
@@ -914,85 +955,153 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     lineHeight: 12,
   },
-  heroMascot: {
-    width: 80,
-    height: 90,
-    borderRadius: RADIUS.lg,
-  },
   heroTitle: {
-    fontSize: FONT_SIZES.hero,
+    fontSize: 40,
     fontWeight: '800',
     color: COLORS.white,
+    lineHeight: 46,
     textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
   },
   heroSubtitle: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: '600',
-    color: COLORS.accent,
-    marginTop: 2,
+    fontSize: FONT_SIZES.md,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.96)',
+    marginTop: SPACING.sm,
   },
   heroDescription: {
-    fontSize: FONT_SIZES.sm,
-    color: 'rgba(255,255,255,0.9)',
+    fontSize: FONT_SIZES.xs,
+    color: 'rgba(255,255,255,0.78)',
     marginTop: SPACING.sm,
-    lineHeight: 20,
+    lineHeight: 18,
   },
-  heroHookRow: {
+  heroProofRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: SPACING.sm,
     marginTop: SPACING.md,
   },
-  heroHookPill: {
+  heroProofItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.round,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.65)',
   },
-  heroHookText: {
+  heroProofText: {
     fontSize: FONT_SIZES.xs,
     fontWeight: '700',
-    color: COLORS.secondary,
+    color: COLORS.white,
   },
   heroButtons: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
     marginTop: SPACING.md,
+    flexWrap: 'wrap',
   },
   heroButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: SPACING.sm,
     backgroundColor: COLORS.secondary,
-    paddingHorizontal: SPACING.xl,
+    paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderRadius: RADIUS.round,
     ...SHADOWS.medium,
   },
   heroButtonText: {
-    fontSize: FONT_SIZES.md,
+    fontSize: FONT_SIZES.sm,
     fontWeight: '700',
     color: COLORS.white,
   },
   heroButtonSecondary: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
     borderRadius: RADIUS.round,
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.5)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   heroButtonSecondaryText: {
     fontSize: FONT_SIZES.sm,
     fontWeight: '600',
     color: COLORS.white,
+  },
+  heroTextLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    marginTop: SPACING.sm,
+  },
+  heroTextLinkText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
+    color: COLORS.white,
+    textDecorationLine: 'underline',
+  },
+  heroPreviewCard: {
+    backgroundColor: 'rgba(255,255,255,0.96)',
+    borderRadius: RADIUS.xl,
+    padding: SPACING.md,
+    ...SHADOWS.medium,
+  },
+  heroPreviewCardSecondary: {
+    backgroundColor: 'rgba(246, 250, 255, 0.95)',
+    borderRadius: RADIUS.xl,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.5)',
+  },
+  heroPreviewTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  heroPreviewIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heroPreviewCopy: {
+    flex: 1,
+  },
+  heroPreviewEyebrow: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  heroPreviewTitle: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '800',
+    color: COLORS.text,
+    marginTop: 2,
+  },
+  heroPreviewMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: SPACING.sm,
+  },
+  heroPreviewMetaText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+  },
+  heroPreviewMetaDot: {
+    fontSize: 11,
+    color: COLORS.mediumGray,
+  },
+  heroPreviewBody: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textLight,
+    lineHeight: 18,
+    marginTop: SPACING.sm,
   },
   section: {
     marginTop: SPACING.lg,
