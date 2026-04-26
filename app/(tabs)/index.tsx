@@ -428,23 +428,11 @@ export default function HomeScreen() {
                       <Text style={styles.heroBrandPack}>{BRAND.tagline}</Text>
                     </View>
                   </View>
-                  <Text style={[styles.heroTitle, compactHero && styles.heroTitleCompact, narrowHero && styles.heroTitleNarrow]}>Plan your week's PSHE lessons in 5 minutes - ready to teach, no prep needed.</Text>
-                  <Text style={styles.heroSubtitle}>Built for EYFS and KS1 teachers who need tomorrow&apos;s emotional literacy lesson ready today.</Text>
+                  <Text style={[styles.heroTitle, compactHero && styles.heroTitleCompact, narrowHero && styles.heroTitleNarrow]}>Plan your week&apos;s PSHE lessons in 5 minutes - ready to teach, no prep needed.</Text>
+                  <Text style={styles.heroSubtitle}>EYFS and KS1 emotional literacy lessons + printables</Text>
                   <Text style={styles.heroDescription}>
-                    Companion teaching resources for Cobie the Cactus, with practical lesson structure, printable support, and SEN-aware guidance.
+                    Built for teachers who need tomorrow&apos;s emotional literacy lesson ready today.
                   </Text>
-                  <View style={styles.heroProofRow}>
-                    {[
-                      '8 ready-made lessons',
-                      'Printables included',
-                      'Supports SEN learners',
-                    ].map((item) => (
-                      <View key={item} style={styles.heroProofItem}>
-                        <Ionicons name="checkmark-circle" size={15} color={COLORS.secondary} />
-                        <Text style={styles.heroProofText}>{item}</Text>
-                      </View>
-                    ))}
-                  </View>
                 </View>
                 <View style={[styles.heroPreviewCol, compactHero && styles.heroPreviewColCompact]}>
                   <View style={styles.heroPreviewCard}>
@@ -462,7 +450,20 @@ export default function HomeScreen() {
                       <Text style={styles.heroPreviewMetaDot}>-</Text>
                       <Text style={styles.heroPreviewMetaText}>{freeLesson.ageRange}</Text>
                     </View>
-                    <Text style={styles.heroPreviewBody}>Objective: {freeLesson.focus}</Text>
+                    <View style={styles.heroPreviewFeatureList}>
+                      <View style={styles.heroPreviewFeatureRow}>
+                        <Ionicons name="time-outline" size={15} color={COLORS.primary} />
+                        <Text style={styles.heroPreviewBody}><Text style={styles.heroPreviewBodyLabel}>20-30 min</Text> lesson length</Text>
+                      </View>
+                      <View style={styles.heroPreviewFeatureRow}>
+                        <Ionicons name="bulb-outline" size={15} color={COLORS.primary} />
+                        <Text style={styles.heroPreviewBody}><Text style={styles.heroPreviewBodyLabel}>Objective:</Text> {freeLesson.focus}</Text>
+                      </View>
+                      <View style={styles.heroPreviewFeatureRow}>
+                        <Ionicons name="layers-outline" size={15} color={COLORS.primary} />
+                        <Text style={styles.heroPreviewBody}><Text style={styles.heroPreviewBodyLabel}>Includes:</Text> Story + Activity + Discussion</Text>
+                      </View>
+                    </View>
                   </View>
 
                   <View style={styles.heroPreviewCardSecondary}>
@@ -495,6 +496,19 @@ export default function HomeScreen() {
                 >
                   <Text style={styles.heroButtonSecondaryText}>Open Free Lesson</Text>
                 </TouchableOpacity>
+              </View>
+              <Text style={styles.heroUrgency}>Use this in your classroom tomorrow - no prep needed.</Text>
+              <View style={styles.heroProofRow}>
+                {[
+                  '8 structured lessons',
+                  'Printables included',
+                  'Supports SEN learners',
+                ].map((item) => (
+                  <View key={item} style={styles.heroProofItem}>
+                    <Ionicons name="checkmark-circle" size={15} color={COLORS.secondary} />
+                    <Text style={styles.heroProofText}>{item}</Text>
+                  </View>
+                ))}
               </View>
               <TouchableOpacity
                 style={styles.heroTextLink}
@@ -1000,16 +1014,16 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   heroDescription: {
-    fontSize: FONT_SIZES.xs,
-    color: 'rgba(255,255,255,0.78)',
+    fontSize: FONT_SIZES.sm,
+    color: 'rgba(255,255,255,0.88)',
     marginTop: SPACING.sm,
-    lineHeight: 18,
+    lineHeight: 22,
   },
   heroProofRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: SPACING.sm,
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
   },
   heroProofItem: {
     flexDirection: 'row',
@@ -1037,8 +1051,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: SPACING.sm,
     backgroundColor: COLORS.secondary,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md + 2,
     borderRadius: RADIUS.round,
     ...SHADOWS.medium,
   },
@@ -1046,7 +1060,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
   },
   heroButtonText: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: FONT_SIZES.md,
     fontWeight: '700',
     color: COLORS.white,
     flexShrink: 1,
@@ -1070,6 +1084,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     alignSelf: 'flex-start',
+    marginTop: SPACING.sm,
+  },
+  heroUrgency: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.92)',
     marginTop: SPACING.sm,
   },
   heroTextLinkText: {
@@ -1138,7 +1158,20 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.xs,
     color: COLORS.textLight,
     lineHeight: 18,
+    flex: 1,
+  },
+  heroPreviewBodyLabel: {
+    fontWeight: '800',
+    color: COLORS.text,
+  },
+  heroPreviewFeatureList: {
     marginTop: SPACING.sm,
+    gap: SPACING.xs,
+  },
+  heroPreviewFeatureRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.xs,
   },
   section: {
     marginTop: SPACING.lg,
