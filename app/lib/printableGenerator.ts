@@ -368,16 +368,17 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
       `;
 
     case 'p-8': // Assessment Checklist
+      const assessmentSections = [
+        { title: 'Emotional Literacy', items: ['Can name at least 4 emotions', 'Recognises emotions in others', 'Uses words to express feelings', 'Shows empathy towards peers'] },
+        { title: 'Sensory Awareness', items: ['Can describe sensory preferences', 'Uses calming strategies independently', 'Tolerates a range of sensory input', 'Seeks appropriate sensory input'] },
+        { title: 'Communication', items: ['Takes turns in conversation', 'Uses appropriate voice volume', 'Asks for help when needed', "Listens to others' perspectives"] },
+        { title: 'Self-Regulation', items: ['Can identify when feeling overwhelmed', 'Uses breathing techniques', 'Transitions between activities calmly', 'Returns to calm after upset'] },
+      ];
       return `
         <div class="content">
           ${nameDate}
           <div class="instruction">Use this checklist to observe and record children's development across key areas. Tick when consistently observed. Date each observation.</div>
-          ${[
-            { title: 'Emotional Literacy', items: ['Can name at least 4 emotions', 'Recognises emotions in others', 'Uses words to express feelings', 'Shows empathy towards peers'] },
-            { title: 'Sensory Awareness', items: ['Can describe sensory preferences', 'Uses calming strategies independently', 'Tolerates a range of sensory input', 'Seeks appropriate sensory input'] },
-            { title: 'Communication', items: ['Takes turns in conversation', 'Uses appropriate voice volume', 'Asks for help when needed', "Listens to others' perspectives"] },
-            { title: 'Self-Regulation', items: ['Can identify when feeling overwhelmed', 'Uses breathing techniques', 'Transitions between activities calmly', 'Returns to calm after upset'] },
-          ].map(section => `
+          ${assessmentSections.slice(0, 2).map(section => `
             <div class="section-title">${section.title}</div>
             ${section.items.map(item => `
               <div class="checklist-item">
@@ -387,10 +388,21 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
               </div>
             `).join('')}
           `).join('')}
-          <div style="margin-top:8mm;">
+          <div class="manual-page-break"></div>
+          ${assessmentSections.slice(2).map(section => `
+            <div class="section-title">${section.title}</div>
+            ${section.items.map(item => `
+              <div class="checklist-item">
+                <div class="checkbox"></div>
+                <div class="checklist-text" style="flex:1;">${item}</div>
+                <div style="width:30mm; border-bottom:1px dotted #ccc; font-size:10px; color:#aaa; text-align:center;">date</div>
+              </div>
+            `).join('')}
+          `).join('')}
+          <div style="margin-top:6mm;">
             <div class="section-title">Additional Notes</div>
             <div class="writing-lines">
-              <div class="writing-line"></div><div class="writing-line"></div><div class="writing-line"></div><div class="writing-line"></div>
+              <div class="writing-line"></div><div class="writing-line"></div><div class="writing-line"></div>
             </div>
           </div>
         </div>
