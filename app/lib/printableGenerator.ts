@@ -544,24 +544,24 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
       return `
         <div class="content">
           ${nameDate}
-          <div class="instruction">Design your own quiet garden! Draw the things that make you feel calm and happy. You could include flowers, trees, water, animals, or a cosy spot to sit.</div>
-          <div style="border:3px dashed ${borderColor}; border-radius:16px; min-height:150mm; margin-top:5mm; position:relative; background:${isColor ? '#F1F8E9' : '#fafafa'};">
+          <div class="instruction" style="padding:8px 10px; font-size:10px; margin-bottom:3mm;">Design your own quiet garden! Draw the things that make you feel calm and happy. You could include flowers, trees, water, animals, or a cosy spot to sit.</div>
+          <div style="border:3px dashed ${borderColor}; border-radius:16px; min-height:126mm; margin-top:4mm; position:relative; background:${isColor ? '#F1F8E9' : '#fafafa'};">
             <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; color:#ccc;">
-              <svg viewBox="0 0 100 80" width="80" height="64" style="opacity:0.3;">
+              <svg viewBox="0 0 100 80" width="64" height="52" style="opacity:0.3;">
                 <path d="M50 10 C30 10 15 25 15 40 C15 60 35 70 50 70 C65 70 85 60 85 40 C85 25 70 10 50 10Z" fill="${isColor ? '#81C784' : '#ccc'}" />
                 <rect x="46" y="55" width="8" height="20" fill="${isColor ? '#8D6E63' : '#999'}" rx="2"/>
               </svg>
-              <div style="font-size:14px; margin-top:8px;">Draw your quiet garden here</div>
+              <div style="font-size:12px; margin-top:6px;">Draw your quiet garden here</div>
             </div>
           </div>
-          <div style="margin-top:5mm;">
-            <div class="section-title">My garden makes me feel calm because...</div>
+          <div style="margin-top:4mm;">
+            <div class="section-title" style="font-size:14px; margin:4mm 0 2mm;">My garden makes me feel calm because...</div>
             <div class="writing-lines">
-              <div class="writing-line"></div><div class="writing-line"></div>
+              <div class="writing-line" style="height:10mm;"></div>
             </div>
-            <div class="section-title">In my garden I would like to...</div>
+            <div class="section-title" style="font-size:14px; margin:4mm 0 2mm;">In my garden I would like to...</div>
             <div class="writing-lines">
-              <div class="writing-line"></div><div class="writing-line"></div>
+              <div class="writing-line" style="height:10mm;"></div>
             </div>
           </div>
         </div>
