@@ -518,24 +518,24 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
       return `
         <div class="content">
           ${nameDate}
-          <div class="instruction">Take this sheet on your outdoor sensory walk. Tick or draw what you find! Can you find everything on the list?</div>
+          <div class="instruction" style="padding:8px 10px; font-size:10px; margin-bottom:3mm;">Take this sheet on your outdoor sensory walk. Tick or draw what you find! Can you find everything on the list?</div>
           ${[
             { sense: 'I Can See...', icon: '&#x1F441;', items: ['Something green', 'Something moving', 'Something tiny', 'A shadow', 'Something beautiful'] },
             { sense: 'I Can Hear...', icon: '&#x1F442;', items: ['Birds singing', 'Wind blowing', 'Footsteps', 'Water', 'Something quiet'] },
             { sense: 'I Can Touch...', icon: '&#x270B;', items: ['Something rough', 'Something smooth', 'Something cold', 'Something soft', 'Something bumpy'] },
             { sense: 'I Can Smell...', icon: '&#x1F443;', items: ['Flowers', 'Fresh air', 'Wet ground', 'Leaves', 'Something nice'] },
           ].map(section => `
-            <div class="section-title"><span style="margin-right:6px;">${section.icon}</span>${section.sense}</div>
+            <div class="section-title" style="font-size:14px; margin:4mm 0 2mm;"><span style="margin-right:6px;">${section.icon}</span>${section.sense}</div>
             ${section.items.map(item => `
-              <div class="checklist-item">
-                <div class="checkbox"></div>
-                <div class="checklist-text">${item}</div>
+              <div class="checklist-item" style="padding:6px 0;">
+                <div class="checkbox" style="width:18px; height:18px;"></div>
+                <div class="checklist-text" style="font-size:12px;">${item}</div>
               </div>
             `).join('')}
           `).join('')}
-          <div style="margin-top:6mm;">
-            <div class="section-title">My favourite thing I found was:</div>
-            <div class="writing-lines"><div class="writing-line"></div><div class="writing-line"></div></div>
+          <div style="margin-top:4mm;">
+            <div class="section-title" style="font-size:14px; margin:4mm 0 2mm;">My favourite thing I found was:</div>
+            <div class="writing-lines"><div class="writing-line" style="height:10mm;"></div></div>
           </div>
         </div>
       `;
