@@ -494,7 +494,7 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
       return `
         <div class="content">
           <div class="instruction">Print and laminate these sorting mats. Children sort pebbles, buttons, or small objects by colour onto the correct mat. Great for fine motor skills and colour recognition!</div>
-          <div class="grid-2" style="margin-top:8mm; gap:8mm;">
+          <div class="grid-2" style="margin-top:6mm; gap:5mm;">
             ${[
               { color: '#EF5350', name: 'Red' },
               { color: '#42A5F5', name: 'Blue' },
@@ -503,11 +503,11 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
               { color: '#AB47BC', name: 'Purple' },
               { color: '#FFCA28', name: 'Yellow' },
             ].map(c => `
-              <div style="border:4px solid ${isColor ? c.color : '#999'}; border-radius:20px; padding:25px; text-align:center; background:${isColor ? c.color + '08' : '#fafafa'}; min-height:110px;">
-                <div style="width:40px; height:40px; border-radius:50%; background:${isColor ? c.color : '#ccc'}; margin:0 auto 10px;"></div>
-                <div style="font-size:28px; font-weight:800; color:${isColor ? c.color : '#555'};">${c.name}</div>
-                <div style="font-size:11px; color:#999; margin-top:6px;">Place ${c.name.toLowerCase()} items here</div>
-                <div style="border:2px dashed ${isColor ? c.color + '40' : '#ccc'}; border-radius:12px; height:30mm; margin-top:8px;"></div>
+              <div style="border:3px solid ${isColor ? c.color : '#999'}; border-radius:18px; padding:16px 16px 14px; text-align:center; background:${isColor ? c.color + '08' : '#fafafa'}; min-height:96px; page-break-inside:avoid; break-inside:avoid;">
+                <div style="width:32px; height:32px; border-radius:50%; background:${isColor ? c.color : '#ccc'}; margin:0 auto 8px;"></div>
+                <div style="font-size:22px; font-weight:800; color:${isColor ? c.color : '#555'}; line-height:1.1;">${c.name}</div>
+                <div style="font-size:10px; color:#999; margin-top:4px;">Place ${c.name.toLowerCase()} items here</div>
+                <div style="border:2px dashed ${isColor ? c.color + '40' : '#ccc'}; border-radius:12px; height:22mm; margin-top:6px;"></div>
               </div>
             `).join('')}
           </div>
