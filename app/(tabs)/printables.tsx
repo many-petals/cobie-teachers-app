@@ -11,7 +11,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { PRINTABLES } from '../data/printables';
-import AppSignOutButton from '../components/AppSignOutButton';
 import SearchBar from '../components/SearchBar';
 import FilterChips from '../components/FilterChips';
 import { useAuth } from '../context/AuthContext';
@@ -122,13 +121,10 @@ export default function PrintablesScreen() {
           <Ionicons name="print" size={24} color={COLORS.accentOrange} />
           <Text style={styles.headerTitle}>Printables</Text>
         </View>
-        <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.downloadAllBtn} onPress={handleDownloadAll} activeOpacity={0.7}>
-            <Ionicons name="download" size={18} color={COLORS.white} />
-            <Text style={styles.downloadAllText}>All</Text>
-          </TouchableOpacity>
-          <AppSignOutButton />
-        </View>
+        <TouchableOpacity style={styles.downloadAllBtn} onPress={handleDownloadAll} activeOpacity={0.7}>
+          <Ionicons name="download" size={18} color={COLORS.white} />
+          <Text style={styles.downloadAllText}>All</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={{ marginHorizontal: 16, marginBottom: 6 }}>
@@ -145,7 +141,7 @@ export default function PrintablesScreen() {
         {filtered.length} resource{filtered.length !== 1 ? 's' : ''} found
       </Text>
 
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
         {filtered.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="document-outline" size={48} color={COLORS.mediumGray} />
@@ -226,7 +222,6 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.bgLight },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg, paddingBottom: SPACING.sm },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   headerTitle: { fontSize: FONT_SIZES.xxl, fontWeight: '800', color: COLORS.text },
   downloadAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.primary, paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: RADIUS.round },
   downloadAllText: { fontSize: FONT_SIZES.sm, fontWeight: '700', color: COLORS.white },

@@ -127,7 +127,7 @@ export default function PricingSection({ visible, onClose }: PricingSectionProps
             </TouchableOpacity>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView showsVerticalScrollIndicator={true}>
             {/* Value proposition */}
             <View style={styles.valueBar}>
               <Ionicons name="shield-checkmark" size={16} color={COLORS.secondary} />

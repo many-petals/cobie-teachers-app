@@ -144,7 +144,7 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
           <Text style={styles.progressText}>{ratedCount} of {totalMilestones} milestones rated</Text>
 
           {/* Milestone Areas */}
-          <ScrollView style={styles.scrollArea} showsVerticalScrollIndicator={false}>
+          <ScrollView style={styles.scrollArea} showsVerticalScrollIndicator={true}>
             {areas.map(area => {
               const isExpanded = expandedArea === area.id;
               const areaRated = area.milestones.filter(m => ratings[m.id]).length;

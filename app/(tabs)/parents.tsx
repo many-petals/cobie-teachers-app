@@ -13,7 +13,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { PARENT_LETTERS, ParentLetter } from '../data/parentLetters';
-import AppSignOutButton from '../components/AppSignOutButton';
 import { downloadParentLetter, downloadAllParentLetters } from '../lib/parentLetterGenerator';
 import { useToast } from '../context/ToastContext';
 
@@ -120,11 +119,10 @@ export default function ParentCommunicationScreen() {
             <Ionicons name="download" size={16} color={COLORS.white} />
             <Text style={styles.downloadAllText}>All</Text>
           </TouchableOpacity>
-          <AppSignOutButton />
         </View>
       </View>
 
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
         {/* Personalisation Banner */}
         <View style={styles.personaliseBanner}>
           <View style={styles.personaliseIcon}>
@@ -311,7 +309,7 @@ export default function ParentCommunicationScreen() {
                 </TouchableOpacity>
               </View>
 
-              <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+              <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={true}>
                 {/* Document Info */}
                 <View style={styles.modalInfoCard}>
                   <View style={styles.modalInfoRow}>

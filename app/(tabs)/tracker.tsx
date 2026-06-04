@@ -17,7 +17,6 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useSEN } from '../context/SENContext';
 import { supabase } from '../lib/supabase';
-import AppSignOutButton from '../components/AppSignOutButton';
 import AddPupilModal from '../components/AddPupilModal';
 import QuickAssess from '../components/QuickAssess';
 import ProgressView from '../components/ProgressView';
@@ -344,22 +343,19 @@ export default function TrackerScreen() {
             <Text style={styles.screenSub}>{currentTerm} {currentYear}</Text>
           </View>
         </View>
-        <View style={styles.headerActions}>
-          <TouchableOpacity
-            style={styles.addBtn}
-            onPress={() => setShowAddPupil(true)}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="add" size={20} color={COLORS.white} />
-            <Text style={styles.addBtnText}>Add Pupil</Text>
-          </TouchableOpacity>
-          <AppSignOutButton />
-        </View>
+        <TouchableOpacity
+          style={styles.addBtn}
+          onPress={() => setShowAddPupil(true)}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="add" size={20} color={COLORS.white} />
+          <Text style={styles.addBtnText}>Add Pupil</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView
         style={styles.container}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.primary]} />
         }
@@ -755,11 +751,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
     flex: 1,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
   },
   screenTitle: {
     fontSize: FONT_SIZES.lg,

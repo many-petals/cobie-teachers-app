@@ -183,7 +183,7 @@ export default function ProgressView({ visible, onClose, pupilCode, ageGroup, se
             </TouchableOpacity>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollArea}>
+          <ScrollView showsVerticalScrollIndicator={true} style={styles.scrollArea}>
             {activeTab === 'milestones' ? (
               <>
                 {/* Overall Summary */}

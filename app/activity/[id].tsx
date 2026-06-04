@@ -11,7 +11,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { ACTIVITIES } from '../data/activities';
-import AppSignOutButton from '../components/AppSignOutButton';
 import { useSEN } from '../context/SENContext';
 import { useAuth } from '../context/AuthContext';
 import DifferentiationWizard from '../components/DifferentiationWizard';
@@ -69,11 +68,10 @@ export default function ActivityDetailScreen() {
           >
             <Ionicons name="accessibility" size={20} color={showSEN ? COLORS.white : COLORS.purple} />
           </TouchableOpacity>
-          <AppSignOutButton />
         </View>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={true}>
         {/* Title Card */}
         <View style={[styles.titleCard, { backgroundColor: activity.color + '15' }]}>
           <View style={[styles.iconCircle, { backgroundColor: activity.color + '30' }]}>

@@ -74,7 +74,7 @@ export default function AddPupilModal({ visible, onClose, onAdd, existingCodes }
             </TouchableOpacity>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView showsVerticalScrollIndicator={true}>
             {/* GDPR Notice */}
             <View style={styles.gdprNotice}>
               <Ionicons name="shield-checkmark" size={18} color={COLORS.primary} />

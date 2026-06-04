@@ -15,8 +15,6 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from './data/theme';
 import { supabase } from './lib/supabase';
 import { SavedWeeklyPlan, loadWeeklyPlans, addWeeklyPlan, removeWeeklyPlan } from './lib/storage';
-import { useAuth } from './context/AuthContext';
-import AppSignOutButton from './components/AppSignOutButton';
 import RequireAuth from './components/RequireAuth';
 
 const FOCUS_AREAS = [
@@ -38,7 +36,6 @@ const DAY_COLORS: Record<string, string> = {
 
 export default function PlannerScreen() {
   const router = useRouter();
-  const { user } = useAuth();
   const [step, setStep] = useState<'config' | 'loading' | 'plan' | 'saved'>('config');
   const [ageGroup, setAgeGroup] = useState<'EYFS' | 'KS1'>('EYFS');
   const [classSize, setClassSize] = useState('30');
@@ -52,18 +49,11 @@ export default function PlannerScreen() {
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
-      loadSaved();
-    } else {
-      setSavedPlans([]);
-      setPlan(null);
-      setStep('config');
-    }
-  }, [user]);
+    loadSaved();
+  }, []);
 
   const loadSaved = async () => {
-    if (!user) return;
-    const plans = await loadWeeklyPlans(user.id);
+    const plans = await loadWeeklyPlans();
     setSavedPlans(plans);
   };
 
@@ -115,12 +105,12 @@ export default function PlannerScreen() {
   };
 
   const savePlan = async () => {
-    if (!plan || !user) return;
+    if (!plan) return;
     const saved = await addWeeklyPlan({
       name: plan.weekTitle || `Week ${weekNumber} Plan`,
       ageGroup,
       plan,
-    }, user.id);
+    });
     setSavedPlans(prev => [saved, ...prev]);
     Alert.alert('Saved', 'Weekly plan saved to your device.');
   };
@@ -132,8 +122,7 @@ export default function PlannerScreen() {
         text: 'Delete',
         style: 'destructive',
         onPress: async () => {
-          if (!user) return;
-          await removeWeeklyPlan(id, user.id);
+          await removeWeeklyPlan(id);
           setSavedPlans(prev => prev.filter(p => p.id !== id));
         },
       },
@@ -148,8 +137,8 @@ export default function PlannerScreen() {
 
   return (
     <RequireAuth
-      title="Sign in to use the weekly planner"
-      message="Your planner is linked to your teacher account so saved weekly plans stay private and synced to the right user."
+      title="Sign In Required"
+      message="Weekly planning is a teacher workspace feature. Sign in to keep your saved plans tied to the right account."
     >
       <SafeAreaView style={styles.safeArea}>
       {/* Header */}
@@ -161,24 +150,21 @@ export default function PlannerScreen() {
           <Text style={styles.headerTitle}>Weekly Planner</Text>
           <Text style={styles.headerSub}>AI-powered lesson planning</Text>
         </View>
-        <View style={styles.headerActions}>
-          {savedPlans.length > 0 && step !== 'saved' ? (
-            <TouchableOpacity
-              style={styles.savedBtn}
-              onPress={() => setStep('saved')}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="folder" size={18} color={COLORS.primary} />
-              <Text style={styles.savedBtnText}>{savedPlans.length}</Text>
-            </TouchableOpacity>
-          ) : null}
-          <AppSignOutButton />
-        </View>
+        {savedPlans.length > 0 && step !== 'saved' && (
+          <TouchableOpacity
+            style={styles.savedBtn}
+            onPress={() => setStep('saved')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="folder" size={18} color={COLORS.primary} />
+            <Text style={styles.savedBtnText}>{savedPlans.length}</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Config Step */}
       {step === 'config' && (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
           <View style={styles.configCard}>
             <View style={styles.configHeader}>
               <Ionicons name="calendar" size={24} color={COLORS.primary} />
@@ -324,7 +310,7 @@ export default function PlannerScreen() {
 
       {/* Plan View */}
       {step === 'plan' && plan && (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
           {/* Plan Header */}
           <View style={styles.planHeader}>
             <Text style={styles.planTitle}>{plan.weekTitle || 'Weekly Plan'}</Text>
@@ -516,7 +502,7 @@ export default function PlannerScreen() {
 
       {/* Saved Plans */}
       {step === 'saved' && (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
           <View style={styles.savedHeader}>
             <TouchableOpacity onPress={() => setStep('config')} activeOpacity={0.7}>
               <Ionicons name="arrow-back" size={20} color={COLORS.primary} />
@@ -572,7 +558,6 @@ const styles = StyleSheet.create({
   backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.bgLight, justifyContent: 'center', alignItems: 'center' },
   headerTitle: { fontSize: FONT_SIZES.lg, fontWeight: '800', color: COLORS.text },
   headerSub: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   savedBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.bgLight, paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: RADIUS.round, borderWidth: 1.5, borderColor: COLORS.primary + '30' },
   savedBtnText: { fontSize: FONT_SIZES.sm, fontWeight: '700', color: COLORS.primary },
   container: { flex: 1, paddingHorizontal: SPACING.lg },

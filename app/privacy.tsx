@@ -203,7 +203,7 @@ export default function PrivacyPolicyScreen() {
 
       <ScrollView
         style={styles.container}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         contentContainerStyle={styles.scrollContent}
       >
         {/* Hero Banner */}
@@ -312,7 +312,7 @@ export default function PrivacyPolicyScreen() {
             To support teaching and learning, the following data is stored in our database:
           </Paragraph>
           <BulletPoint
-            text="Anonymous pupil codes (e.g. 'Pupil A', 'Cactus 3') — never real names"
+            text="Anonymous pupil codes (e.g. 'Pupil A', 'Cactus 3') - never real names"
             icon="checkmark"
             color={COLORS.secondary}
           />
@@ -484,7 +484,7 @@ export default function PrivacyPolicyScreen() {
               color={COLORS.primary}
             />
             <BulletPoint
-              text="RLS policies are enforced at the database level — they cannot be bypassed by the application"
+              text="RLS policies are enforced at the database level - they cannot be bypassed by the application"
               icon="checkmark"
               color={COLORS.primary}
             />

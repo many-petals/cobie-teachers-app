@@ -8,10 +8,8 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { EMOTIONS } from '../data/emotions';
-import AppSignOutButton from '../components/AppSignOutButton';
 import EmotionCard from '../components/EmotionCard';
 import CheckInScreen from '../components/CheckInScreen';
 import EmotionHistory from '../components/EmotionHistory';
@@ -21,7 +19,6 @@ import { loadEmotionLogs, removeEmotionLog, type LocalEmotionLog } from '../lib/
 type Tab = 'emotions' | 'checkin' | 'history';
 
 export default function ToolsScreen() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('emotions');
   const [expandedEmotion, setExpandedEmotion] = useState<string | null>(null);
   const [emotionLogs, setEmotionLogs] = useState<LocalEmotionLog[]>([]);
@@ -45,32 +42,10 @@ export default function ToolsScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Ionicons name="heart" size={24} color={COLORS.pink} />
-          <Text style={styles.headerTitle}>Emotion Tools</Text>
-        </View>
-        <AppSignOutButton />
+        <Ionicons name="heart" size={24} color={COLORS.pink} />
+        <Text style={styles.headerTitle}>Emotion Tools</Text>
       </View>
       <SENBanner />
-
-      <View style={styles.shortcutWrap}>
-        <TouchableOpacity
-          style={styles.voiceNotesCard}
-          onPress={() => router.push('/voice-notes')}
-          activeOpacity={0.8}
-        >
-          <View style={styles.voiceNotesIcon}>
-            <Ionicons name="mic" size={22} color={COLORS.error} />
-          </View>
-          <View style={styles.voiceNotesInfo}>
-            <Text style={styles.voiceNotesTitle}>Voice Notes</Text>
-            <Text style={styles.voiceNotesText}>
-              Record quick classroom observations and save them to your account.
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
-        </TouchableOpacity>
-      </View>
 
       {/* Tab Switcher */}
       <View style={styles.tabBar}>
@@ -121,7 +96,7 @@ export default function ToolsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
         {activeTab === 'emotions' ? (
           <View style={styles.emotionsList}>
             <Text style={styles.intro}>
@@ -177,58 +152,15 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: SPACING.md,
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.lg,
     paddingBottom: SPACING.sm,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-    flex: 1,
   },
   headerTitle: {
     fontSize: FONT_SIZES.xxl,
     fontWeight: '800',
     color: COLORS.text,
-  },
-  shortcutWrap: {
-    paddingHorizontal: SPACING.lg,
-    marginTop: SPACING.md,
-  },
-  voiceNotesCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-    backgroundColor: COLORS.white,
-    borderRadius: RADIUS.xl,
-    padding: SPACING.lg,
-    borderWidth: 1,
-    borderColor: '#F7CACA',
-    ...SHADOWS.small,
-  },
-  voiceNotesIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#FDECEC',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  voiceNotesInfo: {
-    flex: 1,
-  },
-  voiceNotesTitle: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  voiceNotesText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textLight,
-    lineHeight: 20,
-    marginTop: 2,
   },
   tabBar: {
     flexDirection: 'row',

@@ -15,8 +15,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from './data/theme';
 import { VoiceNote, loadVoiceNotes, addVoiceNote, updateVoiceNote, removeVoiceNote } from './lib/storage';
-import { useAuth } from './context/AuthContext';
-import AppSignOutButton from './components/AppSignOutButton';
 import RequireAuth from './components/RequireAuth';
 
 // Tags for categorising voice notes
@@ -51,7 +49,6 @@ function formatDate(dateStr: string): string {
 
 export default function VoiceNotesScreen() {
   const router = useRouter();
-  const { user } = useAuth();
   const [notes, setNotes] = useState<VoiceNote[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -71,17 +68,12 @@ export default function VoiceNotesScreen() {
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    if (user) {
-      loadNotes();
-    } else {
-      setNotes([]);
-    }
-
+    loadNotes();
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       stopPlayback();
     };
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     if (isRecording) {
@@ -97,8 +89,7 @@ export default function VoiceNotesScreen() {
   }, [isRecording]);
 
   const loadNotes = async () => {
-    if (!user) return;
-    const loaded = await loadVoiceNotes(user.id);
+    const loaded = await loadVoiceNotes();
     setNotes(loaded);
   };
 
@@ -174,7 +165,6 @@ export default function VoiceNotesScreen() {
   };
 
   const saveNewNote = async () => {
-    if (!user) return;
     const data = recordingRef.current || { uri: '', duration: recordingDuration };
     const note = await addVoiceNote({
       title: newTitle || `Note ${notes.length + 1}`,
@@ -182,7 +172,7 @@ export default function VoiceNotesScreen() {
       duration: data.duration || recordingDuration,
       pupilCode: newPupilCode || undefined,
       tags: newTags,
-    }, user.id);
+    });
 
     setNotes(prev => [note, ...prev]);
     setShowNewNoteForm(false);
@@ -250,8 +240,7 @@ export default function VoiceNotesScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            if (!user) return;
-            await removeVoiceNote(note.id, user.id);
+            await removeVoiceNote(note.id);
             setNotes(prev => prev.filter(n => n.id !== note.id));
           },
         },
@@ -267,12 +256,12 @@ export default function VoiceNotesScreen() {
   };
 
   const saveEdit = async () => {
-    if (!editingNote || !user) return;
+    if (!editingNote) return;
     await updateVoiceNote(editingNote, {
       title: editTitle,
       pupilCode: editPupilCode || undefined,
       tags: editTags,
-    }, user.id);
+    });
     setNotes(prev => prev.map(n =>
       n.id === editingNote
         ? { ...n, title: editTitle, pupilCode: editPupilCode || undefined, tags: editTags }
@@ -295,8 +284,8 @@ export default function VoiceNotesScreen() {
 
   return (
     <RequireAuth
-      title="Sign in to use voice notes"
-      message="Voice notes are kept inside your teacher account so observations stay private and cannot be reopened after logout."
+      title="Sign In Required"
+      message="Voice notes are private teacher records. Sign in before recording or reopening them so they stay under the correct account."
     >
       <SafeAreaView style={styles.safeArea}>
       {/* Header */}
@@ -308,15 +297,12 @@ export default function VoiceNotesScreen() {
           <Text style={styles.headerTitle}>Voice Notes</Text>
           <Text style={styles.headerSub}>{notes.length} recording{notes.length !== 1 ? 's' : ''}</Text>
         </View>
-        <View style={styles.headerActions}>
-          <View style={styles.headerIcon}>
-            <Ionicons name="mic" size={20} color={COLORS.error} />
-          </View>
-          <AppSignOutButton />
+        <View style={styles.headerIcon}>
+          <Ionicons name="mic" size={20} color={COLORS.error} />
         </View>
       </View>
 
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
         {/* Info Banner */}
         <View style={styles.infoBanner}>
           <Ionicons name="information-circle" size={18} color={COLORS.primary} />
@@ -615,7 +601,6 @@ const styles = StyleSheet.create({
   backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.bgLight, justifyContent: 'center', alignItems: 'center' },
   headerTitle: { fontSize: FONT_SIZES.lg, fontWeight: '800', color: COLORS.text },
   headerSub: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   headerIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFEBEE', justifyContent: 'center', alignItems: 'center' },
   container: { flex: 1 },
   infoBanner: { flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.sm, marginHorizontal: SPACING.lg, marginTop: SPACING.md, padding: SPACING.md, backgroundColor: COLORS.bgLight, borderRadius: RADIUS.md, borderLeftWidth: 3, borderLeftColor: COLORS.primary },

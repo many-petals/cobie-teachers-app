@@ -53,7 +53,7 @@ export default function CalmCornerBuilderComponent() {
   const isReady = emotion && noise && time > 0;
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
       {/* Emotion Selection */}
       <Text style={styles.sectionTitle}>How is the child feeling?</Text>
       <View style={styles.optionsRow}>

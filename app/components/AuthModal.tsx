@@ -167,7 +167,7 @@ export default function AuthModal() {
             </TouchableOpacity>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <ScrollView showsVerticalScrollIndicator={true} keyboardShouldPersistTaps="handled">
             <Text style={styles.subtitle}>{subtitle}</Text>
 
             {error ? (

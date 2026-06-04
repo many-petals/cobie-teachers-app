@@ -61,13 +61,6 @@ export default function RootLayout() {
       styleTag = document.createElement('style');
       styleTag.id = styleId;
       styleTag.textContent = `
-        html,
-        body {
-          overflow-y: scroll;
-          overflow-x: hidden;
-          scrollbar-gutter: stable;
-        }
-
         * {
           scrollbar-width: thin;
           scrollbar-color: #8fb8cf #e8f2f8;

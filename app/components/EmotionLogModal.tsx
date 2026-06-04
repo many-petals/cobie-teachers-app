@@ -99,7 +99,7 @@ export default function EmotionLogModal({ visible, onClose, onLog, pupilCode }: 
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.scrollArea} showsVerticalScrollIndicator={false}>
+          <ScrollView style={styles.scrollArea} showsVerticalScrollIndicator={true}>
             {step === 'emotion' ? (
               <>
                 {/* Step 1: Select Emotion */}

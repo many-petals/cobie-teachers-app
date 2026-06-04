@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,6 @@ import {
   StyleSheet,
   SafeAreaView,
   Modal,
-  useWindowDimensions,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -20,7 +19,6 @@ import TodayActivity from '../components/TodayActivity';
 import WorkbookPromo from '../components/WorkbookPromo';
 import EvidenceBanner from '../components/EvidenceBanner';
 import PricingSection from '../components/PricingSection';
-import AppSignOutButton from '../components/AppSignOutButton';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { LESSONS } from '../data/lessons';
@@ -28,13 +26,13 @@ import { ACTIVITIES } from '../data/activities';
 import { PRINTABLES } from '../data/printables';
 import { BRAND } from '../data/brand';
 
-const HERO_BOOK_COVER = require('../assets/images/book-cover-updated.png');
+const HERO_IMAGE = 'https://d64gsuwffb70l.cloudfront.net/69357762fff8f7f4abcd8985_1771287970946_68002315.png';
+
 
 const QUICK_TILES = [
-  { title: 'Lessons', subtitle: '8 Core', icon: 'book', color: '#1B6B93', bgColor: '#E1F5FE', route: '/lessons' },
+  { title: 'Lessons', subtitle: '4 Core', icon: 'book', color: '#1B6B93', bgColor: '#E1F5FE', route: '/lessons' },
   { title: 'Activities', subtitle: '8 Optional', icon: 'color-palette', color: '#7BC67E', bgColor: '#E8F5E9', route: '/activities' },
   { title: 'Tracker', subtitle: 'Milestones', icon: 'analytics', color: '#9C27B0', bgColor: '#F3E5F5', route: '/tracker' },
-  { title: 'Voice Notes', subtitle: 'Observations', icon: 'mic', color: '#E57373', bgColor: '#FDECEC', route: '/voice-notes' },
   { title: 'Printables', subtitle: '18 Resources', icon: 'print', color: '#F4A460', bgColor: '#FFF3E0', route: '/printables' },
   { title: 'Parents', subtitle: '4 Letters', icon: 'people', color: '#1B6B93', bgColor: '#E1F5FE', route: '/parents' },
   { title: 'Emotions', subtitle: 'Interactive', icon: 'heart', color: '#F48FB1', bgColor: '#FCE4EC', route: '/tools' },
@@ -88,19 +86,6 @@ function ProfileModal({ visible, onClose }: { visible: boolean; onClose: () => v
     });
   };
 
-  const handleProfileSignOut = () => {
-    showConfirm({
-      title: 'Sign Out',
-      message: 'Sign out of your teacher account on this device now?',
-      confirmText: 'Sign Out',
-      onConfirm: async () => {
-        onClose();
-        await signOut();
-        showToast('Signed Out', 'You have been signed out on this device.', 'info');
-      },
-    });
-  };
-
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={pStyles.overlay}>
@@ -112,7 +97,7 @@ function ProfileModal({ visible, onClose }: { visible: boolean; onClose: () => v
             </TouchableOpacity>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView showsVerticalScrollIndicator={true}>
             {/* Profile Card */}
             <View style={pStyles.profileCard}>
               <View style={pStyles.avatarCircle}>
@@ -141,7 +126,7 @@ function ProfileModal({ visible, onClose }: { visible: boolean; onClose: () => v
   
   The programme combines four simple elements:
 Daily Emotion Check-Ins  
-Short 1–2 minute check-ins help children recognise and name their feelings. Over time this builds emotional awareness and helps teachers notice children who may need additional support.
+Short 1-2 minute check-ins help children recognise and name their feelings. Over time this builds emotional awareness and helps teachers notice children who may need additional support.
 </Text>
 
 
@@ -277,7 +262,7 @@ Short 1–2 minute check-ins help children recognise and name their feelings. Ov
             ) : null}
 
             {/* Sign Out */}
-            <TouchableOpacity style={pStyles.signOutBtn} onPress={handleProfileSignOut} activeOpacity={0.7}>
+            <TouchableOpacity style={pStyles.signOutBtn} onPress={() => { signOut(); onClose(); }} activeOpacity={0.7}>
               <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
               <Text style={pStyles.signOutText}>Sign Out</Text>
             </TouchableOpacity>
@@ -328,25 +313,17 @@ const pStyles = StyleSheet.create({
 });
 
 export default function HomeScreen() {
-  const { width } = useWindowDimensions();
   const router = useRouter();
   const { user, profile, setShowAuthModal, completedLessons, favourites } = useAuth();
-  const { showConfirm } = useToast();
   const [showProfile, setShowProfile] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [insideExpanded, setInsideExpanded] = useState(false);
-  const [workbookY, setWorkbookY] = useState(0);
   // Track client-side mount to prevent hydration mismatch from auth state
   const [mounted, setMounted] = useState(false);
-  const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const freeLesson = LESSONS.find((lesson) => lesson.number === 1) ?? LESSONS[0];
-  const compactHero = width < 1760;
-  const narrowHero = width < 1480;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -360,9 +337,9 @@ export default function HomeScreen() {
             style={styles.logoImage}
             resizeMode="contain"
           />
-          <View style={styles.appHeaderCopy}>
-            <Text style={styles.appHeaderTitle}>{BRAND.name}</Text>
-            <Text style={styles.appHeaderSub}>Cobie the Cactus Teacher Pack</Text>
+          <View>
+            <Text style={styles.appHeaderTitle}>{BRAND.shortName}</Text>
+            <Text style={styles.appHeaderSub}>{BRAND.tagline}</Text>
           </View>
 
         </View>
@@ -375,21 +352,18 @@ export default function HomeScreen() {
             <Ionicons name="diamond-outline" size={16} color={COLORS.accentOrange} />
           </TouchableOpacity>
           {mounted && user ? (
-            <>
-              <AppSignOutButton />
-              <TouchableOpacity
-                style={styles.profileBtn}
-                onPress={() => setShowProfile(true)}
-                activeOpacity={0.7}
-              >
-                <View style={styles.profileAvatar}>
-                  <Ionicons name="person" size={16} color={COLORS.primary} />
-                </View>
-                <Text style={styles.profileName} numberOfLines={1}>
-                  {profile?.name?.split(' ')[0] || 'Profile'}
-                </Text>
-              </TouchableOpacity>
-            </>
+            <TouchableOpacity
+              style={styles.profileBtn}
+              onPress={() => setShowProfile(true)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.profileAvatar}>
+                <Ionicons name="person" size={16} color={COLORS.primary} />
+              </View>
+              <Text style={styles.profileName} numberOfLines={1}>
+                {profile?.name?.split(' ')[0] || 'Profile'}
+              </Text>
+            </TouchableOpacity>
           ) : mounted ? (
             <TouchableOpacity
               style={styles.signInBtn}
@@ -405,58 +379,90 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <ScrollView ref={scrollRef} style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
         {/* Hero Section */}
-        <View style={[styles.hero, compactHero && styles.heroCompact, narrowHero && styles.heroNarrow]}>
+        <View style={styles.hero}>
           <Image
-            source={HERO_BOOK_COVER}
+            source={{ uri: HERO_IMAGE }}
             style={styles.heroImage}
             resizeMode="cover"
           />
-          <View style={[styles.heroOverlay, compactHero && styles.heroOverlayCompact]}>
-            <View style={[styles.heroContent, compactHero && styles.heroContentCompact]}>
-              <View style={[styles.heroRow, compactHero && styles.heroRowCompact]}>
-                <View style={[styles.heroTextCol, compactHero && styles.heroTextColCompact]}>
-                  <Text style={[styles.heroTitle, compactHero && styles.heroTitleCompact, narrowHero && styles.heroTitleNarrow]}>Plan your week&apos;s PSHE lessons in 5 minutes - ready to teach, no prep needed.</Text>
-                  <Text style={styles.heroSubtitle}>EYFS and KS1 emotional literacy lessons + printables</Text>
+          <View style={styles.heroOverlay}>
+            <View style={styles.heroContent}>
+              <View style={styles.heroRow}>
+                <View style={styles.heroTextCol}>
+                  <Text style={styles.heroTitle}>Cobie the Cactus</Text>
+                  <Text style={styles.heroSubtitle}>EYFS & KS1 Teacher Pack</Text>
                   <Text style={styles.heroDescription}>
-                    Built for teachers who need tomorrow&apos;s emotional literacy lesson ready today.
+                    Classroom-ready resources for emotional literacy, sensory awareness, and inclusion.
+                    Evidence-based. SEN-first. No preparation required.
                   </Text>
+       
                 </View>
+                <Image
+                  source={{ uri: BRAND.logoUrl }}
+                  style={styles.heroMascot}
+                  resizeMode="contain"
+                />
               </View>
-              <View style={[styles.heroButtons, compactHero && styles.heroButtonsCompact]}>
+              <View style={styles.heroButtons}>
                 <TouchableOpacity
-                  style={[styles.heroButton, compactHero && styles.heroButtonCompact]}
-                  onPress={() => router.push('/upgrade')}
+                  style={styles.heroButton}
+                  onPress={() => router.push('/lessons')}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="rocket-outline" size={20} color={COLORS.white} />
-                  <Text style={styles.heroButtonText}>Start 14-Day Free Trial - No Planning Needed This Week</Text>
+                  <Ionicons name="play-circle" size={22} color={COLORS.white} />
+                  <Text style={styles.heroButtonText}>Start Teaching</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.heroButtonSecondary}
-                  onPress={() => router.push(`/lesson/${freeLesson.id}` as any)}
+                  onPress={() => setShowPricing(true)}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.heroButtonSecondaryText}>Open Free Lesson</Text>
+                  <Text style={styles.heroButtonSecondaryText}>View Plans</Text>
                 </TouchableOpacity>
-              </View>
-              <Text style={styles.heroUrgency}>Use this in your classroom tomorrow - no prep needed.</Text>
-              <View style={styles.heroProofRow}>
-                {[
-                  '8 structured lessons',
-                  'Printables included',
-                  'Supports SEN learners',
-                ].map((item) => (
-                  <View key={item} style={styles.heroProofItem}>
-                    <Ionicons name="checkmark-circle" size={15} color={COLORS.secondary} />
-                    <Text style={styles.heroProofText}>{item}</Text>
-                  </View>
-                ))}
+                <TouchableOpacity
+                  style={styles.heroButtonSecondary}
+                  onPress={() => router.push('/guide' as any)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.heroButtonSecondaryText}>How to Use This Programme</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
         </View>
+
+
+        {/* Welcome back / progress for logged-in users */}
+        {mounted && user ? (
+          <View style={styles.welcomeSection}>
+            <View style={styles.welcomeCard}>
+              <View style={styles.welcomeTop}>
+                <Ionicons name="sparkles" size={20} color={COLORS.accent} />
+                <Text style={styles.welcomeTitle}>
+                  Welcome back, {profile?.name?.split(' ')[0] || 'Teacher'}!
+                </Text>
+              </View>
+              <View style={styles.progressRow}>
+                <View style={styles.progressItem}>
+                  <Text style={styles.progressNum}>{completedLessons.length}/4</Text>
+                  <Text style={styles.progressLabel}>Lessons Done</Text>
+                </View>
+                <View style={styles.progressDivider} />
+                <View style={styles.progressItem}>
+                  <Text style={styles.progressNum}>{favourites.length}</Text>
+                  <Text style={styles.progressLabel}>Saved Items</Text>
+                </View>
+                <View style={styles.progressDivider} />
+                <TouchableOpacity style={styles.progressItem} onPress={() => setShowProfile(true)}>
+                  <Ionicons name="bookmark" size={20} color={COLORS.primary} />
+                  <Text style={[styles.progressLabel, { color: COLORS.primary, fontWeight: '700' }]}>View All</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        ) : null}
 
         {/* SEN Mode Toggle */}
         <SENBanner />
@@ -478,55 +484,7 @@ export default function HomeScreen() {
               </View>
             ))}
           </View>
-          <View style={styles.heroSupportLinks}>
-            <TouchableOpacity
-              style={styles.heroSupportLink}
-              onPress={() => scrollRef.current?.scrollTo({ y: Math.max(workbookY - 24, 0), animated: true })}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="book-outline" size={14} color={COLORS.primary} />
-              <Text style={styles.heroSupportLinkText}>See the Cobie companion book</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.heroSupportLink}
-              onPress={() => router.push('/guide' as any)}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="information-circle-outline" size={14} color={COLORS.primary} />
-              <Text style={styles.heroSupportLinkText}>How it works</Text>
-            </TouchableOpacity>
-          </View>
         </View>
-
-        {/* Welcome back / progress for logged-in users */}
-        {mounted && user ? (
-          <View style={styles.welcomeSection}>
-            <View style={styles.welcomeCard}>
-              <View style={styles.welcomeTop}>
-                <Ionicons name="sparkles" size={20} color={COLORS.accent} />
-                <Text style={styles.welcomeTitle}>
-                  Welcome back, {profile?.name?.split(' ')[0] || 'Teacher'}!
-                </Text>
-              </View>
-              <View style={styles.progressRow}>
-                <View style={styles.progressItem}>
-                  <Text style={styles.progressNum}>{completedLessons.length}/8</Text>
-                  <Text style={styles.progressLabel}>Lessons Done</Text>
-                </View>
-                <View style={styles.progressDivider} />
-                <View style={styles.progressItem}>
-                  <Text style={styles.progressNum}>{favourites.length}</Text>
-                  <Text style={styles.progressLabel}>Saved Items</Text>
-                </View>
-                <View style={styles.progressDivider} />
-                <TouchableOpacity style={styles.progressItem} onPress={() => setShowProfile(true)}>
-                  <Ionicons name="bookmark" size={20} color={COLORS.primary} />
-                  <Text style={[styles.progressLabel, { color: COLORS.primary, fontWeight: '700' }]}>View All</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        ) : null}
 
 
         {/* Today's Activity */}
@@ -538,9 +496,7 @@ export default function HomeScreen() {
           
 
         {/* Workbook Promo - Full */}
-        <View onLayout={(event) => setWorkbookY(event.nativeEvent.layout.y)}>
-          <WorkbookPromo />
-        </View>
+        <WorkbookPromo />
 
         {/* What's Inside */}
         <View style={[styles.section, { paddingHorizontal: 0 }]}>
@@ -649,14 +605,6 @@ export default function HomeScreen() {
         </View>
 
         {/* Footer */}
-        <View style={styles.promiseBannerSection}>
-          <Text style={styles.promiseEyebrow}>The Many Petals Promise</Text>
-          <Text style={styles.promiseTitle}>Every child belongs in this garden, exactly as they are.</Text>
-          <Text style={styles.promiseBody}>
-            Calm, inclusive emotional literacy support for EYFS and KS1 classrooms.
-          </Text>
-        </View>
-
         <View style={styles.footer}>
           <Image
             source={{ uri: BRAND.logoUrl }}
@@ -739,13 +687,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
   },
-  appHeaderCopy: {
-    justifyContent: 'center',
-  },
   logoImage: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 8,
     backgroundColor: COLORS.white,
   },
 
@@ -756,8 +701,8 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   appHeaderSub: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 10,
+    fontWeight: '600',
     color: COLORS.textMuted,
   },
   headerActions: {
@@ -770,16 +715,6 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
     backgroundColor: COLORS.bgWarm,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerLogoutBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FFEBEE',
-    borderWidth: 1,
-    borderColor: '#F7CACA',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -877,210 +812,88 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.lightGray,
   },
   hero: {
-    minHeight: 220,
+    height: 220,
     position: 'relative',
-  },
-  heroCompact: {
-    minHeight: 280,
-  },
-  heroNarrow: {
-    minHeight: 320,
   },
   heroImage: {
     width: '100%',
     height: '100%',
-    opacity: 0.42,
-    transform: [{ scale: 1.02 }],
   },
   heroOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(18, 74, 103, 0.9)',
+    backgroundColor: 'rgba(27, 107, 147, 0.82)',
     justifyContent: 'flex-end',
-    paddingVertical: 8,
-  },
-  heroOverlayCompact: {
-    justifyContent: 'flex-start',
-    paddingTop: 8,
+    paddingVertical: 20,
   },
   heroContent: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 6,
-  },
-  heroContentCompact: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 6,
+    padding: SPACING.md,
   },
   heroRow: {
     flexDirection: 'row',
-    alignItems: 'stretch',
-    flexWrap: 'wrap',
+    alignItems: 'center',
     gap: SPACING.md,
-  },
-  heroRowCompact: {
-    flexDirection: 'column',
-    alignItems: 'stretch',
   },
   heroTextCol: {
     flex: 1,
-    minWidth: 280,
   },
-  heroTextColCompact: {
-    minWidth: 0,
-    width: '100%',
+  heroMascot: {
+    width: 80,
+    height: 90,
+    borderRadius: RADIUS.lg,
   },
   heroTitle: {
-    fontSize: 38,
+    fontSize: FONT_SIZES.hero,
     fontWeight: '800',
     color: COLORS.white,
-    lineHeight: 44,
     textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
   },
-  heroTitleCompact: {
-    fontSize: 30,
-    lineHeight: 36,
-  },
-  heroTitleNarrow: {
-    fontSize: 26,
-    lineHeight: 32,
-  },
   heroSubtitle: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: '700',
-    color: 'rgba(255,255,255,0.96)',
-    marginTop: 6,
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '600',
+    color: COLORS.accent,
+    marginTop: 2,
   },
   heroDescription: {
     fontSize: FONT_SIZES.sm,
-    color: 'rgba(255,255,255,0.88)',
-    marginTop: 6,
+    color: 'rgba(255,255,255,0.9)',
+    marginTop: SPACING.sm,
     lineHeight: 20,
   },
-  heroProofRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.xs,
-    marginTop: 6,
-  },
-  heroProofItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  heroProofText: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: '700',
-    color: COLORS.white,
-  },
+
   heroButtons: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
-    marginTop: 6,
-    flexWrap: 'wrap',
-  },
-  heroButtonsCompact: {
-    gap: SPACING.sm,
+    marginTop: SPACING.md,
   },
   heroButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     gap: SPACING.sm,
     backgroundColor: COLORS.secondary,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm + 2,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
     borderRadius: RADIUS.round,
     ...SHADOWS.medium,
-  },
-  heroButtonCompact: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
   },
   heroButtonText: {
     fontSize: FONT_SIZES.md,
     fontWeight: '700',
     color: COLORS.white,
-    flexShrink: 1,
-    textAlign: 'center',
   },
   heroButtonSecondary: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
     borderRadius: RADIUS.round,
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.5)',
-    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   heroButtonSecondaryText: {
     fontSize: FONT_SIZES.sm,
     fontWeight: '600',
     color: COLORS.white,
-  },
-  heroUrgency: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: '700',
-    color: 'rgba(255,255,255,0.92)',
-    marginTop: 4,
-  },
-  heroSupportLinks: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm,
-    marginTop: SPACING.md,
-  },
-  heroSupportLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 8,
-    borderRadius: RADIUS.round,
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.lightGray,
-  },
-  heroSupportLinkText: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: '700',
-    color: COLORS.primary,
-  },
-  promiseBannerSection: {
-    marginHorizontal: SPACING.xl,
-    marginTop: SPACING.lg,
-    backgroundColor: COLORS.white,
-    borderRadius: RADIUS.xl,
-    borderWidth: 1,
-    borderColor: COLORS.lightGray,
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.lg,
-    alignItems: 'center',
-    ...SHADOWS.medium,
-  },
-  promiseEyebrow: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: '800',
-    color: COLORS.secondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: SPACING.xs,
-  },
-  promiseTitle: {
-    fontSize: FONT_SIZES.xxl,
-    fontWeight: '800',
-    color: COLORS.text,
-    textAlign: 'center',
-    lineHeight: 34,
-    maxWidth: 760,
-  },
-  promiseBody: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textLight,
-    textAlign: 'center',
-    marginTop: SPACING.sm,
-    maxWidth: 620,
-    lineHeight: 22,
   },
   section: {
     marginTop: SPACING.lg,
@@ -1254,7 +1067,7 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
   },
   footer: {
-    marginTop: SPACING.xl,
+    marginTop: SPACING.huge,
     padding: SPACING.xl,
     backgroundColor: COLORS.white,
     borderTopWidth: 1,

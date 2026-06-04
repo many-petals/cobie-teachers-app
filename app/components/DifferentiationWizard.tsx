@@ -125,7 +125,7 @@ export default function DifferentiationWizard({
           </View>
 
           {step === 'select' && (
-            <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollContent}>
+            <ScrollView showsVerticalScrollIndicator={true} style={styles.scrollContent}>
               {/* Resource Info */}
               <View style={styles.resourceInfo}>
                 <Ionicons name={resourceType === 'lesson' ? 'book' : 'color-palette'} size={18} color={COLORS.primary} />
@@ -224,7 +224,7 @@ export default function DifferentiationWizard({
           )}
 
           {step === 'results' && suggestions && (
-            <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollContent}>
+            <ScrollView showsVerticalScrollIndicator={true} style={styles.scrollContent}>
               {/* Overview */}
               <View style={[styles.resultCard, { borderLeftColor: senInfo?.color || COLORS.purple }]}>
                 <View style={styles.resultCardHeader}>
