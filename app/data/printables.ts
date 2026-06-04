@@ -9,6 +9,17 @@ export interface Printable {
   color: string;
   pages: number;
   formats: string[];
+  defaultVariantId?: string;
+  variants?: PrintableVariant[];
+}
+
+export interface PrintableVariant {
+  id: string;
+  label: string;
+  helperText: string;
+  pages: number;
+  formats?: string[];
+  marginHint?: 'Minimum margins' | 'Default margins';
 }
 
 export const PRINTABLES: Printable[] = [
@@ -21,8 +32,27 @@ export const PRINTABLES: Printable[] = [
     description: '8 emotion face cards with labels for matching, discussion, and check-in activities.',
     icon: 'happy',
     color: '#F48FB1',
-    pages: 2,
+    pages: 1,
     formats: ['Colour', 'Ink-light', 'B&W'],
+    defaultVariantId: 'tabletop',
+    variants: [
+      {
+        id: 'tabletop',
+        label: 'Tabletop print',
+        helperText: 'Best for tables, pairs, and small-group matching games.',
+        pages: 1,
+        formats: ['Colour', 'Ink-light', 'B&W'],
+        marginHint: 'Minimum margins',
+      },
+      {
+        id: 'display',
+        label: 'Large display print',
+        helperText: 'Best for circle time and front-of-class emotion recognition.',
+        pages: 2,
+        formats: ['Colour', 'Ink-light', 'B&W'],
+        marginHint: 'Minimum margins',
+      },
+    ],
   },
   {
     id: 'p-2',
@@ -93,8 +123,27 @@ export const PRINTABLES: Printable[] = [
     description: 'Cards featuring Cobie, Tilly, Darcy, and Harper with character traits.',
     icon: 'people',
     color: '#4FC3F7',
-    pages: 2,
+    pages: 1,
     formats: ['Colour'],
+    defaultVariantId: 'tabletop',
+    variants: [
+      {
+        id: 'tabletop',
+        label: 'Tabletop print',
+        helperText: 'Best for table talk, story retelling, and paired discussion.',
+        pages: 1,
+        formats: ['Colour'],
+        marginHint: 'Minimum margins',
+      },
+      {
+        id: 'display',
+        label: 'Large display print',
+        helperText: 'Best for circle time, modelling, and child-visible character work.',
+        pages: 2,
+        formats: ['Colour'],
+        marginHint: 'Minimum margins',
+      },
+    ],
   },
   {
     id: 'p-8',
@@ -131,6 +180,17 @@ export const PRINTABLES: Printable[] = [
     color: '#FFD54F',
     pages: 1,
     formats: ['Colour', 'Ink-light'],
+    defaultVariantId: 'display',
+    variants: [
+      {
+        id: 'display',
+        label: 'Large display print',
+        helperText: 'Best for circle time, daily check-in, and shared classroom routines.',
+        pages: 1,
+        formats: ['Colour', 'Ink-light'],
+        marginHint: 'Minimum margins',
+      },
+    ],
   },
   {
     id: 'p-11',
@@ -143,6 +203,25 @@ export const PRINTABLES: Printable[] = [
     color: '#4FC3F7',
     pages: 1,
     formats: ['Colour', 'B&W'],
+    defaultVariantId: 'tabletop',
+    variants: [
+      {
+        id: 'tabletop',
+        label: 'Tabletop print',
+        helperText: 'Best for teacher desks, group tables, and quick prompting.',
+        pages: 1,
+        formats: ['Colour', 'B&W'],
+        marginHint: 'Minimum margins',
+      },
+      {
+        id: 'display',
+        label: 'Large display print',
+        helperText: 'Best for whole-class teaching and child-visible voice reminders.',
+        pages: 2,
+        formats: ['Colour', 'B&W'],
+        marginHint: 'Minimum margins',
+      },
+    ],
   },
   {
     id: 'p-12',
@@ -153,8 +232,27 @@ export const PRINTABLES: Printable[] = [
     description: 'Colour sorting mats for the Pebble Sorting activity.',
     icon: 'ellipse',
     color: '#FFB74D',
-    pages: 2,
+    pages: 1,
     formats: ['Colour'],
+    defaultVariantId: 'tabletop',
+    variants: [
+      {
+        id: 'tabletop',
+        label: 'Tabletop print',
+        helperText: 'Best for table work, trays, and individual colour sorting.',
+        pages: 1,
+        formats: ['Colour'],
+        marginHint: 'Minimum margins',
+      },
+      {
+        id: 'display',
+        label: 'Large display print',
+        helperText: 'Best for bigger objects, floor work, and easier child visibility.',
+        pages: 3,
+        formats: ['Colour'],
+        marginHint: 'Minimum margins',
+      },
+    ],
   },
   {
     id: 'p-13',

@@ -54,21 +54,23 @@ export default function PrintablesScreen() {
     });
   }, [search, categoryFilter, ageFilter]);
 
-  const handleDownload = async (printable: typeof PRINTABLES[0], format: string) => {
-    setDownloading(printable.id + format);
+  const handleDownload = async (printable: typeof PRINTABLES[0], format: string, variantId?: string) => {
+    setDownloading(printable.id + format + (variantId ?? 'default'));
     try {
-      const result = await downloadPrintable(printable, format);
+      const result = await downloadPrintable(printable, format, variantId);
+      const variant = printable.variants?.find((item) => item.id === variantId) ?? printable.variants?.[0];
+      const variantLabel = variant ? ` - ${variant.label}` : '';
       if (result.success) {
         if (result.method === 'tab') {
           showToast(
             'Printable Opened',
-            `"${printable.title}" (${format}) is open in a new tab. Use the "Print / Save as PDF" button to download it.`,
+            `"${printable.title}"${variantLabel} (${format}) is open in a new tab. Use the "Print / Save as PDF" button to download it.`,
             'success'
           );
         } else if (result.method === 'file') {
           showToast(
             'File Downloaded',
-            `"${printable.title}" (${format}) has been downloaded as an HTML file. Open it in your browser, then use Print > Save as PDF.`,
+            `"${printable.title}"${variantLabel} (${format}) has been downloaded as an HTML file. Open it in your browser, then use Print > Save as PDF.`,
             'success'
           );
         }
@@ -150,6 +152,18 @@ export default function PrintablesScreen() {
         ) : (
           filtered.map((printable) => {
             const favourited = isFavourite('printable', printable.id);
+            const variants = printable.variants?.length
+              ? printable.variants
+              : [
+                  {
+                    id: 'default',
+                    label: 'Printable',
+                    helperText: 'Ready to print.',
+                    pages: printable.pages,
+                    formats: printable.formats,
+                    marginHint: 'Minimum margins' as const,
+                  },
+                ];
             return (
               <View key={printable.id} style={[styles.card, { borderLeftColor: printable.color }]}>
                 <View style={styles.cardHeader}>
@@ -164,7 +178,11 @@ export default function PrintablesScreen() {
                           {printable.category}
                         </Text>
                       </View>
-                      <Text style={styles.pages}>{printable.pages} page{printable.pages > 1 ? 's' : ''}</Text>
+                      <Text style={styles.pages}>
+                        {variants.length > 1
+                          ? `${variants.length} versions`
+                          : `${variants[0].pages} page${variants[0].pages > 1 ? 's' : ''}`}
+                      </Text>
                       <Text style={styles.ageText}>{printable.ageRange}</Text>
                     </View>
                   </View>
@@ -183,29 +201,48 @@ export default function PrintablesScreen() {
 
                 <Text style={styles.description}>{printable.description}</Text>
 
-                <View style={styles.formatRow}>
-                  <Text style={styles.formatLabel}>Download:</Text>
-                  {printable.formats.map((format) => {
-                    const isDownloading = downloading === printable.id + format;
-                    return (
-                      <TouchableOpacity
-                        key={format}
-                        style={[styles.formatButton, isDownloading && styles.formatButtonActive]}
-                        onPress={() => handleDownload(printable, format)}
-                        disabled={isDownloading}
-                        activeOpacity={0.7}
-                      >
-                        <Ionicons
-                          name={isDownloading ? 'hourglass' : 'download-outline'}
-                          size={14}
-                          color={isDownloading ? COLORS.white : COLORS.primary}
-                        />
-                        <Text style={[styles.formatText, isDownloading && styles.formatTextActive]}>
-                          {format}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
+                <View style={styles.variantList}>
+                  {variants.map((variant) => (
+                    <View key={variant.id} style={styles.variantCard}>
+                      <View style={styles.variantHeader}>
+                        <View style={styles.variantTextWrap}>
+                          <Text style={styles.variantTitle}>{variant.label}</Text>
+                          <Text style={styles.variantHelper}>{variant.helperText}</Text>
+                        </View>
+                        <View style={styles.variantMetaWrap}>
+                          <Text style={styles.variantMetaText}>
+                            {variant.pages} page{variant.pages > 1 ? 's' : ''}
+                          </Text>
+                          <Text style={styles.variantMetaText}>{variant.marginHint ?? 'Minimum margins'}</Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.formatRow}>
+                        <Text style={styles.formatLabel}>Download:</Text>
+                        {(variant.formats ?? printable.formats).map((format) => {
+                          const isDownloading = downloading === printable.id + format + variant.id;
+                          return (
+                            <TouchableOpacity
+                              key={variant.id + format}
+                              style={[styles.formatButton, isDownloading && styles.formatButtonActive]}
+                              onPress={() => handleDownload(printable, format, variant.id)}
+                              disabled={isDownloading}
+                              activeOpacity={0.7}
+                            >
+                              <Ionicons
+                                name={isDownloading ? 'hourglass' : 'download-outline'}
+                                size={14}
+                                color={isDownloading ? COLORS.white : COLORS.primary}
+                              />
+                              <Text style={[styles.formatText, isDownloading && styles.formatTextActive]}>
+                                {format}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  ))}
                 </View>
               </View>
             );
@@ -240,6 +277,14 @@ const styles = StyleSheet.create({
   ageText: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
   favBtn: { padding: 6 },
   description: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20, marginTop: SPACING.md },
+  variantList: { marginTop: SPACING.md, gap: SPACING.sm },
+  variantCard: { borderWidth: 1, borderColor: COLORS.lightGray, borderRadius: RADIUS.lg, padding: SPACING.md, backgroundColor: COLORS.bgLight },
+  variantHeader: { flexDirection: 'row', justifyContent: 'space-between', gap: SPACING.md, alignItems: 'flex-start' },
+  variantTextWrap: { flex: 1 },
+  variantTitle: { fontSize: FONT_SIZES.sm, fontWeight: '700', color: COLORS.text },
+  variantHelper: { fontSize: FONT_SIZES.xs, color: COLORS.textLight, lineHeight: 18, marginTop: 4 },
+  variantMetaWrap: { alignItems: 'flex-end', gap: 4 },
+  variantMetaText: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, fontWeight: '600' },
   formatRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginTop: SPACING.md, flexWrap: 'wrap' },
   formatLabel: { fontSize: FONT_SIZES.xs, fontWeight: '600', color: COLORS.textMuted },
   formatButton: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: COLORS.primary + '10' },

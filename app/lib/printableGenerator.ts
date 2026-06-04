@@ -1,5 +1,24 @@
 import { Platform } from 'react-native';
-import { Printable } from '../data/printables';
+import { Printable, PrintableVariant } from '../data/printables';
+
+function getPrintableVariant(printable: Printable, variantId?: string): PrintableVariant {
+  if (printable.variants?.length) {
+    return (
+      printable.variants.find((variant) => variant.id === variantId) ||
+      printable.variants.find((variant) => variant.id === printable.defaultVariantId) ||
+      printable.variants[0]
+    );
+  }
+
+  return {
+    id: 'default',
+    label: 'Printable',
+    helperText: printable.description,
+    pages: printable.pages,
+    formats: printable.formats,
+    marginHint: 'Minimum margins',
+  };
+}
 
 /* ------------------------------------------------------------------ */
 /*  STYLES                                                             */
@@ -38,6 +57,11 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
         border-radius: 4px;
       }
       .header { text-align: center; margin-bottom: 8mm; padding-bottom: 6mm; border-bottom: 3px solid ${borderColor}; }
+      .variant-badge {
+        display: inline-block; margin-bottom: 4mm; padding: 2.5mm 5mm;
+        border-radius: 999px; background: ${bgColor}; border: 1px solid ${borderColor}55;
+        color: ${primaryColor}; font-size: 10px; font-weight: 700; letter-spacing: 0.2px;
+      }
       .header h1 { font-size: 28pt; color: ${primaryColor}; margin-bottom: 4px; font-weight: 800; }
       .header .subtitle { font-size: 11pt; color: #888; font-weight: 500; }
       .header .brand { font-size: 9pt; color: #aaa; margin-top: 6px; font-style: italic; }
@@ -86,7 +110,16 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
 /* ------------------------------------------------------------------ */
 /*  CONTENT GENERATORS PER PRINTABLE                                   */
 /* ------------------------------------------------------------------ */
-function getContentHTML(printable: Printable, format: string, primaryColor: string, bgColor: string, borderColor: string, isColor: boolean, isBW: boolean): string {
+function getContentHTML(
+  printable: Printable,
+  format: string,
+  variant: PrintableVariant,
+  primaryColor: string,
+  bgColor: string,
+  borderColor: string,
+  isColor: boolean,
+  isBW: boolean
+): string {
   const nameDate = `
     <div class="name-field">
       <label>Name:</label><div class="line"></div>
@@ -118,6 +151,36 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
           </div>
         `;
       }).join('');
+
+      if (variant.id === 'display') {
+        const displayPages = [faces.slice(0, 4), faces.slice(4, 8)];
+        return `
+          <div class="content">
+            <div class="instruction">Use the large cards for circle time, front-of-class modelling, and child-visible emotion matching.</div>
+            ${displayPages.map((pageFaces, pageIndex) => `
+              <div style="${pageIndex > 0 ? 'break-before: page; page-break-before: always; margin-top:10mm;' : ''}">
+                <div class="grid-2" style="gap:8mm;">
+                  ${pageFaces.map((f) => {
+                    const needsDefaultEyes = !f.mouth.includes('cx="28" cy="3') || f.label === 'Happy' || f.label === 'Sad' || f.label === 'Calm';
+                    const svg = `<svg viewBox="0 0 80 80" width="74" height="74"><circle cx="40" cy="40" r="36" fill="${f.fill}" stroke="${primaryColor}" stroke-width="3"/>${needsDefaultEyes ? defaultEyes : ''}${f.mouth}</svg>`;
+                    return `
+                      <div class="card-item" style="min-height:125px; padding:16px 12px; break-inside:avoid; page-break-inside:avoid;">
+                        <div style="margin-bottom:8px;">${svg}</div>
+                        <div style="font-size:22px; font-weight:800; color:${primaryColor};">${f.label}</div>
+                        <div style="font-size:13px; color:#666; margin-top:4px;">${f.desc}</div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            `).join('')}
+            <div style="margin-top:8mm; text-align:center; font-size:10px; color:#888;">
+              <p>Tip: Print on card stock and laminate for repeated class use.</p>
+            </div>
+          </div>
+        `;
+      }
+
       return `
         <div class="content">
           <div class="instruction">Cut out each card along the border. Use for matching games, emotion check-ins, circle time discussions, or display on your feelings board.</div>
@@ -279,6 +342,34 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
       `;
 
     case 'p-7': // Character Cards Set
+      if (variant.id === 'display') {
+        const characters = [
+          { name: 'Cobie', trait: 'The Cactus', desc: 'Cobie is kind, thoughtful, and brave. He sometimes finds the world too noisy or busy, but he shows that every child belongs exactly as they are.', color: '#81C784', icon: '&#x1F335;' },
+          { name: 'Tilly', trait: 'The Tulip', desc: 'Tilly has quiet strength. She learns that her voice matters, and that saying what feels right can help keep her safe and understood.', color: '#F48FB1', icon: '&#x1F337;' },
+          { name: 'Darcy', trait: 'The Daisy', desc: 'Darcy is kind and caring, but she sometimes wants things to happen quickly. As she learns to wait, listen, and give others time, she discovers that everyone grows at their own pace.', color: '#FFD54F', icon: '&#x1F33C;' },
+          { name: 'Harper', trait: 'The Hyacinth', desc: 'Harper blooms in more than one colour. They show the garden that everyone should be free to play, grow, and be themselves.', color: '#FFA726', icon: '&#x1FABB;' },
+        ];
+        const characterPairs = [characters.slice(0, 2), characters.slice(2, 4)];
+
+        return `
+          <div class="content">
+            <div class="instruction">Use the larger character cards for circle time, modelling, story retelling, and child-visible classroom discussion.</div>
+            ${characterPairs.map((pair, index) => `
+              <div style="${index > 0 ? 'break-before: page; page-break-before: always; margin-top:10mm;' : ''}display:grid; grid-template-columns:1fr 1fr; gap:8mm;">
+                ${pair.map(character => `
+                  <div class="card-item" style="min-height:178px; justify-content:flex-start; padding:20px 18px; border-color:${isColor ? character.color : borderColor}; background:${isColor ? character.color + '10' : bgColor}; break-inside:avoid; page-break-inside:avoid;">
+                    <div style="font-size:50px; margin-bottom:8px;">${character.icon}</div>
+                    <div style="font-size:26px; font-weight:800; color:${isColor ? character.color : primaryColor};">${character.name}</div>
+                    <div style="font-size:15px; font-weight:700; color:#888; margin:4px 0 10px;">${character.trait}</div>
+                    <div style="font-size:12.5px; color:#555; line-height:1.55; text-align:center;">${character.desc}</div>
+                  </div>
+                `).join('')}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
       return `
         <div class="content">
           <div class="instruction">Meet the characters from "Cobie the Cactus: Happy As He Is". Use these cards for discussion, role-play, and storytelling activities.</div>
@@ -392,6 +483,43 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
       `;
 
     case 'p-11': // Voice Volume Cards
+      if (variant.id === 'display') {
+        const displayGroups = [
+          [
+            { level: 'Whisper Voice', desc: 'Very quiet - only the person right next to you can hear', volume: '1', color: '#81C784', bars: 1 },
+            { level: 'Quiet Voice', desc: 'Soft speaking - people nearby can hear you', volume: '2', color: '#4FC3F7', bars: 2 },
+          ],
+          [
+            { level: 'Talking Voice', desc: 'Normal speaking - the whole group can hear', volume: '3', color: '#FFA726', bars: 3 },
+            { level: 'Outside Voice', desc: 'Loud voice - for outdoor play only!', volume: '4', color: '#EF5350', bars: 4 },
+          ],
+        ];
+
+        return `
+          <div class="content">
+            <div class="instruction">Use the larger cards for whole-class modelling, carpet time, and clear child-visible reminders.</div>
+            ${displayGroups.map((group, groupIndex) => `
+              <div style="${groupIndex > 0 ? 'break-before: page; page-break-before: always; margin-top:10mm;' : ''}display:flex; flex-direction:column; gap:10mm;">
+                ${group.map(v => `
+                  <div style="border:3px solid ${isColor ? v.color : '#999'}; border-radius:20px; padding:26px 22px; display:flex; align-items:center; gap:18px; background:${isColor ? v.color + '10' : '#fafafa'}; min-height:110px; break-inside:avoid; page-break-inside:avoid;">
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:6px; flex-shrink:0; width:74px;">
+                      <div style="width:60px; height:60px; border-radius:50%; background:${isColor ? v.color : '#888'}; color:white; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800;">${v.volume}</div>
+                      <div style="display:flex; gap:4px; align-items:flex-end; height:26px;">
+                        ${Array(4).fill(null).map((_, i) => `<div style="width:8px; height:${(i + 1) * 6}px; border-radius:2px; background:${i < v.bars ? (isColor ? v.color : '#666') : '#ddd'};"></div>`).join('')}
+                      </div>
+                    </div>
+                    <div>
+                      <div style="font-size:26px; font-weight:800; color:${isColor ? v.color : '#333'};">${v.level}</div>
+                      <div style="font-size:16px; color:#666; margin-top:6px; line-height:1.5;">${v.desc}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
       return `
         <div class="content">
           <div class="instruction">Cut out and display these cards. Point to the appropriate card to help children understand and use the right voice level.</div>
@@ -420,6 +548,36 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
       `;
 
     case 'p-12': // Sorting Activity Mats
+      if (variant.id === 'display') {
+        const mats = [
+          { color: '#EF5350', name: 'Red' },
+          { color: '#42A5F5', name: 'Blue' },
+          { color: '#66BB6A', name: 'Green' },
+          { color: '#FFA726', name: 'Orange' },
+          { color: '#AB47BC', name: 'Purple' },
+          { color: '#FFCA28', name: 'Yellow' },
+        ];
+        const matPairs = [mats.slice(0, 2), mats.slice(2, 4), mats.slice(4, 6)];
+
+        return `
+          <div class="content">
+            <div class="instruction">Use the larger mats for bigger objects, floor work, and easier colour sorting during group teaching.</div>
+            ${matPairs.map((pair, pairIndex) => `
+              <div style="${pairIndex > 0 ? 'break-before: page; page-break-before: always; margin-top:10mm;' : ''}display:grid; grid-template-columns:1fr 1fr; gap:10mm;">
+                ${pair.map(c => `
+                  <div style="border:4px solid ${isColor ? c.color : '#999'}; border-radius:24px; padding:24px 20px; text-align:center; background:${isColor ? c.color + '08' : '#fafafa'}; min-height:155px; break-inside:avoid; page-break-inside:avoid;">
+                    <div style="width:48px; height:48px; border-radius:50%; background:${isColor ? c.color : '#ccc'}; margin:0 auto 12px;"></div>
+                    <div style="font-size:30px; font-weight:800; color:${isColor ? c.color : '#555'};">${c.name}</div>
+                    <div style="font-size:12px; color:#999; margin-top:7px;">Place ${c.name.toLowerCase()} items here</div>
+                    <div style="border:2px dashed ${isColor ? c.color + '40' : '#ccc'}; border-radius:14px; height:38mm; margin-top:12px;"></div>
+                  </div>
+                `).join('')}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
       return `
         <div class="content">
           <div class="instruction">Print and laminate these sorting mats. Children sort pebbles, buttons, or small objects by colour onto the correct mat. Great for fine motor skills and colour recognition!</div>
@@ -618,9 +776,10 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
 /* ------------------------------------------------------------------ */
 /*  FULL PAGE BUILDER                                                  */
 /* ------------------------------------------------------------------ */
-function generatePrintableHTML(printable: Printable, format: string): string {
+function generatePrintableHTML(printable: Printable, format: string, variantId?: string): string {
   const isColor = format === 'Colour';
   const isBW = format === 'B&W';
+  const variant = getPrintableVariant(printable, variantId);
 
 
   const primaryColor = isColor ? printable.color : isBW ? '#333333' : '#666666';
@@ -629,19 +788,19 @@ function generatePrintableHTML(printable: Printable, format: string): string {
   const headerBg = isColor ? printable.color : isBW ? '#333333' : '#888888';
 
   const styles = getStyles(primaryColor, bgColor, borderColor, headerBg);
-  const content = getContentHTML(printable, format, primaryColor, bgColor, borderColor, isColor, isBW);
+  const content = getContentHTML(printable, format, variant, primaryColor, bgColor, borderColor, isColor, isBW);
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${printable.title} - ${format} | Many Petals Learning</title>
+  <title>${printable.title} - ${variant.label} - ${format} | Many Petals Learning</title>
   ${styles}
 </head>
 <body>
   <div class="toolbar no-print">
-    <h3>${printable.title} (${format})</h3>
+    <h3>${printable.title} - ${variant.label} (${format})</h3>
     <div class="toolbar-buttons">
       <button onclick="window.print()" class="primary">Print / Save as PDF</button>
       <button onclick="window.close()">Close</button>
@@ -649,13 +808,14 @@ function generatePrintableHTML(printable: Printable, format: string): string {
   </div>
   <div class="page">
     <div class="header">
+      <div class="variant-badge">${variant.label} • ${variant.helperText}</div>
       <h1>${printable.title}</h1>
       <div class="subtitle">${printable.description}</div>
       <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack</div>
     </div>
     ${content}
     <div class="footer">
-      Many Petals Learning &bull; Cobie Teacher Pack &bull; ${printable.title} &bull; ${format} version
+      Many Petals Learning &bull; Cobie Teacher Pack &bull; ${printable.title} &bull; ${variant.label} &bull; ${format} version
     </div>
   </div>
 </body>
@@ -739,15 +899,20 @@ function openHTML(html: string, filename: string): { success: boolean; method: s
 /*  PUBLIC API                                                         */
 /* ------------------------------------------------------------------ */
 
-export function downloadPrintable(printable: Printable, format: string): Promise<{ success: boolean; method: string }> {
+export function downloadPrintable(
+  printable: Printable,
+  format: string,
+  variantId?: string
+): Promise<{ success: boolean; method: string }> {
   return new Promise((resolve) => {
     try {
       if (Platform.OS !== 'web') {
         resolve({ success: false, method: 'native' });
         return;
       }
-      const html = generatePrintableHTML(printable, format);
-      const filename = `${printable.title.replace(/\s+/g, '_')}_${format}.html`;
+      const variant = getPrintableVariant(printable, variantId);
+      const html = generatePrintableHTML(printable, format, variant.id);
+      const filename = `${printable.title.replace(/\s+/g, '_')}_${variant.id}_${format}.html`;
       const result = openHTML(html, filename);
       resolve(result);
     } catch (error) {
@@ -768,25 +933,27 @@ export async function downloadAllPrintables(
 
     // Build a combined document with FULL content for every printable
     const allPages = printables.map((p) => {
-      const format = p.formats[0]; // Use first available format
+      const variant = getPrintableVariant(p, p.defaultVariantId);
+      const format = (variant.formats && variant.formats[0]) || p.formats[0];
       const isColor = format === 'Colour';
       const isBW = format === 'B&W';
       const primaryColor = isColor ? p.color : isBW ? '#333333' : '#666666';
       const bgColor = isColor ? p.color + '15' : isBW ? '#ffffff' : '#f5f5f5';
       const borderColor = isColor ? p.color : '#999999';
 
-      const content = getContentHTML(p, format, primaryColor, bgColor, borderColor, isColor, isBW);
+      const content = getContentHTML(p, format, variant, primaryColor, bgColor, borderColor, isColor, isBW);
 
       return `
         <div class="page" style="border-left: 4px solid ${p.color};">
           <div class="header">
+            <div class="variant-badge">${variant.label} • ${variant.helperText}</div>
             <h1 style="color:${primaryColor};">${p.title}</h1>
             <div class="subtitle">${p.description}</div>
-            <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack &bull; ${format} version</div>
+            <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack &bull; ${variant.label} &bull; ${format} version</div>
           </div>
           ${content}
           <div class="footer">
-            Many Petals Learning &bull; Cobie Teacher Pack &bull; ${p.title}
+            Many Petals Learning &bull; Cobie Teacher Pack &bull; ${p.title} &bull; ${variant.label}
           </div>
         </div>
       `;
