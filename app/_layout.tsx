@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { Stack } from 'expo-router';
 import { SENProvider } from './context/SENContext';
 import { AuthProvider } from './context/AuthContext';
@@ -47,6 +47,58 @@ export default function RootLayout() {
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') {
+      return;
+    }
+
+    const styleId = 'many-petals-global-scrollbar';
+    let styleTag = document.getElementById(styleId) as HTMLStyleElement | null;
+
+    if (!styleTag) {
+      styleTag = document.createElement('style');
+      styleTag.id = styleId;
+      styleTag.textContent = `
+        html,
+        body {
+          overflow-y: scroll;
+          overflow-x: hidden;
+          scrollbar-gutter: stable;
+        }
+
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: #8fb8cf #e8f2f8;
+        }
+
+        *::-webkit-scrollbar {
+          width: 12px;
+          height: 12px;
+        }
+
+        *::-webkit-scrollbar-track {
+          background: #e8f2f8;
+          border-radius: 999px;
+        }
+
+        *::-webkit-scrollbar-thumb {
+          background: #8fb8cf;
+          border-radius: 999px;
+          border: 3px solid #e8f2f8;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+          background: #6b9bb6;
+        }
+      `;
+      document.head.appendChild(styleTag);
+    }
+
+    return () => {
+      styleTag?.remove();
+    };
   }, []);
 
   // During SSR / static export, render a minimal placeholder that will
