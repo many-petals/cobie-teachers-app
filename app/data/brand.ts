@@ -18,6 +18,8 @@
 //      source={LOCAL_LOGO}
 // ============================================================
 
+export const LOCAL_LOGO = require('../assets/images/logo.png');
+
 export const BRAND = {
   // ⬇️ REPLACE THIS URL WITH YOUR NEW LOGO IMAGE URL ⬇️
   logoUrl: 'https://d64gsuwffb70l.cloudfront.net/69357762fff8f7f4abcd8985_1772906598277_0a0e41ba.png',
@@ -29,4 +31,5 @@ export const BRAND = {
   storyTitle: 'Cobie the Cactus: Happy As He Is',
   packDescription: 'EYFS & KS1 Teacher Resource Pack',
   copyright: 'All story and character content \u00A9 Many Petals Learning',
+  helperLine: 'Story-led emotional literacy for EYFS & KS1 classrooms',
 };

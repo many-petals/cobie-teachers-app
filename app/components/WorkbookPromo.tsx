@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
+import BrandLockup from './BrandLockup';
 
 const WORKBOOK_IMAGE = 'https://d64gsuwffb70l.cloudfront.net/6993b5b66d45d72ccfd31c24_1771291498634_bbc463f2.jpg';
 
@@ -58,13 +59,14 @@ export default function WorkbookPromo({ compact = false }: WorkbookPromoProps) {
       </TouchableOpacity>
 
       <View style={styles.header}>
+        <BrandLockup size="sm" mode="pill" style={styles.brandLockup} />
         <View style={styles.newBadge}>
-          <Ionicons name="sparkles" size={12} color={COLORS.white} />
-          <Text style={styles.newBadgeText}>Print Edition</Text>
+          <Ionicons name="book-outline" size={12} color={COLORS.white} />
+          <Text style={styles.newBadgeText}>Companion Workbook</Text>
         </View>
         <Text style={styles.title}>Cobie the Cactus Activity Workbook</Text>
         <Text style={styles.subtitle}>
-          The extended print companion to this app
+          Story-linked print support for follow-up work, home links, and classroom discussion
         </Text>
       </View>
 
@@ -152,11 +154,14 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: SPACING.lg,
   },
+  brandLockup: {
+    marginBottom: SPACING.sm,
+  },
   newBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: COLORS.accentOrange,
+    backgroundColor: COLORS.primaryDark,
     alignSelf: 'flex-start',
     paddingHorizontal: SPACING.md,
     paddingVertical: 4,

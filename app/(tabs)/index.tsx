@@ -19,12 +19,13 @@ import TodayActivity from '../components/TodayActivity';
 import WorkbookPromo from '../components/WorkbookPromo';
 import EvidenceBanner from '../components/EvidenceBanner';
 import PricingSection from '../components/PricingSection';
+import BrandLockup from '../components/BrandLockup';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { LESSONS } from '../data/lessons';
 import { ACTIVITIES } from '../data/activities';
 import { PRINTABLES } from '../data/printables';
-import { BRAND } from '../data/brand';
+import { BRAND, LOCAL_LOGO } from '../data/brand';
 
 const HERO_IMAGE = 'https://d64gsuwffb70l.cloudfront.net/69357762fff8f7f4abcd8985_1771287970946_68002315.png';
 
@@ -331,18 +332,7 @@ export default function HomeScreen() {
 
       {/* App Header Bar with Many Petals branding */}
       <View style={styles.appHeader}>
-        <View style={styles.appHeaderLeft}>
-          <Image
-            source={{ uri: BRAND.logoUrl }}
-            style={styles.logoImage}
-            resizeMode="contain"
-          />
-          <View>
-            <Text style={styles.appHeaderTitle}>{BRAND.shortName}</Text>
-            <Text style={styles.appHeaderSub}>{BRAND.tagline}</Text>
-          </View>
-
-        </View>
+        <BrandLockup size="sm" mode="pill" />
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.pricingBtn}
@@ -389,21 +379,26 @@ export default function HomeScreen() {
           />
           <View style={styles.heroOverlay}>
             <View style={styles.heroContent}>
+              <BrandLockup size="sm" mode="hero" />
               <View style={styles.heroRow}>
                 <View style={styles.heroTextCol}>
+                  <Text style={styles.heroEyebrow}>Official companion teaching pack</Text>
                   <Text style={styles.heroTitle}>Cobie the Cactus</Text>
-                  <Text style={styles.heroSubtitle}>EYFS & KS1 Teacher Pack</Text>
+                  <Text style={styles.heroSubtitle}>{BRAND.packDescription}</Text>
                   <Text style={styles.heroDescription}>
                     Classroom-ready resources for emotional literacy, sensory awareness, and inclusion.
-                    Evidence-based. SEN-first. No preparation required.
+                    Evidence-based. SEN-first. Built to save planning time.
                   </Text>
-       
                 </View>
-                <Image
-                  source={{ uri: BRAND.logoUrl }}
-                  style={styles.heroMascot}
-                  resizeMode="contain"
-                />
+                <View style={styles.heroBookCard}>
+                  <Image
+                    source={LOCAL_LOGO}
+                    style={styles.heroBookMark}
+                    resizeMode="cover"
+                  />
+                  <Text style={styles.heroBookTitle}>{BRAND.shortName}</Text>
+                  <Text style={styles.heroBookCaption}>Trusted classroom companion</Text>
+                </View>
               </View>
               <View style={styles.heroButtons}>
                 <TouchableOpacity
@@ -606,12 +601,7 @@ export default function HomeScreen() {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Image
-            source={{ uri: BRAND.logoUrl }}
-            style={styles.footerLogo}
-            resizeMode="contain"
-          />
-          <Text style={styles.footerBrand}>{BRAND.name}</Text>
+          <BrandLockup size="md" mode="pill" />
           <Text style={styles.footerText}>{BRAND.storyTitle}</Text>
           <Text style={styles.footerText}>{BRAND.packDescription}</Text>
           <View style={styles.footerLinks}>
@@ -681,29 +671,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.lightGray,
-  },
-  appHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  logoImage: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: COLORS.white,
-  },
-
-  appHeaderTitle: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: '800',
-    color: COLORS.secondary,
-    lineHeight: 18,
-  },
-  appHeaderSub: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: COLORS.textMuted,
   },
   headerActions: {
     flexDirection: 'row',
@@ -830,16 +797,50 @@ const styles = StyleSheet.create({
   },
   heroRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: SPACING.md,
+    marginTop: SPACING.md,
   },
   heroTextCol: {
     flex: 1,
   },
-  heroMascot: {
-    width: 80,
-    height: 90,
+  heroEyebrow: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
+    color: COLORS.accent,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: SPACING.xs,
+  },
+  heroBookCard: {
+    width: 150,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.16)',
+    borderRadius: RADIUS.xl,
+    padding: SPACING.md,
+    alignItems: 'center',
+    ...SHADOWS.small,
+  },
+  heroBookMark: {
+    width: 72,
+    height: 72,
     borderRadius: RADIUS.lg,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    marginBottom: SPACING.sm,
+  },
+  heroBookTitle: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '800',
+    color: COLORS.white,
+    textAlign: 'center',
+  },
+  heroBookCaption: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.75)',
+    textAlign: 'center',
+    marginTop: 4,
   },
   heroTitle: {
     fontSize: FONT_SIZES.hero,
@@ -1075,23 +1076,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: SPACING.huge,
   },
-  footerLogo: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
-    marginBottom: SPACING.sm,
-  },
-
-  footerBrand: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: '700',
-    color: COLORS.secondary,
-    marginBottom: SPACING.sm,
-  },
   footerText: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textLight,
     textAlign: 'center',
+    marginTop: SPACING.sm,
   },
   footerLinks: {
     flexDirection: 'row',

@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from './data/theme';
-import { BRAND } from './data/brand';
+import { BRAND, LOCAL_LOGO } from './data/brand';
 
 const LAST_UPDATED = '7 March 2026';
 
@@ -655,7 +655,7 @@ export default function PrivacyPolicyScreen() {
 
           <View style={styles.contactCard}>
             <Image
-              source={{ uri: BRAND.logoUrl }}
+              source={LOCAL_LOGO}
               style={styles.contactLogo}
               resizeMode="contain"
             />
@@ -814,7 +814,7 @@ export default function PrivacyPolicyScreen() {
         {/* Footer */}
         <View style={styles.footer}>
           <Image
-            source={{ uri: BRAND.logoUrl }}
+            source={LOCAL_LOGO}
             style={styles.footerLogo}
             resizeMode="contain"
           />
