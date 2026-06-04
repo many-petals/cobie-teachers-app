@@ -122,14 +122,14 @@ export const PRINTABLES: Printable[] = [
   },
   {
     id: 'p-10',
-    title: 'How Do You Feel Today? Board',
+    title: 'How Do You Feel Today?',
     category: 'display',
     skillType: 'emotional',
     ageRange: 'Both',
-    description: 'Interactive display board for daily emotion check-ins.',
+    description: 'Whole-class check-in display with 6 large feeling boxes for reusable name cards, tokens, or pegs.',
     icon: 'grid',
     color: '#FFD54F',
-    pages: 2,
+    pages: 1,
     formats: ['Colour', 'Ink-light'],
   },
   {

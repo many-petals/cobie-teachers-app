@@ -1,26 +1,5 @@
 import { Platform } from 'react-native';
 import { Printable } from '../data/printables';
-import { BRAND } from '../data/brand';
-
-function getStageMeta(ageRange: Printable['ageRange']) {
-  switch (ageRange) {
-    case 'EYFS':
-      return {
-        badge: 'EYFS Teacher Pack',
-        footer: 'EYFS classroom printable',
-      };
-    case 'KS1':
-      return {
-        badge: 'KS1 Teacher Pack',
-        footer: 'KS1 classroom printable',
-      };
-    default:
-      return {
-        badge: 'EYFS & KS1 Teacher Pack',
-        footer: 'EYFS & KS1 classroom printable',
-      };
-  }
-}
 
 /* ------------------------------------------------------------------ */
 /*  STYLES                                                             */
@@ -32,7 +11,7 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
       @media print {
         html, body { margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         .no-print { display: none !important; }
-        .page { box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; min-height: auto !important; page-break-after: always; padding: 15mm 18mm 14mm !important; }
+        .page { box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; min-height: auto !important; page-break-after: always; }
         .page:last-child { page-break-after: auto; }
       }
       * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -43,12 +22,7 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
         display: flex; justify-content: space-between; align-items: center;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       }
-      .toolbar-info { display: flex; flex-direction: column; gap: 4px; }
       .toolbar h3 { font-size: 16px; font-weight: 600; }
-      .toolbar-note {
-        font-size: 12px;
-        opacity: 0.9;
-      }
       .toolbar-buttons { display: flex; gap: 10px; }
       .toolbar button {
         background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
@@ -60,36 +34,18 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
       .page {
         max-width: 210mm; margin: 70px auto 20px; background: white;
         box-shadow: 0 4px 20px rgba(0,0,0,0.12); position: relative;
-        min-height: 297mm; padding: 16mm 18mm 18mm;
+        min-height: 297mm; padding: 18mm 20mm 25mm;
         border-radius: 4px;
       }
-      .header { text-align: center; margin-bottom: 6mm; padding-bottom: 5mm; border-bottom: 3px solid ${borderColor}; }
-      .brand-row {
-        display: flex; align-items: center; justify-content: center; gap: 12px;
-        margin-bottom: 4mm;
-      }
-      .brand-logo {
-        width: 44px; height: 44px; object-fit: contain; border-radius: 10px;
-        background: white; padding: 4px; border: 1px solid #eee;
-      }
-      .brand-copy { text-align: left; }
-      .brand-name { font-size: 12pt; font-weight: 800; color: ${primaryColor}; line-height: 1.2; }
-      .brand-pack { font-size: 9pt; color: #777; margin-top: 2px; }
-      .stage-pill {
-        display: inline-flex; align-items: center; justify-content: center;
-        margin-top: 3mm; padding: 7px 16px; border-radius: 999px;
-        background: ${bgColor}; color: ${primaryColor}; border: 1px solid ${borderColor}55;
-        font-size: 9pt; font-weight: 800; letter-spacing: 0.4px;
-      }
+      .header { text-align: center; margin-bottom: 8mm; padding-bottom: 6mm; border-bottom: 3px solid ${borderColor}; }
       .header h1 { font-size: 28pt; color: ${primaryColor}; margin-bottom: 4px; font-weight: 800; }
       .header .subtitle { font-size: 11pt; color: #888; font-weight: 500; }
       .header .brand { font-size: 9pt; color: #aaa; margin-top: 6px; font-style: italic; }
-      .header .a4-note { font-size: 8.5pt; color: #999; margin-top: 5px; font-weight: 600; }
       .content { margin-top: 6mm; }
       .footer {
-        position: absolute; bottom: 8mm; left: 18mm; right: 18mm;
-        text-align: center; font-size: 7pt; color: #bbb;
-        border-top: 1px solid #eee; padding-top: 2mm;
+        position: absolute; bottom: 12mm; left: 20mm; right: 20mm;
+        text-align: center; font-size: 8pt; color: #bbb;
+        border-top: 1px solid #eee; padding-top: 3mm;
       }
       .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
       .grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
@@ -107,7 +63,7 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
       .writing-lines { margin-top: 5mm; }
       .writing-line { border-bottom: 1px solid #ccc; height: 12mm; margin-bottom: 2mm; }
       .section-title { font-size: 16px; font-weight: 700; color: ${primaryColor}; margin: 6mm 0 3mm; padding-bottom: 2mm; border-bottom: 2px solid ${borderColor}30; }
-      .instruction { background: ${bgColor}; padding: 10px 12px; border-radius: 8px; font-size: 11px; color: #555; line-height: 1.5; margin-bottom: 4mm; border-left: 4px solid ${borderColor}; }
+      .instruction { background: ${bgColor}; padding: 12px 16px; border-radius: 8px; font-size: 12px; color: #555; line-height: 1.6; margin-bottom: 5mm; border-left: 4px solid ${borderColor}; }
       .thermo-level { width: 100%; padding: 14px 20px; text-align: center; font-weight: 700; font-size: 15px; color: white; border: 2px solid rgba(255,255,255,0.3); }
       .poster-content { text-align: center; padding: 5mm; }
       .poster-content h2 { font-size: 28pt; color: ${primaryColor}; margin-bottom: 8mm; font-weight: 800; }
@@ -116,11 +72,6 @@ function getStyles(primaryColor: string, bgColor: string, borderColor: string, h
       .script-text { font-size: 13px; line-height: 1.7; color: #444; }
       .circle-area { display: flex; flex-wrap: wrap; gap: 6mm; justify-content: center; margin: 5mm 0; }
       .circle-item { width: 28mm; height: 28mm; border-radius: 50%; border: 2px dashed ${borderColor}; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #666; text-align: center; padding: 4px; }
-      .manual-page-break {
-        break-before: page;
-        page-break-before: always;
-        padding-top: 8mm;
-      }
       .name-field { display: flex; align-items: center; gap: 8px; margin-bottom: 5mm; }
       .name-field label { font-size: 13px; font-weight: 600; color: #555; }
       .name-field .line { flex: 1; border-bottom: 2px solid ${borderColor}; height: 1px; }
@@ -158,10 +109,10 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
       const defaultEyes = '<circle cx="28" cy="32" r="4" fill="#333"/><circle cx="52" cy="32" r="4" fill="#333"/>';
       const faceCards = faces.map(f => {
         const needsDefaultEyes = !f.mouth.includes('cx="28" cy="3') || f.label === 'Happy' || f.label === 'Sad' || f.label === 'Calm';
-        const svg = `<svg viewBox="0 0 80 80" width="54" height="54"><circle cx="40" cy="40" r="36" fill="${f.fill}" stroke="${primaryColor}" stroke-width="3"/>${needsDefaultEyes ? defaultEyes : ''}${f.mouth}</svg>`;
+        const svg = `<svg viewBox="0 0 80 80" width="60" height="60"><circle cx="40" cy="40" r="36" fill="${f.fill}" stroke="${primaryColor}" stroke-width="3"/>${needsDefaultEyes ? defaultEyes : ''}${f.mouth}</svg>`;
         return `
-          <div class="card-item" style="min-height:96px; padding:10px 8px;">
-            <div style="margin-bottom:4px;">${svg}</div>
+          <div class="card-item" style="min-height:110px; padding:12px 8px;">
+            <div style="margin-bottom:6px;">${svg}</div>
             <div class="label">${f.label}</div>
             <div class="desc">${f.desc}</div>
           </div>
@@ -171,7 +122,7 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
         <div class="content">
           <div class="instruction">Cut out each card along the border. Use for matching games, emotion check-ins, circle time discussions, or display on your feelings board.</div>
           <div class="grid-4">${faceCards}</div>
-          <div style="margin-top:5mm; text-align:center; font-size:9px; color:#aaa;">
+          <div style="margin-top:8mm; text-align:center; font-size:10px; color:#aaa;">
             <p>Tip: Print on card stock and laminate for durability. Cut along the card borders.</p>
           </div>
         </div>
@@ -182,9 +133,9 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
     case 'p-2': // Calm Corner Poster
       return `
         <div class="poster-content">
-          <div style="border:3px solid ${borderColor}; border-radius:20px; padding:14mm 12mm; background:${bgColor};">
-            <h2 style="font-size:30pt; margin-bottom:4mm;">Our Calm Corner</h2>
-            <p style="font-size:12px; color:#888; margin-bottom:6mm;">When you need a moment, come here and try one of these:</p>
+          <div style="border:3px solid ${borderColor}; border-radius:20px; padding:20mm 15mm; background:${bgColor};">
+            <h2 style="font-size:36pt; margin-bottom:5mm;">Our Calm Corner</h2>
+            <p style="font-size:13px; color:#888; margin-bottom:10mm;">When you need a moment, come here and try one of these:</p>
             ${[
               { num: 1, text: 'Take 3 deep breaths', icon: '&#x1F32C;' },
               { num: 2, text: 'Squeeze a soft toy', icon: '&#x1F9F8;' },
@@ -193,13 +144,13 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
               { num: 5, text: 'Use a fidget tool', icon: '&#x1F9E9;' },
               { num: 6, text: 'Tell a grown-up how you feel', icon: '&#x1F5E3;' },
             ].map(item => `
-              <div style="display:flex; align-items:center; gap:10px; padding:11px 14px; margin:3mm 0; background:white; border-radius:12px; border:2px solid ${borderColor}40;">
-                <div style="width:34px; height:34px; border-radius:50%; background:${primaryColor}; color:white; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; flex-shrink:0;">${item.num}</div>
-                <div style="font-size:16px; font-weight:700; color:#444;">${item.text}</div>
+              <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; margin:4mm 0; background:white; border-radius:12px; border:2px solid ${borderColor}40;">
+                <div style="width:40px; height:40px; border-radius:50%; background:${primaryColor}; color:white; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; flex-shrink:0;">${item.num}</div>
+                <div style="font-size:18px; font-weight:700; color:#444;">${item.text}</div>
               </div>
             `).join('')}
-            <div style="margin-top:6mm; padding:10px; background:white; border-radius:12px; border:2px dashed ${borderColor};">
-              <p style="font-size:14px; font-style:italic; color:${primaryColor}; font-weight:600; text-align:center;">
+            <div style="margin-top:10mm; padding:12px; background:white; border-radius:12px; border:2px dashed ${borderColor};">
+              <p style="font-size:16px; font-style:italic; color:${primaryColor}; font-weight:600; text-align:center;">
                 "It's okay to need a moment. This is your safe space."
               </p>
             </div>
@@ -210,9 +161,9 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
     case 'p-3': // Cobie Breathing Visual
       return `
         <div class="poster-content">
-          <div style="border:3px solid ${borderColor}; border-radius:20px; padding:12mm; background:${bgColor};">
-            <h2 style="font-size:27pt; margin-bottom:2mm;">Breathe with Cobie</h2>
-            <p style="font-size:11px; color:#888; margin-bottom:5mm;">Follow these steps when you need to feel calm</p>
+          <div style="border:3px solid ${borderColor}; border-radius:20px; padding:15mm; background:${bgColor};">
+            <h2 style="font-size:32pt; margin-bottom:3mm;">Breathe with Cobie</h2>
+            <p style="font-size:12px; color:#888; margin-bottom:8mm;">Follow these steps when you need to feel calm</p>
             <div style="max-width:160mm; margin:0 auto;">
               ${[
                 { step: '1', title: 'Sit Comfortably', desc: 'Find a quiet spot and sit down gently. Put your hands on your tummy.', color: '#81C784' },
@@ -221,24 +172,24 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
                 { step: '4', title: 'Breathe Out', desc: 'Breathe out slowly through your mouth for 4 counts. Like blowing out a candle.', color: '#43A047' },
                 { step: '5', title: 'Repeat', desc: 'Do this 3 more times. Notice how your body feels calmer each time.', color: '#388E3C' },
               ].map(s => `
-                <div class="step-row" style="padding:10px 0;">
-                  <div class="step-num" style="background:${isColor ? s.color : '#888'}; width:42px; height:42px; font-size:18px;">${s.step}</div>
+                <div class="step-row" style="padding:14px 0;">
+                  <div class="step-num" style="background:${isColor ? s.color : '#888'}; width:50px; height:50px; font-size:22px;">${s.step}</div>
                   <div style="flex:1;">
-                    <div class="step-title" style="color:${isColor ? s.color : '#444'}; font-size:15px;">${s.title}</div>
-                    <div class="step-desc" style="font-size:12px; margin-top:2px;">${s.desc}</div>
+                    <div class="step-title" style="color:${isColor ? s.color : '#444'}; font-size:17px;">${s.title}</div>
+                    <div class="step-desc" style="font-size:13px; margin-top:3px;">${s.desc}</div>
                   </div>
                 </div>
               `).join('')}
             </div>
-            <div style="margin-top:6mm; display:flex; justify-content:center; gap:6mm;">
+            <div style="margin-top:10mm; display:flex; justify-content:center; gap:8mm;">
               ${[
                 { label: 'IN', sub: '1...2...3...4', bg: '#E8F5E9' },
                 { label: 'HOLD', sub: '1...2', bg: '#FFF8E1' },
                 { label: 'OUT', sub: '1...2...3...4', bg: '#E3F2FD' },
               ].map(b => `
-                <div style="width:44mm; padding:10px; border-radius:16px; border:3px solid ${borderColor}; background:${isColor ? b.bg : '#f5f5f5'}; text-align:center;">
-                  <div style="font-size:20px; font-weight:800; color:${primaryColor};">${b.label}</div>
-                  <div style="font-size:12px; color:#888; margin-top:3px;">${b.sub}</div>
+                <div style="width:50mm; padding:12px; border-radius:16px; border:3px solid ${borderColor}; background:${isColor ? b.bg : '#f5f5f5'}; text-align:center;">
+                  <div style="font-size:24px; font-weight:800; color:${primaryColor};">${b.label}</div>
+                  <div style="font-size:14px; color:#888; margin-top:4px;">${b.sub}</div>
                 </div>
               `).join('')}
             </div>
@@ -251,7 +202,7 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
         <div class="content" style="text-align:center;">
           ${nameDate}
           <div class="instruction" style="text-align:left;">Point to or colour the level that shows how you feel right now. Use throughout the day to track changes in how you feel.</div>
-          <div style="display:flex; flex-direction:column; align-items:center; gap:0; margin:6mm auto; max-width:124mm;">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:0; margin:8mm auto; max-width:130mm;">
             ${[
               { label: 'OVERWHELMED', desc: 'I can\'t cope right now', color: '#D32F2F' },
               { label: 'VERY UPSET', desc: 'I feel really bad', color: '#E53935' },
@@ -263,44 +214,36 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
             ].map((level, i) => `
               <div class="thermo-level" style="background:${isColor ? level.color : 'hsl(0,0%,' + (30 + i * 10) + '%)'};
                 ${i === 0 ? 'border-radius:12px 12px 0 0;' : ''} ${i === 6 ? 'border-radius:0 0 12px 12px;' : ''}
-                display:flex; justify-content:space-between; align-items:center; padding:12px 16px; font-size:14px;">
+                display:flex; justify-content:space-between; align-items:center;">
                 <span>${level.label}</span>
                 <span style="font-size:11px; font-weight:400; opacity:0.9;">${level.desc}</span>
               </div>
             `).join('')}
           </div>
-          <div style="margin-top:4mm; text-align:left;">
-            <div class="section-title" style="margin:4mm 0 2mm; font-size:14px;">How I feel right now:</div>
+          <div style="margin-top:5mm; text-align:left;">
+            <div class="section-title">How I feel right now:</div>
             <div class="writing-lines">
-              <div class="writing-line" style="height:10mm;"></div><div class="writing-line" style="height:10mm;"></div>
+              <div class="writing-line"></div><div class="writing-line"></div><div class="writing-line"></div>
             </div>
-            <div class="section-title" style="margin:4mm 0 2mm; font-size:14px;">What happened to make me feel this way:</div>
+            <div class="section-title" style="margin-top:5mm;">What happened to make me feel this way:</div>
             <div class="writing-lines">
-              <div class="writing-line" style="height:10mm;"></div><div class="writing-line" style="height:10mm;"></div>
+              <div class="writing-line"></div><div class="writing-line"></div><div class="writing-line"></div>
             </div>
           </div>
         </div>
       `;
 
-    case 'p-5': { // Sensory Preferences Worksheet
-      const sensorySections = [
-        { sense: 'Things I Can See', items: ['Bright lights', 'Dim lights', 'Colours', 'Patterns', 'Screens', 'Sparkly things'] },
-        { sense: 'Things I Can Hear', items: ['Loud music', 'Quiet sounds', 'Singing', 'Clapping', 'Silence', 'Nature sounds'] },
-        { sense: 'Things I Can Touch', items: ['Soft things', 'Rough things', 'Squishy things', 'Cold things', 'Warm things', 'Sticky things'] },
-        { sense: 'Things I Can Smell', items: ['Flowers', 'Food cooking', 'Fresh air', 'Paint', 'Perfume', 'Grass'] },
-      ];
+    case 'p-5': // Sensory Preferences Worksheet
       return `
         <div class="content">
           ${nameDate}
           <div class="instruction">Circle the things you like. Cross out the things you don't like. Draw a line under things you're not sure about.</div>
-          ${sensorySections.slice(0, 2).map(section => `
-            <div class="section-title">${section.sense}</div>
-            <div class="circle-area">
-              ${section.items.map(item => `<div class="circle-item">${item}</div>`).join('')}
-            </div>
-          `).join('')}
-          <div class="manual-page-break"></div>
-          ${sensorySections.slice(2).map(section => `
+          ${[
+            { sense: 'Things I Can See', items: ['Bright lights', 'Dim lights', 'Colours', 'Patterns', 'Screens', 'Sparkly things'] },
+            { sense: 'Things I Can Hear', items: ['Loud music', 'Quiet sounds', 'Singing', 'Clapping', 'Silence', 'Nature sounds'] },
+            { sense: 'Things I Can Touch', items: ['Soft things', 'Rough things', 'Squishy things', 'Cold things', 'Warm things', 'Sticky things'] },
+            { sense: 'Things I Can Smell', items: ['Flowers', 'Food cooking', 'Fresh air', 'Paint', 'Perfume', 'Grass'] },
+          ].map(section => `
             <div class="section-title">${section.sense}</div>
             <div class="circle-area">
               ${section.items.map(item => `<div class="circle-item">${item}</div>`).join('')}
@@ -312,7 +255,6 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
           <div class="writing-lines"><div class="writing-line"></div></div>
         </div>
       `;
-    }
 
     case 'p-6': // Kindness Cards
       return `
@@ -342,16 +284,16 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
           <div class="instruction">Meet the characters from "Cobie the Cactus: Happy As He Is". Use these cards for discussion, role-play, and storytelling activities.</div>
           <div class="grid-2" style="gap:8mm;">
             ${[
-              { name: 'Cobie', trait: 'The Cactus', desc: 'Cobie is learning that being different is wonderful. He is kind, thoughtful, and brave.', color: '#81C784', icon: '&#x1F335;' },
-              { name: 'Tilly', trait: 'The Tulip', desc: 'Tilly is colourful and cheerful. She helps Cobie see the bright side of things.', color: '#F48FB1', icon: '&#x1F337;' },
-              { name: 'Darcy', trait: 'The Daisy', desc: 'Darcy is gentle and caring. She notices when others need help.', color: '#FFD54F', icon: '&#x1F33C;' },
-              { name: 'Harper', trait: 'The Sunflower', desc: 'Harper is tall and confident. She shows that everyone grows at their own pace.', color: '#FFA726', icon: '&#x1F33B;' },
+              { name: 'Cobie', trait: 'The Cactus', desc: 'Cobie is kind, thoughtful, and brave. He sometimes finds the world too noisy or busy, but he shows that every child belongs exactly as they are.', color: '#81C784', icon: '&#x1F335;' },
+              { name: 'Tilly', trait: 'The Tulip', desc: 'Tilly has quiet strength. She learns that her voice matters, and that saying what feels right can help keep her safe and understood.', color: '#F48FB1', icon: '&#x1F337;' },
+              { name: 'Darcy', trait: 'The Daisy', desc: 'Darcy is kind and caring, but she sometimes wants things to happen quickly. As she learns to wait, listen, and give others time, she discovers that everyone grows at their own pace.', color: '#FFD54F', icon: '&#x1F33C;' },
+              { name: 'Harper', trait: 'The Hyacinth', desc: 'Harper blooms in more than one colour. They show the garden that everyone should be free to play, grow, and be themselves.', color: '#FFA726', icon: '&#x1FABB;' },
             ].map(char => `
-              <div class="card-item" style="min-height:160px; justify-content:flex-start; padding:20px; border-color:${isColor ? char.color : borderColor}; background:${isColor ? char.color + '10' : bgColor};">
+              <div class="card-item" style="min-height:176px; justify-content:flex-start; padding:20px; border-color:${isColor ? char.color : borderColor}; background:${isColor ? char.color + '10' : bgColor};">
                 <div style="font-size:42px; margin-bottom:6px;">${char.icon}</div>
                 <div style="font-size:22px; font-weight:800; color:${isColor ? char.color : primaryColor};">${char.name}</div>
                 <div style="font-size:13px; font-weight:600; color:#888; margin:2px 0 8px;">${char.trait}</div>
-                <div style="font-size:12px; color:#666; line-height:1.5; text-align:center;">${char.desc}</div>
+                <div style="font-size:11px; color:#666; line-height:1.45; text-align:center;">${char.desc}</div>
               </div>
             `).join('')}
           </div>
@@ -368,17 +310,16 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
       `;
 
     case 'p-8': // Assessment Checklist
-      const assessmentSections = [
-        { title: 'Emotional Literacy', items: ['Can name at least 4 emotions', 'Recognises emotions in others', 'Uses words to express feelings', 'Shows empathy towards peers'] },
-        { title: 'Sensory Awareness', items: ['Can describe sensory preferences', 'Uses calming strategies independently', 'Tolerates a range of sensory input', 'Seeks appropriate sensory input'] },
-        { title: 'Communication', items: ['Takes turns in conversation', 'Uses appropriate voice volume', 'Asks for help when needed', "Listens to others' perspectives"] },
-        { title: 'Self-Regulation', items: ['Can identify when feeling overwhelmed', 'Uses breathing techniques', 'Transitions between activities calmly', 'Returns to calm after upset'] },
-      ];
       return `
         <div class="content">
           ${nameDate}
           <div class="instruction">Use this checklist to observe and record children's development across key areas. Tick when consistently observed. Date each observation.</div>
-          ${assessmentSections.slice(0, 2).map(section => `
+          ${[
+            { title: 'Emotional Literacy', items: ['Can name at least 4 emotions', 'Recognises emotions in others', 'Uses words to express feelings', 'Shows empathy towards peers'] },
+            { title: 'Sensory Awareness', items: ['Can describe sensory preferences', 'Uses calming strategies independently', 'Tolerates a range of sensory input', 'Seeks appropriate sensory input'] },
+            { title: 'Communication', items: ['Takes turns in conversation', 'Uses appropriate voice volume', 'Asks for help when needed', "Listens to others' perspectives"] },
+            { title: 'Self-Regulation', items: ['Can identify when feeling overwhelmed', 'Uses breathing techniques', 'Transitions between activities calmly', 'Returns to calm after upset'] },
+          ].map(section => `
             <div class="section-title">${section.title}</div>
             ${section.items.map(item => `
               <div class="checklist-item">
@@ -388,21 +329,10 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
               </div>
             `).join('')}
           `).join('')}
-          <div class="manual-page-break"></div>
-          ${assessmentSections.slice(2).map(section => `
-            <div class="section-title">${section.title}</div>
-            ${section.items.map(item => `
-              <div class="checklist-item">
-                <div class="checkbox"></div>
-                <div class="checklist-text" style="flex:1;">${item}</div>
-                <div style="width:30mm; border-bottom:1px dotted #ccc; font-size:10px; color:#aaa; text-align:center;">date</div>
-              </div>
-            `).join('')}
-          `).join('')}
-          <div style="margin-top:6mm;">
+          <div style="margin-top:8mm;">
             <div class="section-title">Additional Notes</div>
             <div class="writing-lines">
-              <div class="writing-line"></div><div class="writing-line"></div><div class="writing-line"></div>
+              <div class="writing-line"></div><div class="writing-line"></div><div class="writing-line"></div><div class="writing-line"></div>
             </div>
           </div>
         </div>
@@ -433,31 +363,30 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
     case 'p-10': // How Do You Feel Today? Board
       return `
         <div class="poster-content">
-          <div style="border:3px solid ${borderColor}; border-radius:20px; padding:15mm; background:${bgColor};">
-            <h2 style="font-size:30pt; margin-bottom:3mm;">How Do You Feel Today?</h2>
-            <p style="font-size:12px; color:#888; margin-bottom:8mm;">Put your name next to how you feel</p>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6mm; text-align:left;">
+          <div style="border:3px solid ${borderColor}; border-radius:20px; padding:11mm 11mm 9mm; background:${bgColor};">
+            <h2 style="font-size:28pt; margin-bottom:2mm;">How Do You Feel Today?</h2>
+            <p style="font-size:12px; color:#666; margin-bottom:6mm;">Place your name card, peg, or token next to how you feel today.</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:5mm; text-align:left;">
               ${[
                 { emotion: 'Happy', color: '#66BB6A', icon: '&#x263A;' },
-                { emotion: 'Sad', color: '#42A5F5', icon: '&#x2639;' },
-                { emotion: 'Angry', color: '#EF5350', icon: '&#x1F620;' },
-                { emotion: 'Scared', color: '#AB47BC', icon: '&#x1F628;' },
-                { emotion: 'Excited', color: '#FFA726', icon: '&#x1F929;' },
                 { emotion: 'Calm', color: '#26A69A', icon: '&#x1F60C;' },
-                { emotion: 'Tired', color: '#78909C', icon: '&#x1F634;' },
+                { emotion: 'Sad', color: '#42A5F5', icon: '&#x2639;' },
                 { emotion: 'Worried', color: '#FFCA28', icon: '&#x1F61F;' },
+                { emotion: 'Angry', color: '#EF5350', icon: '&#x1F620;' },
+                { emotion: 'Tired', color: '#78909C', icon: '&#x1F634;' },
               ].map(e => `
-                <div style="display:flex; align-items:center; gap:10px; padding:12px; border:3px solid ${isColor ? e.color : '#999'}; border-radius:14px; background:white;">
-                  <div style="width:44px; height:44px; border-radius:50%; background:${isColor ? e.color : '#ddd'}; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                    <span style="font-size:24px; ${isBW ? 'filter:grayscale(1);' : ''}">${e.icon}</span>
-                  </div>
-                  <div style="flex:1;">
+                <div style="display:flex; flex-direction:column; gap:4mm; padding:12px 12px 10px; border:3px solid ${isColor ? e.color : '#999'}; border-radius:16px; background:white; min-height:102px;">
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:44px; height:44px; border-radius:50%; background:${isColor ? e.color : '#ddd'}; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                      <span style="font-size:24px; ${isBW ? 'filter:grayscale(1);' : ''}">${e.icon}</span>
+                    </div>
                     <div style="font-size:18px; font-weight:700; color:${isColor ? e.color : '#333'};">${e.emotion}</div>
-                    <div style="height:22px; border-bottom:2px dashed #ccc; width:100%;"></div>
                   </div>
+                  <div style="height:34px; border:2px dashed ${isColor ? e.color + '55' : '#ccc'}; border-radius:10px; width:100%; display:flex; align-items:center; justify-content:center; font-size:10px; color:#aaa;">Place token here</div>
                 </div>
               `).join('')}
             </div>
+            <p style="font-size:11px; color:#666; margin-top:6mm; margin-bottom:0; text-align:center;">Tip: laminate and use with reusable name cards, counters, or pegs.</p>
           </div>
         </div>
       `;
@@ -494,7 +423,7 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
       return `
         <div class="content">
           <div class="instruction">Print and laminate these sorting mats. Children sort pebbles, buttons, or small objects by colour onto the correct mat. Great for fine motor skills and colour recognition!</div>
-          <div class="grid-2" style="margin-top:6mm; gap:5mm;">
+          <div class="grid-2" style="margin-top:8mm; gap:8mm;">
             ${[
               { color: '#EF5350', name: 'Red' },
               { color: '#42A5F5', name: 'Blue' },
@@ -503,11 +432,11 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
               { color: '#AB47BC', name: 'Purple' },
               { color: '#FFCA28', name: 'Yellow' },
             ].map(c => `
-              <div style="border:3px solid ${isColor ? c.color : '#999'}; border-radius:18px; padding:16px 16px 14px; text-align:center; background:${isColor ? c.color + '08' : '#fafafa'}; min-height:96px; page-break-inside:avoid; break-inside:avoid;">
-                <div style="width:32px; height:32px; border-radius:50%; background:${isColor ? c.color : '#ccc'}; margin:0 auto 8px;"></div>
-                <div style="font-size:22px; font-weight:800; color:${isColor ? c.color : '#555'}; line-height:1.1;">${c.name}</div>
-                <div style="font-size:10px; color:#999; margin-top:4px;">Place ${c.name.toLowerCase()} items here</div>
-                <div style="border:2px dashed ${isColor ? c.color + '40' : '#ccc'}; border-radius:12px; height:22mm; margin-top:6px;"></div>
+              <div style="border:4px solid ${isColor ? c.color : '#999'}; border-radius:20px; padding:25px; text-align:center; background:${isColor ? c.color + '08' : '#fafafa'}; min-height:110px;">
+                <div style="width:40px; height:40px; border-radius:50%; background:${isColor ? c.color : '#ccc'}; margin:0 auto 10px;"></div>
+                <div style="font-size:28px; font-weight:800; color:${isColor ? c.color : '#555'};">${c.name}</div>
+                <div style="font-size:11px; color:#999; margin-top:6px;">Place ${c.name.toLowerCase()} items here</div>
+                <div style="border:2px dashed ${isColor ? c.color + '40' : '#ccc'}; border-radius:12px; height:30mm; margin-top:8px;"></div>
               </div>
             `).join('')}
           </div>
@@ -518,24 +447,24 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
       return `
         <div class="content">
           ${nameDate}
-          <div class="instruction" style="padding:8px 10px; font-size:10px; margin-bottom:3mm;">Take this sheet on your outdoor sensory walk. Tick or draw what you find! Can you find everything on the list?</div>
+          <div class="instruction">Take this sheet on your outdoor sensory walk. Tick or draw what you find! Can you find everything on the list?</div>
           ${[
             { sense: 'I Can See...', icon: '&#x1F441;', items: ['Something green', 'Something moving', 'Something tiny', 'A shadow', 'Something beautiful'] },
             { sense: 'I Can Hear...', icon: '&#x1F442;', items: ['Birds singing', 'Wind blowing', 'Footsteps', 'Water', 'Something quiet'] },
             { sense: 'I Can Touch...', icon: '&#x270B;', items: ['Something rough', 'Something smooth', 'Something cold', 'Something soft', 'Something bumpy'] },
             { sense: 'I Can Smell...', icon: '&#x1F443;', items: ['Flowers', 'Fresh air', 'Wet ground', 'Leaves', 'Something nice'] },
           ].map(section => `
-            <div class="section-title" style="font-size:14px; margin:4mm 0 2mm;"><span style="margin-right:6px;">${section.icon}</span>${section.sense}</div>
+            <div class="section-title"><span style="margin-right:6px;">${section.icon}</span>${section.sense}</div>
             ${section.items.map(item => `
-              <div class="checklist-item" style="padding:6px 0;">
-                <div class="checkbox" style="width:18px; height:18px;"></div>
-                <div class="checklist-text" style="font-size:12px;">${item}</div>
+              <div class="checklist-item">
+                <div class="checkbox"></div>
+                <div class="checklist-text">${item}</div>
               </div>
             `).join('')}
           `).join('')}
-          <div style="margin-top:4mm;">
-            <div class="section-title" style="font-size:14px; margin:4mm 0 2mm;">My favourite thing I found was:</div>
-            <div class="writing-lines"><div class="writing-line" style="height:10mm;"></div></div>
+          <div style="margin-top:6mm;">
+            <div class="section-title">My favourite thing I found was:</div>
+            <div class="writing-lines"><div class="writing-line"></div><div class="writing-line"></div></div>
           </div>
         </div>
       `;
@@ -544,24 +473,24 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
       return `
         <div class="content">
           ${nameDate}
-          <div class="instruction" style="padding:8px 10px; font-size:10px; margin-bottom:3mm;">Design your own quiet garden! Draw the things that make you feel calm and happy. You could include flowers, trees, water, animals, or a cosy spot to sit.</div>
-          <div style="border:3px dashed ${borderColor}; border-radius:16px; min-height:126mm; margin-top:4mm; position:relative; background:${isColor ? '#F1F8E9' : '#fafafa'};">
+          <div class="instruction">Design your own quiet garden! Draw the things that make you feel calm and happy. You could include flowers, trees, water, animals, or a cosy spot to sit.</div>
+          <div style="border:3px dashed ${borderColor}; border-radius:16px; min-height:150mm; margin-top:5mm; position:relative; background:${isColor ? '#F1F8E9' : '#fafafa'};">
             <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; color:#ccc;">
-              <svg viewBox="0 0 100 80" width="64" height="52" style="opacity:0.3;">
+              <svg viewBox="0 0 100 80" width="80" height="64" style="opacity:0.3;">
                 <path d="M50 10 C30 10 15 25 15 40 C15 60 35 70 50 70 C65 70 85 60 85 40 C85 25 70 10 50 10Z" fill="${isColor ? '#81C784' : '#ccc'}" />
                 <rect x="46" y="55" width="8" height="20" fill="${isColor ? '#8D6E63' : '#999'}" rx="2"/>
               </svg>
-              <div style="font-size:12px; margin-top:6px;">Draw your quiet garden here</div>
+              <div style="font-size:14px; margin-top:8px;">Draw your quiet garden here</div>
             </div>
           </div>
-          <div style="margin-top:4mm;">
-            <div class="section-title" style="font-size:14px; margin:4mm 0 2mm;">My garden makes me feel calm because...</div>
+          <div style="margin-top:5mm;">
+            <div class="section-title">My garden makes me feel calm because...</div>
             <div class="writing-lines">
-              <div class="writing-line" style="height:10mm;"></div>
+              <div class="writing-line"></div><div class="writing-line"></div>
             </div>
-            <div class="section-title" style="font-size:14px; margin:4mm 0 2mm;">In my garden I would like to...</div>
+            <div class="section-title">In my garden I would like to...</div>
             <div class="writing-lines">
-              <div class="writing-line" style="height:10mm;"></div>
+              <div class="writing-line"></div><div class="writing-line"></div>
             </div>
           </div>
         </div>
@@ -692,7 +621,7 @@ function getContentHTML(printable: Printable, format: string, primaryColor: stri
 function generatePrintableHTML(printable: Printable, format: string): string {
   const isColor = format === 'Colour';
   const isBW = format === 'B&W';
-  const stageMeta = getStageMeta(printable.ageRange);
+
 
   const primaryColor = isColor ? printable.color : isBW ? '#333333' : '#666666';
   const bgColor = isColor ? printable.color + '15' : isBW ? '#ffffff' : '#f5f5f5';
@@ -711,40 +640,22 @@ function generatePrintableHTML(printable: Printable, format: string): string {
   ${styles}
 </head>
 <body>
-  <script>
-    function handlePrint() {
-      alert('For best results, print on A4 with Margins set to Minimal.');
-      window.print();
-    }
-  </script>
   <div class="toolbar no-print">
-      <div class="toolbar-info">
-        <h3>${printable.title} (${format})</h3>
-        <div class="toolbar-note">Best results: A4 paper | Margins set to Minimal</div>
-      </div>
-      <div class="toolbar-buttons">
-        <button onclick="handlePrint()" class="primary">Print / Save as PDF</button>
-        <button onclick="window.close()">Close</button>
-      </div>
+    <h3>${printable.title} (${format})</h3>
+    <div class="toolbar-buttons">
+      <button onclick="window.print()" class="primary">Print / Save as PDF</button>
+      <button onclick="window.close()">Close</button>
     </div>
+  </div>
   <div class="page">
     <div class="header">
-      <div class="brand-row">
-        <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
-        <div class="brand-copy">
-          <div class="brand-name">${BRAND.name}</div>
-          <div class="brand-pack">${BRAND.storyTitle}</div>
-        </div>
-      </div>
-      <div class="stage-pill">${stageMeta.badge}</div>
       <h1>${printable.title}</h1>
       <div class="subtitle">${printable.description}</div>
-      <div class="brand">${BRAND.name} &bull; ${BRAND.packDescription}</div>
-      <div class="a4-note">A4-ready classroom printable &bull; ${format} version</div>
+      <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack</div>
     </div>
     ${content}
     <div class="footer">
-      ${BRAND.name} &bull; ${stageMeta.footer} &bull; ${printable.title} &bull; A4 ${format} version
+      Many Petals Learning &bull; Cobie Teacher Pack &bull; ${printable.title} &bull; ${format} version
     </div>
   </div>
 </body>
@@ -860,7 +771,6 @@ export async function downloadAllPrintables(
       const format = p.formats[0]; // Use first available format
       const isColor = format === 'Colour';
       const isBW = format === 'B&W';
-      const stageMeta = getStageMeta(p.ageRange);
       const primaryColor = isColor ? p.color : isBW ? '#333333' : '#666666';
       const bgColor = isColor ? p.color + '15' : isBW ? '#ffffff' : '#f5f5f5';
       const borderColor = isColor ? p.color : '#999999';
@@ -870,22 +780,13 @@ export async function downloadAllPrintables(
       return `
         <div class="page" style="border-left: 4px solid ${p.color};">
           <div class="header">
-            <div class="brand-row">
-              <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
-              <div class="brand-copy">
-                <div class="brand-name">${BRAND.name}</div>
-                <div class="brand-pack">${BRAND.storyTitle}</div>
-              </div>
-            </div>
-            <div class="stage-pill">${stageMeta.badge}</div>
             <h1 style="color:${primaryColor};">${p.title}</h1>
             <div class="subtitle">${p.description}</div>
-            <div class="brand">${BRAND.name} &bull; ${BRAND.packDescription}</div>
-            <div class="a4-note">A4-ready classroom printable &bull; ${format} version</div>
+            <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack &bull; ${format} version</div>
           </div>
           ${content}
           <div class="footer">
-            ${BRAND.name} &bull; ${stageMeta.footer} &bull; ${p.title}
+            Many Petals Learning &bull; Cobie Teacher Pack &bull; ${p.title}
           </div>
         </div>
       `;
@@ -902,38 +803,20 @@ export async function downloadAllPrintables(
   ${masterStyles}
 </head>
 <body>
-  <script>
-    function handlePrint() {
-      alert('For best results, print on A4 with Margins set to Minimal.');
-      window.print();
-    }
-  </script>
   <div class="toolbar no-print">
-      <div class="toolbar-info">
-        <h3>All Printables - Many Petals Learning (${printables.length} resources)</h3>
-        <div class="toolbar-note">Best results: A4 paper | Margins set to Minimal</div>
-      </div>
-      <div class="toolbar-buttons">
-        <button onclick="handlePrint()" class="primary">Print All / Save as PDF</button>
-        <button onclick="window.close()">Close</button>
-      </div>
+    <h3>All Printables - Many Petals Learning (${printables.length} resources)</h3>
+    <div class="toolbar-buttons">
+      <button onclick="window.print()" class="primary">Print All / Save as PDF</button>
+      <button onclick="window.close()">Close</button>
     </div>
+  </div>
 
   <!-- Table of Contents -->
   <div class="page" style="min-height:auto; padding-bottom:20mm;">
     <div class="header">
-      <div class="brand-row">
-        <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
-        <div class="brand-copy">
-          <div class="brand-name">${BRAND.name}</div>
-          <div class="brand-pack">${BRAND.storyTitle}</div>
-        </div>
-      </div>
-      <div class="stage-pill">EYFS &amp; KS1 Teacher Pack</div>
       <h1>Many Petals Learning</h1>
       <div class="subtitle">Cobie Teacher Pack - Complete Printable Resources</div>
       <div class="brand">${printables.length} printable resources included</div>
-      <div class="a4-note">A4-ready printable collection</div>
     </div>
     <div class="content">
       <div class="section-title">Contents</div>
