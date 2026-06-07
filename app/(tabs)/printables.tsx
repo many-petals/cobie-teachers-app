@@ -41,9 +41,13 @@ export default function PrintablesScreen() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [ageFilter, setAgeFilter] = useState('all');
   const [downloading, setDownloading] = useState<string | null>(null);
+  const visiblePrintables = useMemo(
+    () => PRINTABLES.filter((printable) => printable.id !== 'p-10'),
+    []
+  );
 
   const filtered = useMemo(() => {
-    return PRINTABLES.filter((p) => {
+    return visiblePrintables.filter((p) => {
       const matchesSearch =
         search === '' ||
         p.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -52,7 +56,7 @@ export default function PrintablesScreen() {
       const matchesAge = ageFilter === 'all' || p.ageRange === ageFilter;
       return matchesSearch && matchesCategory && matchesAge;
     });
-  }, [search, categoryFilter, ageFilter]);
+  }, [search, categoryFilter, ageFilter, visiblePrintables]);
 
   const handleDownload = async (printable: typeof PRINTABLES[0], format: string, variantId?: string) => {
     setDownloading(printable.id + format + (variantId ?? 'default'));
@@ -98,11 +102,11 @@ export default function PrintablesScreen() {
   const handleDownloadAll = () => {
     showConfirm({
       title: 'Download All Resources',
-      message: `Open all ${PRINTABLES.length} printable resources in a new tab? You can then print or save as PDF.`,
+      message: `Open all ${visiblePrintables.length} A4-first printable resources in a new tab? You can then print or save as PDF.`,
       confirmText: 'Open All',
       cancelText: 'Cancel',
       onConfirm: async () => {
-        const result = await downloadAllPrintables(PRINTABLES);
+        const result = await downloadAllPrintables(visiblePrintables);
         if (result.success) {
           if (result.method === 'tab') {
             showToast('All Resources Opened', 'All printables are open in a new tab. Use "Print All / Save as PDF" to download.', 'success');
@@ -152,18 +156,17 @@ export default function PrintablesScreen() {
         ) : (
           filtered.map((printable) => {
             const favourited = isFavourite('printable', printable.id);
-            const variants = printable.variants?.length
-              ? printable.variants
-              : [
-                  {
-                    id: 'default',
-                    label: 'Printable',
-                    helperText: 'Ready to print.',
-                    pages: printable.pages,
-                    formats: printable.formats,
-                    marginHint: 'Minimum margins' as const,
-                  },
-                ];
+            const defaultVariant =
+              printable.variants?.find((variant) => variant.id === printable.defaultVariantId) ??
+              printable.variants?.[0] ?? {
+                id: 'default',
+                label: 'A4 classroom printable',
+                helperText: 'Best for reliable 1-page classroom printing.',
+                pages: printable.pages,
+                formats: printable.formats,
+                marginHint: 'Minimum margins' as const,
+              };
+
             return (
               <View key={printable.id} style={[styles.card, { borderLeftColor: printable.color }]}>
                 <View style={styles.cardHeader}>
@@ -178,11 +181,7 @@ export default function PrintablesScreen() {
                           {printable.category}
                         </Text>
                       </View>
-                      <Text style={styles.pages}>
-                        {variants.length > 1
-                          ? `${variants.length} versions`
-                          : `${variants[0].pages} page${variants[0].pages > 1 ? 's' : ''}`}
-                      </Text>
+                      <Text style={styles.pages}>{defaultVariant.pages} page{defaultVariant.pages > 1 ? 's' : ''}</Text>
                       <Text style={styles.ageText}>{printable.ageRange}</Text>
                     </View>
                   </View>
@@ -202,47 +201,45 @@ export default function PrintablesScreen() {
                 <Text style={styles.description}>{printable.description}</Text>
 
                 <View style={styles.variantList}>
-                  {variants.map((variant) => (
-                    <View key={variant.id} style={styles.variantCard}>
-                      <View style={styles.variantHeader}>
-                        <View style={styles.variantTextWrap}>
-                          <Text style={styles.variantTitle}>{variant.label}</Text>
-                          <Text style={styles.variantHelper}>{variant.helperText}</Text>
-                        </View>
-                        <View style={styles.variantMetaWrap}>
-                          <Text style={styles.variantMetaText}>
-                            {variant.pages} page{variant.pages > 1 ? 's' : ''}
-                          </Text>
-                          <Text style={styles.variantMetaText}>{variant.marginHint ?? 'Minimum margins'}</Text>
-                        </View>
+                  <View style={styles.variantCard}>
+                    <View style={styles.variantHeader}>
+                      <View style={styles.variantTextWrap}>
+                        <Text style={styles.variantTitle}>{defaultVariant.label}</Text>
+                        <Text style={styles.variantHelper}>{defaultVariant.helperText}</Text>
                       </View>
-
-                      <View style={styles.formatRow}>
-                        <Text style={styles.formatLabel}>Download:</Text>
-                        {(variant.formats ?? printable.formats).map((format) => {
-                          const isDownloading = downloading === printable.id + format + variant.id;
-                          return (
-                            <TouchableOpacity
-                              key={variant.id + format}
-                              style={[styles.formatButton, isDownloading && styles.formatButtonActive]}
-                              onPress={() => handleDownload(printable, format, variant.id)}
-                              disabled={isDownloading}
-                              activeOpacity={0.7}
-                            >
-                              <Ionicons
-                                name={isDownloading ? 'hourglass' : 'download-outline'}
-                                size={14}
-                                color={isDownloading ? COLORS.white : COLORS.primary}
-                              />
-                              <Text style={[styles.formatText, isDownloading && styles.formatTextActive]}>
-                                {format}
-                              </Text>
-                            </TouchableOpacity>
-                          );
-                        })}
+                      <View style={styles.variantMetaWrap}>
+                        <Text style={styles.variantMetaText}>
+                          {defaultVariant.pages} page{defaultVariant.pages > 1 ? 's' : ''}
+                        </Text>
+                        <Text style={styles.variantMetaText}>{defaultVariant.marginHint ?? 'Minimum margins'}</Text>
                       </View>
                     </View>
-                  ))}
+
+                    <View style={styles.formatRow}>
+                      <Text style={styles.formatLabel}>Download:</Text>
+                      {(defaultVariant.formats ?? printable.formats).map((format) => {
+                        const isDownloading = downloading === printable.id + format + defaultVariant.id;
+                        return (
+                          <TouchableOpacity
+                            key={defaultVariant.id + format}
+                            style={[styles.formatButton, isDownloading && styles.formatButtonActive]}
+                            onPress={() => handleDownload(printable, format, defaultVariant.id)}
+                            disabled={isDownloading}
+                            activeOpacity={0.7}
+                          >
+                            <Ionicons
+                              name={isDownloading ? 'hourglass' : 'download-outline'}
+                              size={14}
+                              color={isDownloading ? COLORS.white : COLORS.primary}
+                            />
+                            <Text style={[styles.formatText, isDownloading && styles.formatTextActive]}>
+                              {format}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
                 </View>
               </View>
             );
