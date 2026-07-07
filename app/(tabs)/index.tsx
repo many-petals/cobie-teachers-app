@@ -25,7 +25,7 @@ import { useToast } from '../context/ToastContext';
 import { LESSONS } from '../data/lessons';
 import { ACTIVITIES } from '../data/activities';
 import { PRINTABLES } from '../data/printables';
-import { BRAND, LOCAL_LOGO } from '../data/brand';
+import { BRAND } from '../data/brand';
 
 const HERO_IMAGE = 'https://d64gsuwffb70l.cloudfront.net/69357762fff8f7f4abcd8985_1771287970946_68002315.png';
 
@@ -332,7 +332,7 @@ export default function HomeScreen() {
 
       {/* App Header Bar with Many Petals branding */}
       <View style={styles.appHeader}>
-        <BrandLockup size="sm" mode="pill" />
+        <BrandLockup size="sm" mode="plain" />
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.pricingBtn}
@@ -379,34 +379,35 @@ export default function HomeScreen() {
           />
           <View style={styles.heroOverlay}>
             <View style={styles.heroContent}>
-              <BrandLockup size="sm" mode="hero" />
-              <View style={styles.heroRow}>
-                <View style={styles.heroTextCol}>
-                  <Text style={styles.heroEyebrow}>Official companion teaching pack</Text>
-                  <Text style={styles.heroTitle}>Cobie the Cactus</Text>
-                  <Text style={styles.heroSubtitle}>{BRAND.packDescription}</Text>
-                  <Text style={styles.heroDescription}>
-                    Classroom-ready resources for emotional literacy, sensory awareness, and inclusion.
-                    Evidence-based. SEN-first. Built to save planning time.
-                  </Text>
+              <Text style={styles.heroEyebrow}>Many Petals companion resource</Text>
+              <Text style={styles.heroTitle}>Plan your week&apos;s PSHE lessons in 5 minutes</Text>
+              <Text style={styles.heroSubtitle}>Ready-to-teach emotional literacy for EYFS &amp; KS1</Text>
+              <Text style={styles.heroDescription}>
+                Use story-led lessons, classroom printables, and calm teaching prompts tomorrow with less prep.
+              </Text>
+
+              <View style={styles.heroPoints}>
+                <View style={styles.heroPoint}>
+                  <Ionicons name="checkmark-circle" size={16} color={COLORS.accent} />
+                  <Text style={styles.heroPointText}>8 structured lessons</Text>
                 </View>
-                <View style={styles.heroBookCard}>
-                  <Image
-                    source={LOCAL_LOGO}
-                    style={styles.heroBookMark}
-                    resizeMode="cover"
-                  />
-                  <Text style={styles.heroBookTitle}>{BRAND.shortName}</Text>
-                  <Text style={styles.heroBookCaption}>Trusted classroom companion</Text>
+                <View style={styles.heroPoint}>
+                  <Ionicons name="checkmark-circle" size={16} color={COLORS.accent} />
+                  <Text style={styles.heroPointText}>A4 printables included</Text>
+                </View>
+                <View style={styles.heroPoint}>
+                  <Ionicons name="checkmark-circle" size={16} color={COLORS.accent} />
+                  <Text style={styles.heroPointText}>SEN-aware classroom support</Text>
                 </View>
               </View>
+
               <View style={styles.heroButtons}>
                 <TouchableOpacity
                   style={styles.heroButton}
                   onPress={() => router.push('/lessons')}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="play-circle" size={22} color={COLORS.white} />
+                  <Ionicons name="play-circle" size={20} color={COLORS.white} />
                   <Text style={styles.heroButtonText}>Start Teaching</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -416,14 +417,16 @@ export default function HomeScreen() {
                 >
                   <Text style={styles.heroButtonSecondaryText}>View Plans</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.heroButtonSecondary}
-                  onPress={() => router.push('/guide' as any)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.heroButtonSecondaryText}>How to Use This Programme</Text>
-                </TouchableOpacity>
               </View>
+
+              <TouchableOpacity
+                style={styles.heroTextLink}
+                onPress={() => router.push('/guide' as any)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.heroTextLinkText}>How to use this programme</Text>
+                <Ionicons name="arrow-forward" size={14} color={COLORS.white} />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -490,8 +493,10 @@ export default function HomeScreen() {
  
           
 
-        {/* Workbook Promo - Full */}
-        <WorkbookPromo />
+        {/* Companion Workbook */}
+        <View style={styles.section}>
+          <WorkbookPromo compact />
+        </View>
 
         {/* What's Inside */}
         <View style={[styles.section, { paddingHorizontal: 0 }]}>
@@ -601,8 +606,8 @@ export default function HomeScreen() {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <BrandLockup size="md" mode="pill" />
-          <Text style={styles.footerText}>{BRAND.storyTitle}</Text>
+          <BrandLockup size="md" mode="plain" showHelper />
+          <Text style={styles.footerStory}>{BRAND.storyTitle}</Text>
           <Text style={styles.footerText}>{BRAND.packDescription}</Text>
           <View style={styles.footerLinks}>
             <TouchableOpacity onPress={() => setShowPricing(true)}>
@@ -667,7 +672,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.md,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.lightGray,
@@ -779,7 +785,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.lightGray,
   },
   hero: {
-    height: 220,
+    minHeight: 208,
     position: 'relative',
   },
   heroImage: {
@@ -790,19 +796,13 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(27, 107, 147, 0.82)',
     justifyContent: 'flex-end',
-    paddingVertical: 20,
+    paddingVertical: SPACING.md,
   },
   heroContent: {
-    padding: SPACING.md,
-  },
-  heroRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: SPACING.md,
-    marginTop: SPACING.md,
-  },
-  heroTextCol: {
-    flex: 1,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.md,
+    maxWidth: 760,
   },
   heroEyebrow: {
     fontSize: FONT_SIZES.xs,
@@ -812,62 +812,49 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginBottom: SPACING.xs,
   },
-  heroBookCard: {
-    width: 150,
-    backgroundColor: 'rgba(255,255,255,0.10)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.16)',
-    borderRadius: RADIUS.xl,
-    padding: SPACING.md,
-    alignItems: 'center',
-    ...SHADOWS.small,
-  },
-  heroBookMark: {
-    width: 72,
-    height: 72,
-    borderRadius: RADIUS.lg,
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    marginBottom: SPACING.sm,
-  },
-  heroBookTitle: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: '800',
-    color: COLORS.white,
-    textAlign: 'center',
-  },
-  heroBookCaption: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.75)',
-    textAlign: 'center',
-    marginTop: 4,
-  },
   heroTitle: {
-    fontSize: FONT_SIZES.hero,
+    fontSize: 34,
     fontWeight: '800',
     color: COLORS.white,
     textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
+    lineHeight: 40,
   },
   heroSubtitle: {
     fontSize: FONT_SIZES.lg,
-    fontWeight: '600',
-    color: COLORS.accent,
-    marginTop: 2,
+    fontWeight: '700',
+    color: COLORS.white,
+    marginTop: 6,
   },
   heroDescription: {
     fontSize: FONT_SIZES.sm,
     color: 'rgba(255,255,255,0.9)',
-    marginTop: SPACING.sm,
+    marginTop: SPACING.xs,
     lineHeight: 20,
   },
-
+  heroPoints: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.md,
+    marginTop: SPACING.md,
+  },
+  heroPoint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  heroPointText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
+    color: COLORS.white,
+  },
   heroButtons: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
     marginTop: SPACING.md,
+    flexWrap: 'wrap',
   },
   heroButton: {
     flexDirection: 'row',
@@ -875,7 +862,7 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     backgroundColor: COLORS.secondary,
     paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md,
+    paddingVertical: SPACING.sm + 2,
     borderRadius: RADIUS.round,
     ...SHADOWS.medium,
   },
@@ -886,7 +873,7 @@ const styles = StyleSheet.create({
   },
   heroButtonSecondary: {
     paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
+    paddingVertical: SPACING.sm + 2,
     borderRadius: RADIUS.round,
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.5)',
@@ -895,6 +882,19 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     fontWeight: '600',
     color: COLORS.white,
+  },
+  heroTextLink: {
+    marginTop: SPACING.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+  },
+  heroTextLinkText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '700',
+    color: COLORS.white,
+    textDecorationLine: 'underline',
   },
   section: {
     marginTop: SPACING.lg,
@@ -1075,6 +1075,13 @@ const styles = StyleSheet.create({
     borderTopColor: COLORS.lightGray,
     alignItems: 'center',
     paddingBottom: SPACING.huge,
+  },
+  footerStory: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '800',
+    color: COLORS.text,
+    textAlign: 'center',
+    marginTop: SPACING.sm,
   },
   footerText: {
     fontSize: FONT_SIZES.sm,

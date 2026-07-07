@@ -12,8 +12,6 @@ import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import BrandLockup from './BrandLockup';
 
 const WORKBOOK_IMAGE = 'https://d64gsuwffb70l.cloudfront.net/6993b5b66d45d72ccfd31c24_1771291498634_bbc463f2.jpg';
-
-// This would be updated with the real Amazon link once the workbook is published
 const AMAZON_URL = 'https://www.amazon.co.uk';
 
 interface WorkbookPromoProps {
@@ -35,13 +33,15 @@ export default function WorkbookPromo({ compact = false }: WorkbookPromoProps) {
         <View style={styles.compactLeft}>
           <View style={styles.compactBadge}>
             <Ionicons name="book" size={14} color={COLORS.white} />
-            <Text style={styles.compactBadgeText}>NEW</Text>
+            <Text style={styles.compactBadgeText}>WORKBOOK</Text>
           </View>
           <Text style={styles.compactTitle}>Cobie Activity Workbook</Text>
-          <Text style={styles.compactSubtitle}>Extended print edition on Amazon</Text>
+          <Text style={styles.compactSubtitle}>
+            Story-linked print support for classroom follow-up and home links
+          </Text>
         </View>
         <View style={styles.compactRight}>
-          <Text style={styles.compactPrice}>From £8.99</Text>
+          <Text style={styles.compactPrice}>View book</Text>
           <Ionicons name="arrow-forward-circle" size={20} color={COLORS.primary} />
         </View>
       </TouchableOpacity>
@@ -78,7 +78,7 @@ export default function WorkbookPromo({ compact = false }: WorkbookPromoProps) {
         />
         <View style={styles.details}>
           <Text style={styles.description}>
-            40+ pages of classroom-ready worksheets, colouring pages, and activities 
+            40+ pages of classroom-ready worksheets, colouring pages, and activities
             that mirror and extend the digital resources in this app.
           </Text>
 
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     maxWidth: 900,
     alignSelf: 'stretch',
-    width: '100%', 
+    width: '100%',
   },
   dismissBtn: {
     position: 'absolute',
@@ -253,7 +253,6 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     fontStyle: 'italic',
   },
-  // Compact variant
   compactCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -295,6 +294,7 @@ const styles = StyleSheet.create({
   compactRight: {
     alignItems: 'center',
     gap: 4,
+    marginLeft: SPACING.md,
   },
   compactPrice: {
     fontSize: FONT_SIZES.sm,
