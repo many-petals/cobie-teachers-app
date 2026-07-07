@@ -8,6 +8,7 @@ import {
   StyleSheet,
   SafeAreaView,
   Modal,
+  useWindowDimensions,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -314,6 +315,7 @@ const pStyles = StyleSheet.create({
 });
 
 export default function HomeScreen() {
+  const { width } = useWindowDimensions();
   const router = useRouter();
   const { user, profile, setShowAuthModal, completedLessons, favourites } = useAuth();
   const [showProfile, setShowProfile] = useState(false);
@@ -321,6 +323,8 @@ export default function HomeScreen() {
   const [insideExpanded, setInsideExpanded] = useState(false);
   // Track client-side mount to prevent hydration mismatch from auth state
   const [mounted, setMounted] = useState(false);
+  const isCompactHero = width < 1320;
+  const isTightHero = width < 1080;
 
   useEffect(() => {
     setMounted(true);
@@ -332,7 +336,7 @@ export default function HomeScreen() {
 
       {/* App Header Bar with Many Petals branding */}
       <View style={styles.appHeader}>
-        <BrandLockup size="sm" mode="plain" />
+        <BrandLockup size={isTightHero ? 'sm' : 'md'} mode="plain" />
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.pricingBtn}
@@ -378,10 +382,14 @@ export default function HomeScreen() {
             resizeMode="cover"
           />
           <View style={styles.heroOverlay}>
-            <View style={styles.heroContent}>
+            <View style={[styles.heroContent, isCompactHero && styles.heroContentCompact]}>
               <Text style={styles.heroEyebrow}>Many Petals companion resource</Text>
-              <Text style={styles.heroTitle}>Plan your week&apos;s PSHE lessons in 5 minutes</Text>
-              <Text style={styles.heroSubtitle}>Ready-to-teach emotional literacy for EYFS &amp; KS1</Text>
+              <Text style={[styles.heroTitle, isCompactHero && styles.heroTitleCompact, isTightHero && styles.heroTitleTight]}>
+                Plan your week&apos;s PSHE lessons in 5 minutes
+              </Text>
+              <Text style={[styles.heroSubtitle, isTightHero && styles.heroSubtitleTight]}>
+                Ready-to-teach emotional literacy for EYFS &amp; KS1
+              </Text>
               <Text style={styles.heroDescription}>
                 Use story-led lessons, classroom printables, and calm teaching prompts tomorrow with less prep.
               </Text>
@@ -787,6 +795,7 @@ const styles = StyleSheet.create({
   hero: {
     minHeight: 208,
     position: 'relative',
+    overflow: 'hidden',
   },
   heroImage: {
     width: '100%',
@@ -797,12 +806,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(27, 107, 147, 0.82)',
     justifyContent: 'flex-end',
     paddingVertical: SPACING.md,
+    overflow: 'hidden',
   },
   heroContent: {
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.md,
     paddingBottom: SPACING.md,
+    width: '100%',
     maxWidth: 760,
+    minWidth: 0,
+    alignSelf: 'flex-start',
+  },
+  heroContentCompact: {
+    maxWidth: 680,
   },
   heroEyebrow: {
     fontSize: FONT_SIZES.xs,
@@ -820,12 +836,24 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
     lineHeight: 40,
+    maxWidth: '100%',
+  },
+  heroTitleCompact: {
+    fontSize: 30,
+    lineHeight: 36,
+  },
+  heroTitleTight: {
+    fontSize: 26,
+    lineHeight: 32,
   },
   heroSubtitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '700',
     color: COLORS.white,
     marginTop: 6,
+  },
+  heroSubtitleTight: {
+    fontSize: FONT_SIZES.md,
   },
   heroDescription: {
     fontSize: FONT_SIZES.sm,
