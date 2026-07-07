@@ -375,7 +375,7 @@ export default function HomeScreen() {
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
         {/* Hero Section */}
-        <View style={styles.hero}>
+        <View style={[styles.hero, isCompactHero && styles.heroCompact, isTightHero && styles.heroTight]}>
           <Image
             source={{ uri: HERO_IMAGE }}
             style={styles.heroImage}
@@ -793,9 +793,15 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.lightGray,
   },
   hero: {
-    minHeight: 208,
+    minHeight: 320,
     position: 'relative',
     overflow: 'hidden',
+  },
+  heroCompact: {
+    minHeight: 292,
+  },
+  heroTight: {
+    minHeight: 276,
   },
   heroImage: {
     width: '100%',
@@ -805,7 +811,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(27, 107, 147, 0.82)',
     justifyContent: 'flex-end',
-    paddingVertical: SPACING.md,
+    paddingVertical: SPACING.lg,
     overflow: 'hidden',
   },
   heroContent: {
