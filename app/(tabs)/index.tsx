@@ -27,16 +27,26 @@ import { LESSONS } from '../data/lessons';
 import { ACTIVITIES } from '../data/activities';
 import { PRINTABLES } from '../data/printables';
 import { BRAND } from '../data/brand';
+import { openParentApp, ParentAppSection } from '../lib/parentAppLinks';
 
 const HERO_IMAGE = 'https://d64gsuwffb70l.cloudfront.net/69357762fff8f7f4abcd8985_1771287970946_68002315.png';
 
+type QuickTileConfig = {
+  title: string;
+  subtitle: string;
+  icon: string;
+  color: string;
+  bgColor: string;
+  route?: string;
+  externalSection?: ParentAppSection;
+};
 
-const QUICK_TILES = [
+const QUICK_TILES: QuickTileConfig[] = [
   { title: 'Lessons', subtitle: '4 Core', icon: 'book', color: '#1B6B93', bgColor: '#E1F5FE', route: '/lessons' },
   { title: 'Activities', subtitle: '8 Optional', icon: 'color-palette', color: '#7BC67E', bgColor: '#E8F5E9', route: '/activities' },
-  { title: 'Tracker', subtitle: 'Milestones', icon: 'analytics', color: '#9C27B0', bgColor: '#F3E5F5', route: '/tracker' },
+  { title: 'Tracker', subtitle: 'Parent App', icon: 'analytics', color: '#9C27B0', bgColor: '#F3E5F5', externalSection: 'tracker' },
   { title: 'Printables', subtitle: '18 Resources', icon: 'print', color: '#F4A460', bgColor: '#FFF3E0', route: '/printables' },
-  { title: 'Parents', subtitle: '4 Letters', icon: 'people', color: '#1B6B93', bgColor: '#E1F5FE', route: '/parents' },
+  { title: 'Parents', subtitle: 'Parent App', icon: 'people', color: '#1B6B93', bgColor: '#E1F5FE', externalSection: 'home' },
   { title: 'Emotions', subtitle: 'Interactive', icon: 'heart', color: '#F48FB1', bgColor: '#FCE4EC', route: '/tools' },
   { title: 'Calm Corner', subtitle: 'Builder', icon: 'leaf', color: '#81C784', bgColor: '#E8F5E9', route: '/calm' },
 ];
@@ -330,6 +340,17 @@ export default function HomeScreen() {
     setMounted(true);
   }, []);
 
+  const handleTilePress = async (tile: QuickTileConfig) => {
+    if (tile.externalSection) {
+      await openParentApp(tile.externalSection);
+      return;
+    }
+
+    if (tile.route) {
+      router.push(tile.route as any);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
 
@@ -485,7 +506,9 @@ export default function HomeScreen() {
                   icon={tile.icon}
                   color={tile.color}
                   bgColor={tile.bgColor}
-                  onPress={() => router.push(tile.route as any)}
+                  onPress={() => {
+                    handleTilePress(tile).catch(() => {});
+                  }}
                 />
               </View>
             ))}
@@ -626,11 +649,11 @@ export default function HomeScreen() {
               <Text style={styles.footerLink}>Printables</Text>
             </TouchableOpacity>
             <Text style={styles.footerDot}>|</Text>
-            <TouchableOpacity onPress={() => router.push('/parents' as any)}>
+            <TouchableOpacity onPress={() => { openParentApp('home').catch(() => {}); }}>
               <Text style={styles.footerLink}>Parents</Text>
             </TouchableOpacity>
             <Text style={styles.footerDot}>|</Text>
-            <TouchableOpacity onPress={() => router.push('/tracker' as any)}>
+            <TouchableOpacity onPress={() => { openParentApp('tracker').catch(() => {}); }}>
               <Text style={styles.footerLink}>Tracker</Text>
             </TouchableOpacity>
           </View>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { openParentApp } from './lib/parentAppLinks';
 
 export default function GuideScreen() {
   return (
@@ -49,7 +50,7 @@ export default function GuideScreen() {
 </Text>
 <TouchableOpacity
   style={{ marginTop: 12, padding: 10, backgroundColor: "#4CAF50", borderRadius: 8 }}
-  onPress={() => Linking.openURL("https://cobie-parent-app-nns9.vercel.app/")}
+  onPress={() => openParentApp('home').catch(() => {})}
 >
   <Text style={{ color: "#fff", fontWeight: "600" }}>
     Open the Cobie Parent App
