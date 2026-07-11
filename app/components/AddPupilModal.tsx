@@ -14,7 +14,7 @@ import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onAdd: (pupil: { display_code: string; age_group: 'EYFS' | 'KS1'; sen_status: boolean; notes: string }) => void;
+  onAdd: (pupil: { display_code: string; age_group: 'EYFS' | 'KS1'; sen_status: boolean; notes: string }) => Promise<{ success: boolean; error?: string }>;
   existingCodes: string[];
 }
 
@@ -24,13 +24,16 @@ export default function AddPupilModal({ visible, onClose, onAdd, existingCodes }
   const [senStatus, setSenStatus] = useState(false);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const suggestedCode = `P${existingCodes.length + 1}`;
 
-  const handleAdd = () => {
-    const finalCode = code.trim() || suggestedCode;
+  const handleAdd = async () => {
+    if (submitting) return;
+
+    const finalCode = (code.trim() || suggestedCode).toUpperCase();
     
-    if (existingCodes.includes(finalCode)) {
+    if (existingCodes.some(existingCode => existingCode.toUpperCase() === finalCode)) {
       setError('This code is already in use. Please choose a different one.');
       return;
     }
@@ -40,23 +43,35 @@ export default function AddPupilModal({ visible, onClose, onAdd, existingCodes }
       return;
     }
 
-    onAdd({
-      display_code: finalCode,
-      age_group: ageGroup,
-      sen_status: senStatus,
-      notes: notes.trim(),
-    });
-
-    // Reset form
-    setCode('');
-    setAgeGroup('EYFS');
-    setSenStatus(false);
-    setNotes('');
+    setSubmitting(true);
     setError('');
-    onClose();
+
+    try {
+      const result = await onAdd({
+        display_code: finalCode,
+        age_group: ageGroup,
+        sen_status: senStatus,
+        notes: notes.trim(),
+      });
+
+      if (!result.success) {
+        setError(result.error || 'We could not add this pupil right now. Please try again.');
+        return;
+      }
+
+      setCode('');
+      setAgeGroup('EYFS');
+      setSenStatus(false);
+      setNotes('');
+      setError('');
+      onClose();
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleClose = () => {
+    if (submitting) return;
     setCode('');
     setError('');
     setNotes('');
@@ -173,9 +188,14 @@ export default function AddPupilModal({ visible, onClose, onAdd, existingCodes }
               <TouchableOpacity style={styles.cancelBtn} onPress={handleClose} activeOpacity={0.7}>
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.addBtn} onPress={handleAdd} activeOpacity={0.7}>
+              <TouchableOpacity
+                style={[styles.addBtn, submitting && styles.addBtnDisabled]}
+                onPress={handleAdd}
+                activeOpacity={0.7}
+                disabled={submitting}
+              >
                 <Ionicons name="add-circle" size={20} color={COLORS.white} />
-                <Text style={styles.addText}>Add Pupil</Text>
+                <Text style={styles.addText}>{submitting ? 'Adding...' : 'Add Pupil'}</Text>
               </TouchableOpacity>
             </View>
 
@@ -381,6 +401,9 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     borderRadius: RADIUS.lg,
     backgroundColor: COLORS.primary,
+  },
+  addBtnDisabled: {
+    opacity: 0.7,
   },
   addText: {
     fontSize: FONT_SIZES.md,

@@ -16,7 +16,10 @@ import { EMOTIONS } from '../data/emotions';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useSEN } from '../context/SENContext';
+import { PARENT_LETTERS } from '../data/parentLetters';
+import { downloadParentLetter, type PrefilledProgressReportData } from '../lib/parentLetterGenerator';
 import { supabase } from '../lib/supabase';
+import BrandedScreenHeader from '../components/BrandedScreenHeader';
 import AddPupilModal from '../components/AddPupilModal';
 import QuickAssess from '../components/QuickAssess';
 import ProgressView from '../components/ProgressView';
@@ -54,8 +57,30 @@ interface EmotionLog {
   logged_at: string;
 }
 
+const HOME_SUGGESTIONS_BY_AREA: Record<string, string> = {
+  'self-regulation': 'Practise short calm-down routines at home, such as slow breathing, counting, or a quiet corner.',
+  'managing-self': 'Build confidence with simple routines that encourage independence, resilience, and trying new tasks.',
+  'relationships': 'Model turn-taking, sharing, and kind language during play, mealtimes, and family routines.',
+  'emotional-literacy': 'Name feelings during the day and talk about what might help when emotions change.',
+  'sensory-awareness': 'Notice which sounds, textures, or environments feel comfortable and talk about helpful supports.',
+  'inclusion-kindness': 'Use stories and daily conversations to celebrate differences, kindness, and including others.',
+};
+
+const REPORT_STRATEGY_POOL = [
+  'Calm corner / quiet space',
+  'Breathing exercises',
+  'Emotion check-in cards',
+  'Feelings thermometer',
+  'Sensory tools (fidgets, etc.)',
+  'Visual schedule / timetable',
+  'Social stories',
+  'Help / break cards',
+  'Peer buddy system',
+  'Small group work',
+];
+
 export default function TrackerScreen() {
-  const { user, clearUserData } = useAuth();
+  const { user, profile, clearUserData } = useAuth();
   const { showToast, showConfirm } = useToast();
   const { senMode } = useSEN();
   const [mounted, setMounted] = useState(false);
@@ -119,20 +144,38 @@ export default function TrackerScreen() {
     setRefreshing(false);
   }, [loadData]);
 
-  const handleAddPupil = async (pupilData: { display_code: string; age_group: 'EYFS' | 'KS1'; sen_status: boolean; notes: string }) => {
-    if (!user) return;
+  const handleAddPupil = async (
+    pupilData: { display_code: string; age_group: 'EYFS' | 'KS1'; sen_status: boolean; notes: string }
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!user) {
+      return { success: false, error: 'Please sign in again before adding a pupil.' };
+    }
+
     try {
+      const normalizedCode = pupilData.display_code.trim().toUpperCase();
+
+      if (pupils.some((pupil) => pupil.display_code.toUpperCase() === normalizedCode)) {
+        return { success: false, error: 'This code is already in use. Please choose a different one.' };
+      }
+
       const { data, error } = await supabase.from('tracker_pupils').insert({
         user_id: user.id,
         ...pupilData,
+        display_code: normalizedCode,
       }).select('*').single();
       if (error) throw error;
+
       if (data) {
         setPupils(prev => [...prev, data]);
-        showToast('Pupil Added', `${pupilData.display_code} has been added to your tracker.`);
+        showToast('Pupil Added', `${normalizedCode} has been added to your tracker.`);
+        return { success: true };
       }
+
+      return { success: false, error: 'The pupil was not saved. Please try again.' };
     } catch (err: any) {
-      showToast('Error', err.message || 'Failed to add pupil', 'error');
+      const message = err?.message || 'Failed to add pupil';
+      showToast('Error', message, 'error');
+      return { success: false, error: message };
     }
   };
 
@@ -309,6 +352,174 @@ export default function TrackerScreen() {
     return { rated, totalMilestones, avg, emotionCount };
   };
 
+  const getProgressLabel = (rating: number) => {
+    if (rating >= 4) return RATING_LABELS[3].label;
+    if (rating >= 3) return RATING_LABELS[2].label;
+    if (rating >= 2) return RATING_LABELS[1].label;
+    if (rating >= 1) return RATING_LABELS[0].label;
+    return 'Not yet assessed';
+  };
+
+  const buildProgressReportData = (pupil: Pupil): PrefilledProgressReportData => {
+    const latestAssessments = getLatestPupilAssessments(pupil.id);
+    const pupilEmotionLogs = getPupilEmotionLogs(pupil.id);
+    const areas = getMilestonesForAgeGroup(pupil.age_group);
+
+    const progressAreas = areas.map(area => {
+      const areaAssessments = latestAssessments.filter(a => a.area_id === area.id);
+      const rawAverage = areaAssessments.length > 0
+        ? areaAssessments.reduce((sum, item) => sum + item.rating, 0) / areaAssessments.length
+        : 0;
+      const roundedRating = rawAverage > 0 ? Math.max(1, Math.min(4, Math.round(rawAverage))) : 0;
+
+      return {
+        areaId: area.id,
+        area: area.title,
+        description: areaAssessments.length > 0
+          ? `${areaAssessments.length}/${area.milestones.length} milestones assessed`
+          : 'More observations needed to complete this area.',
+        rating: roundedRating,
+        ratingLabel: getProgressLabel(roundedRating),
+      };
+    });
+
+    const strongestAreas = progressAreas
+      .filter(area => area.rating > 0)
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 2);
+
+    const strengths = strongestAreas.map(area =>
+      `${area.area}: ${area.ratingLabel} in the latest tracker snapshot.`
+    );
+
+    const developingAreas = progressAreas
+      .filter(area => area.rating === 0 || area.rating < 3)
+      .sort((a, b) => a.rating - b.rating)
+      .slice(0, 2);
+
+    const nextSteps = developingAreas.map(area =>
+      area.rating === 0
+        ? `Gather more observations in ${area.area.toLowerCase()} to build a clearer end-of-term picture.`
+        : `Keep practising ${area.area.toLowerCase()} through short, regular routines and adult modelling.`
+    );
+
+    const homeSuggestions = Array.from(new Set(
+      developingAreas
+        .map(area => HOME_SUGGESTIONS_BY_AREA[area.areaId])
+        .filter((item): item is string => Boolean(item))
+    )).slice(0, 3);
+
+    const emotionCounts = pupilEmotionLogs.reduce<Record<string, number>>((acc, log) => {
+      acc[log.emotion_name] = (acc[log.emotion_name] || 0) + 1;
+      return acc;
+    }, {});
+
+    const emotionSummary = Object.entries(emotionCounts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 4);
+
+    const latestEmotion = pupilEmotionLogs[0];
+    const latestEmotionLine = latestEmotion
+      ? ` Most recent logged feeling: ${latestEmotion.emotion_name}${latestEmotion.context ? ` during ${formatContext(latestEmotion.context)}` : ''}.`
+      : '';
+
+    const strategiesUsed = Array.from(new Set([
+      'Emotion check-in cards',
+      'Feelings thermometer',
+      'Calm corner / quiet space',
+      ...(emotionSummary.some(item => ['Worried', 'Angry', 'Scared', 'Overwhelmed'].includes(item.name))
+        ? ['Breathing exercises', 'Help / break cards']
+        : []),
+      ...(pupil.sen_status || progressAreas.some(area => area.areaId === 'sensory-awareness' && area.rating > 0 && area.rating < 3)
+        ? ['Sensory tools (fidgets, etc.)', 'Visual schedule / timetable']
+        : []),
+      ...(progressAreas.some(area => area.areaId === 'relationships' && area.rating > 0 && area.rating < 3)
+        ? ['Peer buddy system', 'Small group work']
+        : []),
+      ...(progressAreas.some(area => area.areaId === 'inclusion-kindness' && area.rating > 0 && area.rating < 3)
+        ? ['Social stories']
+        : []),
+    ].filter(strategy => REPORT_STRATEGY_POOL.includes(strategy))));
+
+    const latestAssessmentDate = latestAssessments.length > 0
+      ? latestAssessments
+          .slice()
+          .sort((a, b) => new Date(b.assessed_at).getTime() - new Date(a.assessed_at).getTime())[0]
+      : null;
+
+    const reportPeriod = latestAssessmentDate
+      ? `${latestAssessmentDate.term} ${latestAssessmentDate.academic_year}`
+      : `${currentTerm} ${currentYear}`;
+
+    return {
+      childLabel: `Pupil ${pupil.display_code}`,
+      pupilCode: pupil.display_code,
+      ageGroup: pupil.age_group,
+      classYear: pupil.age_group,
+      reportPeriod,
+      progressAreas: progressAreas.map(({ area, description, rating, ratingLabel }) => ({
+        area,
+        description,
+        rating,
+        ratingLabel,
+      })),
+      strengths: strengths.length > 0
+        ? strengths
+        : ['Tracker observations have started, and more time will help build a fuller picture of strengths.'],
+      nextSteps: nextSteps.length > 0
+        ? nextSteps
+        : ['Continue using the tracker across the term to identify the next best steps for this child.'],
+      strategiesUsed,
+      homeSuggestions: homeSuggestions.length > 0
+        ? homeSuggestions
+        : ['Continue naming emotions, sharing calm routines, and using simple daily check-ins at home.'],
+      emotionSummary,
+      additionalNotes: `Generated from ${latestAssessments.length} latest milestone ratings and ${pupilEmotionLogs.length} emotion log${pupilEmotionLogs.length === 1 ? '' : 's'} recorded in the teacher tracker.${latestEmotionLine}`,
+    };
+  };
+
+  const handleGenerateProgressReport = async (pupil: Pupil) => {
+    const reportTemplate = PARENT_LETTERS.find(letter => letter.id === 'pl-4');
+
+    if (!reportTemplate) {
+      showToast('Report Missing', 'The progress report template could not be found.', 'error');
+      return;
+    }
+
+    const reportData = buildProgressReportData(pupil);
+    const result = await downloadParentLetter(
+      reportTemplate,
+      profile?.school || '',
+      profile?.name || '',
+      { reportData }
+    );
+
+    if (result.success) {
+      if (result.method === 'tab') {
+        showToast(
+          'Report Opened',
+          `The end-of-term report for ${pupil.display_code} is open in a new tab. Use "Print / Save as PDF" to download.`,
+          'success'
+        );
+      } else if (result.method === 'file') {
+        showToast(
+          'Report Downloaded',
+          `The end-of-term report for ${pupil.display_code} has been downloaded.`,
+          'success'
+        );
+      }
+      return;
+    }
+
+    if (result.method === 'native') {
+      showToast('Web Only', 'Prefilled progress reports are available in the web version.', 'info');
+      return;
+    }
+
+    showToast('Pop-up Blocked', 'Please allow pop-ups for this site and try again.', 'info');
+  };
+
   const filteredPupils = filterAgeGroup === 'All'
     ? pupils
     : pupils.filter(p => p.age_group === filterAgeGroup);
@@ -334,24 +545,22 @@ export default function TrackerScreen() {
       <SafeAreaView style={styles.safeArea}>
 
 
-      {/* Header */}
-      <View style={styles.screenHeader}>
-        <View style={styles.headerLeft}>
-          <Ionicons name="analytics" size={24} color={COLORS.primary} />
-          <View>
-            <Text style={styles.screenTitle}>Pupil Tracker</Text>
-            <Text style={styles.screenSub}>{currentTerm} {currentYear}</Text>
-          </View>
-        </View>
-        <TouchableOpacity
-          style={styles.addBtn}
-          onPress={() => setShowAddPupil(true)}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="add" size={20} color={COLORS.white} />
-          <Text style={styles.addBtnText}>Add Pupil</Text>
-        </TouchableOpacity>
-      </View>
+        <BrandedScreenHeader
+          title="Pupil Tracker"
+          subtitle={`${currentTerm} ${currentYear} milestones, notes, and emotion records in one place.`}
+          icon="analytics"
+          iconColor={COLORS.primary}
+          rightAction={(
+            <TouchableOpacity
+              style={styles.addBtn}
+              onPress={() => setShowAddPupil(true)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="add" size={20} color={COLORS.white} />
+              <Text style={styles.addBtnText}>Add Pupil</Text>
+            </TouchableOpacity>
+          )}
+        />
 
       <ScrollView
         style={styles.container}
@@ -675,6 +884,7 @@ export default function TrackerScreen() {
         <ProgressView
           visible={!!progressPupil}
           onClose={() => setProgressPupil(null)}
+          onGenerateReport={() => handleGenerateProgressReport(progressPupil)}
           pupilCode={progressPupil.display_code}
           ageGroup={progressPupil.age_group}
           senStatus={progressPupil.sen_status}

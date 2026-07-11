@@ -1,25 +1,103 @@
 import { Platform } from 'react-native';
 import { ParentLetter } from '../data/parentLetters';
-import { BRAND } from '../data/brand';
 
-function getLetterStageMeta(ageRange: ParentLetter['ageRange']) {
-  switch (ageRange) {
-    case 'EYFS':
-      return {
-        badge: 'EYFS Teacher Pack',
-        footer: 'EYFS parent communication',
-      };
-    case 'KS1':
-      return {
-        badge: 'KS1 Teacher Pack',
-        footer: 'KS1 parent communication',
-      };
-    default:
-      return {
-        badge: 'EYFS & KS1 Teacher Pack',
-        footer: 'EYFS & KS1 parent communication',
-      };
+export interface ProgressReportAreaData {
+  area: string;
+  description: string;
+  rating: number;
+  ratingLabel: string;
+}
+
+export interface ProgressReportEmotionData {
+  name: string;
+  count: number;
+}
+
+export interface PrefilledProgressReportData {
+  childLabel: string;
+  pupilCode: string;
+  ageGroup: 'EYFS' | 'KS1';
+  classYear?: string;
+  reportPeriod?: string;
+  progressAreas: ProgressReportAreaData[];
+  strengths: string[];
+  nextSteps: string[];
+  strategiesUsed: string[];
+  homeSuggestions: string[];
+  emotionSummary: ProgressReportEmotionData[];
+  additionalNotes?: string;
+}
+
+export interface ParentLetterOptions {
+  reportData?: PrefilledProgressReportData;
+}
+
+const REPORT_STRATEGIES = [
+  'Calm corner / quiet space',
+  'Breathing exercises',
+  'Emotion check-in cards',
+  'Feelings thermometer',
+  'Sensory tools (fidgets, etc.)',
+  'Visual schedule / timetable',
+  'Social stories',
+  'Help / break cards',
+  'Peer buddy system',
+  'Small group work',
+];
+
+function escapeHTML(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderBulletList(items: string[], emptyText: string): string {
+  if (items.length === 0) {
+    return `<p style="color:#666;">${escapeHTML(emptyText)}</p>`;
   }
+
+  return `
+    <ul>
+      ${items.map(item => `<li>${escapeHTML(item)}</li>`).join('')}
+    </ul>
+  `;
+}
+
+function renderEmotionSummary(items: ProgressReportEmotionData[]): string {
+  if (items.length === 0) {
+    return '<p style="font-size:10pt; color:#666;">No emotion check-ins have been logged for this report period yet.</p>';
+  }
+
+  return `
+    <div style="display:flex; gap:4mm; flex-wrap:wrap; margin-bottom:4mm;">
+      ${items.map(item => `
+        <div style="border:2px solid #ddd; border-radius:8px; padding:6px 12px; text-align:center; min-width:72px;">
+          <div style="font-size:10pt; font-weight:700; color:#444;">${escapeHTML(item.name)}</div>
+          <div style="font-size:16pt; font-weight:800; color:#1B6B93; line-height:1.2;">${item.count}</div>
+          <div style="font-size:8pt; color:#888;">check-in${item.count === 1 ? '' : 's'}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderStrategyChecklist(selected: string[]): string {
+  return `
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2mm;">
+      ${REPORT_STRATEGIES.map(strategy => {
+        const checked = selected.includes(strategy);
+        return `
+          <div style="display:flex; align-items:center; gap:6px; padding:3px 0;">
+            <div class="checkbox${checked ? ' checked' : ''}">${checked ? '&#10003;' : ''}</div>
+            <span style="font-size:10pt; color:#444;">${escapeHTML(strategy)}</span>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
 }
 
 /* ------------------------------------------------------------------ */
@@ -62,27 +140,9 @@ function getLetterStyles(primaryColor: string): string {
         text-align: center; margin-bottom: 8mm; padding-bottom: 6mm;
         border-bottom: 3px solid ${primaryColor};
       }
-      .brand-row {
-        display: flex; align-items: center; justify-content: center; gap: 12px;
-        margin-bottom: 4mm;
-      }
-      .brand-logo {
-        width: 44px; height: 44px; object-fit: contain; border-radius: 10px;
-        background: white; padding: 4px; border: 1px solid #eee;
-      }
-      .brand-copy { text-align: left; }
-      .brand-name { font-size: 12pt; font-weight: 800; color: ${primaryColor}; line-height: 1.2; }
-      .brand-pack { font-size: 9pt; color: #777; margin-top: 2px; }
-      .stage-pill {
-        display: inline-flex; align-items: center; justify-content: center;
-        margin-top: 3mm; padding: 7px 16px; border-radius: 999px;
-        background: ${primaryColor}10; color: ${primaryColor}; border: 1px solid ${primaryColor}35;
-        font-size: 9pt; font-weight: 800; letter-spacing: 0.4px;
-      }
       .letter-header h1 { font-size: 22pt; color: ${primaryColor}; margin-bottom: 4px; font-weight: 800; }
       .letter-header .subtitle { font-size: 12pt; color: #666; font-weight: 500; margin-top: 4px; }
       .letter-header .brand { font-size: 9pt; color: #aaa; margin-top: 8px; font-style: italic; }
-      .letter-header .a4-note { font-size: 8.5pt; color: #999; margin-top: 5px; font-weight: 600; }
       .letter-header .school-info { font-size: 11pt; color: #444; margin-top: 8px; font-weight: 600; }
       .letter-body { margin-top: 6mm; font-size: 11.5pt; line-height: 1.7; color: #333; }
       .letter-body p { margin-bottom: 4mm; }
@@ -111,6 +171,15 @@ function getLetterStyles(primaryColor: string): string {
         display: flex; align-items: center; gap: 6px; font-size: 10.5pt; color: #555;
       }
       .checkbox { width: 16px; height: 16px; border: 2px solid ${primaryColor}; border-radius: 3px; flex-shrink: 0; }
+      .checkbox.checked {
+        background: ${primaryColor};
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 800;
+      }
       .radio { width: 16px; height: 16px; border: 2px solid ${primaryColor}; border-radius: 50%; flex-shrink: 0; }
       .write-line { border-bottom: 1px solid #ccc; height: 10mm; margin: 2mm 0; }
       .write-area { border: 1px solid #ccc; border-radius: 6px; min-height: 20mm; margin: 3mm 0; padding: 6px; }
@@ -140,7 +209,13 @@ function getLetterStyles(primaryColor: string): string {
 /* ------------------------------------------------------------------ */
 /*  CONTENT GENERATORS                                                 */
 /* ------------------------------------------------------------------ */
-function getLetterContent(letter: ParentLetter, schoolName: string, teacherName: string, primaryColor: string): string {
+function getLetterContent(
+  letter: ParentLetter,
+  schoolName: string,
+  teacherName: string,
+  primaryColor: string,
+  options?: ParentLetterOptions
+): string {
   const today = new Date();
   const dateStr = today.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -430,6 +505,105 @@ function getLetterContent(letter: ParentLetter, schoolName: string, teacherName:
     /* PL-4: PROGRESS REPORT TEMPLATE                               */
     /* ============================================================ */
     case 'pl-4':
+      if (options?.reportData) {
+        const report = options.reportData;
+        const childLabel = escapeHTML(report.childLabel || report.pupilCode);
+        const classYear = escapeHTML(report.classYear || report.ageGroup);
+        const reportPeriod = escapeHTML(report.reportPeriod || 'Current term');
+        const teacherLabel = escapeHTML(teacherName || '');
+
+        return `
+          <div class="letter-body">
+            <p style="text-align:right; color:#888; font-size:10pt;">${dateStr}</p>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:4mm; margin-bottom:6mm;">
+              <div class="question-block">
+                <label>Child:</label>
+                <div class="write-line" style="position:relative;"><span style="position:absolute; top:2px; left:0; color:#444; font-size:10pt;">${childLabel}</span></div>
+              </div>
+              <div class="question-block">
+                <label>Pupil Code:</label>
+                <div class="write-line" style="position:relative;"><span style="position:absolute; top:2px; left:0; color:#444; font-size:10pt;">${escapeHTML(report.pupilCode)}</span></div>
+              </div>
+              <div class="question-block">
+                <label>Class / Year Group:</label>
+                <div class="write-line" style="position:relative;"><span style="position:absolute; top:2px; left:0; color:#444; font-size:10pt;">${classYear}</span></div>
+              </div>
+              <div class="question-block">
+                <label>Report Period:</label>
+                <div class="write-line" style="position:relative;"><span style="position:absolute; top:2px; left:0; color:#444; font-size:10pt;">${reportPeriod}</span></div>
+              </div>
+              <div class="question-block">
+                <label>Teacher:</label>
+                <div class="write-line" style="position:relative;"><span style="position:absolute; top:2px; left:0; color:#444; font-size:10pt;">${teacherLabel}</span></div>
+              </div>
+            </div>
+
+            <p>Dear Parent/Carer,</p>
+            <p>This report provides an update on ${childLabel}&rsquo;s progress in emotional literacy and wellbeing, based on tracker observations recorded as part of the Cobie programme at ${escapeHTML(schoolName || 'our school')}.</p>
+
+            <h2>Progress Overview</h2>
+            <p style="font-size:10pt; color:#888; margin-bottom:3mm;">Rating scale: 1 = Emerging &bull; 2 = Developing &bull; 3 = Secure &bull; 4 = Exceeding</p>
+
+            <div class="progress-grid">
+              ${report.progressAreas.map(item => `
+                <div class="progress-item">
+                  <h4>${escapeHTML(item.area)}</h4>
+                  <p style="font-size:9pt; color:#888; margin:2px 0 6px;">${escapeHTML(item.description)}</p>
+                  <div class="rating">
+                    ${[1, 2, 3, 4].map(value => `
+                      <div style="text-align:center;">
+                        <div class="dot" style="${value <= item.rating ? `background:${primaryColor}; border-color:${primaryColor};` : ''}"></div>
+                        <div class="dot-label">${value}</div>
+                      </div>
+                    `).join('')}
+                  </div>
+                  <p style="font-size:9pt; color:${primaryColor}; font-weight:700; margin-top:6px;">${escapeHTML(item.ratingLabel)}</p>
+                </div>
+              `).join('')}
+            </div>
+
+            <h2>Key Strengths</h2>
+            ${renderBulletList(report.strengths, 'More observations will help build a fuller picture of strengths over time.')}
+
+            <h2>Areas for Development</h2>
+            ${renderBulletList(report.nextSteps, 'Continue regular tracker observations to identify clear next steps.')}
+
+            <h2>Strategies Used in School</h2>
+            <p style="font-size:10pt; color:#666; margin-bottom:3mm;">These are the approaches currently being used to support this child:</p>
+            ${renderStrategyChecklist(report.strategiesUsed)}
+
+            <h2>Suggestions for Home</h2>
+            ${renderBulletList(report.homeSuggestions, 'Continue naming emotions, sharing calm routines, and using simple daily check-ins at home.')}
+
+            <h2>Emotional Check-In Summary</h2>
+            <p style="font-size:10pt; color:#666; margin-bottom:3mm;">Most frequently recorded emotions this term:</p>
+            ${renderEmotionSummary(report.emotionSummary)}
+
+            <h2>Additional Notes</h2>
+            <div class="write-area" style="min-height:22mm;">
+              <p style="font-size:10pt; color:#555; line-height:1.6;">${escapeHTML(report.additionalNotes || 'Teachers can add individual examples, observations, or home-school comments here before sharing this report.')}</p>
+            </div>
+
+            <div class="sign-off" style="margin-top:8mm;">
+              <p>If you would like to discuss this report further, please don&rsquo;t hesitate to arrange a meeting.</p>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8mm; margin-top:6mm;">
+                <div>
+                  <p style="font-size:10pt; color:#888;">Teacher&rsquo;s signature:</p>
+                  <div class="write-line" style="margin-top:10mm;"></div>
+                  <p style="font-size:10pt; color:#888; margin-top:2mm;">${teacherLabel}</p>
+                </div>
+                <div>
+                  <p style="font-size:10pt; color:#888;">Parent/Carer&rsquo;s signature:</p>
+                  <div class="write-line" style="margin-top:10mm;"></div>
+                  <p style="font-size:10pt; color:#888; margin-top:2mm;">Date: _______________</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
       return `
         <div class="letter-body">
           <p style="text-align:right; color:#888; font-size:10pt;">${dateStr}</p>
@@ -552,11 +726,15 @@ function getLetterContent(letter: ParentLetter, schoolName: string, teacherName:
 /* ------------------------------------------------------------------ */
 /*  FULL PAGE BUILDER                                                  */
 /* ------------------------------------------------------------------ */
-function generateLetterHTML(letter: ParentLetter, schoolName: string, teacherName: string): string {
+function generateLetterHTML(
+  letter: ParentLetter,
+  schoolName: string,
+  teacherName: string,
+  options?: ParentLetterOptions
+): string {
   const primaryColor = letter.color;
-  const stageMeta = getLetterStageMeta(letter.ageRange);
   const styles = getLetterStyles(primaryColor);
-  const content = getLetterContent(letter, schoolName, teacherName, primaryColor);
+  const content = getLetterContent(letter, schoolName, teacherName, primaryColor, options);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -576,23 +754,14 @@ function generateLetterHTML(letter: ParentLetter, schoolName: string, teacherNam
   </div>
   <div class="page">
     <div class="letter-header">
-      <div class="brand-row">
-        <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
-        <div class="brand-copy">
-          <div class="brand-name">${BRAND.name}</div>
-          <div class="brand-pack">${BRAND.storyTitle}</div>
-        </div>
-      </div>
-      <div class="stage-pill">${stageMeta.badge}</div>
       <div class="school-info">${schoolName || ''}</div>
       <h1>${letter.title}</h1>
       <div class="subtitle">${letter.subtitle}</div>
-      <div class="brand">${BRAND.name} &bull; ${BRAND.packDescription}</div>
-      <div class="a4-note">A4-ready parent document</div>
+      <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack</div>
     </div>
     ${content}
     <div class="footer">
-      ${BRAND.name} &bull; ${stageMeta.footer} &bull; ${letter.title} &bull; A4 document
+      Many Petals Learning &bull; Cobie Teacher Pack &bull; ${letter.title} &bull; Parent Communication
     </div>
   </div>
 </body>
@@ -660,7 +829,8 @@ function openHTML(html: string, filename: string): { success: boolean; method: s
 export function downloadParentLetter(
   letter: ParentLetter,
   schoolName: string,
-  teacherName: string
+  teacherName: string,
+  options?: ParentLetterOptions
 ): Promise<{ success: boolean; method: string }> {
   return new Promise((resolve) => {
     try {
@@ -668,7 +838,7 @@ export function downloadParentLetter(
         resolve({ success: false, method: 'native' });
         return;
       }
-      const html = generateLetterHTML(letter, schoolName, teacherName);
+      const html = generateLetterHTML(letter, schoolName, teacherName, options);
       const filename = `${letter.title.replace(/\s+/g, '_')}.html`;
       const result = openHTML(html, filename);
       resolve(result);
@@ -696,27 +866,17 @@ export function downloadAllParentLetters(
 
       const allPages = letters.map((letter) => {
         const content = getLetterContent(letter, schoolName, teacherName, letter.color);
-        const stageMeta = getLetterStageMeta(letter.ageRange);
         return `
           <div class="page" style="border-left: 4px solid ${letter.color};">
             <div class="letter-header">
-              <div class="brand-row">
-                <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
-                <div class="brand-copy">
-                  <div class="brand-name">${BRAND.name}</div>
-                  <div class="brand-pack">${BRAND.storyTitle}</div>
-                </div>
-              </div>
-              <div class="stage-pill">${stageMeta.badge}</div>
               <div class="school-info">${schoolName || ''}</div>
               <h1 style="color:${letter.color};">${letter.title}</h1>
               <div class="subtitle">${letter.subtitle}</div>
-              <div class="brand">${BRAND.name} &bull; ${BRAND.packDescription}</div>
-              <div class="a4-note">A4-ready parent document</div>
+              <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack</div>
             </div>
             ${content}
             <div class="footer">
-              ${BRAND.name} &bull; ${stageMeta.footer} &bull; ${letter.title}
+              Many Petals Learning &bull; Cobie Teacher Pack &bull; ${letter.title}
             </div>
           </div>
         `;
@@ -740,19 +900,10 @@ export function downloadAllParentLetters(
   </div>
   <div class="page" style="min-height:auto; padding-bottom:20mm;">
     <div class="letter-header">
-      <div class="brand-row">
-        <img src="${BRAND.logoUrl}" alt="${BRAND.name}" class="brand-logo" />
-        <div class="brand-copy">
-          <div class="brand-name">${BRAND.name}</div>
-          <div class="brand-pack">${BRAND.storyTitle}</div>
-        </div>
-      </div>
-      <div class="stage-pill">EYFS &amp; KS1 Teacher Pack</div>
       <div class="school-info">${schoolName || ''}</div>
       <h1>Parent Communication Pack</h1>
       <div class="subtitle">Cobie Emotional Literacy Programme</div>
-      <div class="brand">${BRAND.name} &bull; ${BRAND.packDescription}</div>
-      <div class="a4-note">A4-ready parent pack</div>
+      <div class="brand">Many Petals Learning &bull; Cobie Teacher Pack</div>
     </div>
     <div class="letter-body">
       <h2>Contents</h2>

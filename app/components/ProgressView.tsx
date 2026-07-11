@@ -40,6 +40,7 @@ interface EmotionLogData {
 interface Props {
   visible: boolean;
   onClose: () => void;
+  onGenerateReport?: () => void;
   pupilCode: string;
   ageGroup: 'EYFS' | 'KS1';
   senStatus: boolean;
@@ -50,7 +51,17 @@ interface Props {
 
 type ViewTab = 'milestones' | 'emotions';
 
-export default function ProgressView({ visible, onClose, pupilCode, ageGroup, senStatus, assessments, emotionLogs = [], onDeleteEmotionLog }: Props) {
+export default function ProgressView({
+  visible,
+  onClose,
+  onGenerateReport,
+  pupilCode,
+  ageGroup,
+  senStatus,
+  assessments,
+  emotionLogs = [],
+  onDeleteEmotionLog,
+}: Props) {
   const [selectedTerm, setSelectedTerm] = useState<string | 'all'>('all');
   const [activeTab, setActiveTab] = useState<ViewTab>('milestones');
   const areas = getMilestonesForAgeGroup(ageGroup);
@@ -146,9 +157,17 @@ export default function ProgressView({ visible, onClose, pupilCode, ageGroup, se
                 ) : null}
               </View>
             </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
-              <Ionicons name="close" size={22} color={COLORS.text} />
-            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              {onGenerateReport ? (
+                <TouchableOpacity onPress={onGenerateReport} style={styles.reportBtn} activeOpacity={0.7}>
+                  <Ionicons name="document-text-outline" size={16} color={COLORS.primary} />
+                  <Text style={styles.reportBtnText}>Report</Text>
+                </TouchableOpacity>
+              ) : null}
+              <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
+                <Ionicons name="close" size={22} color={COLORS.text} />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Tab Switcher */}
@@ -430,6 +449,27 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bgLight,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  reportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    backgroundColor: COLORS.bgLight,
+    borderRadius: RADIUS.round,
+    borderWidth: 1,
+    borderColor: COLORS.primary + '25',
+  },
+  reportBtnText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '700',
+    color: COLORS.primary,
   },
   // Tab bar
   tabBar: {
