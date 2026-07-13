@@ -9,11 +9,13 @@ import {
   SafeAreaView,
   Modal,
   Platform,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { PARENT_LETTERS, ParentLetter } from '../data/parentLetters';
 import { downloadParentLetter, downloadAllParentLetters } from '../lib/parentLetterGenerator';
+import BrandedScreenHeader from '../components/BrandedScreenHeader';
 import { useToast } from '../context/ToastContext';
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -30,6 +32,8 @@ const CATEGORY_LABELS: Record<string, string> = {
   report: 'Report Template',
 };
 
+const PARENT_APP_URL = 'https://cobie-parent-app-nns9.vercel.app/';
+
 export default function ParentCommunicationScreen() {
   const { showToast, showConfirm } = useToast();
   const [schoolName, setSchoolName] = useState('');
@@ -37,6 +41,24 @@ export default function ParentCommunicationScreen() {
   const [downloading, setDownloading] = useState<string | null>(null);
   const [previewLetter, setPreviewLetter] = useState<ParentLetter | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+
+  const openParentApp = useCallback(() => {
+    try {
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        window.open(PARENT_APP_URL, '_blank', 'noopener,noreferrer');
+      } else {
+        Linking.openURL(PARENT_APP_URL).catch(() => {});
+      }
+
+      showToast(
+        'Parent App Opened',
+        'The parent app is opening separately for home check-ins and family follow-up. Live tracker syncing is not connected yet.',
+        'success'
+      );
+    } catch {
+      showToast('Could Not Open', 'Please try opening the parent app again.', 'error');
+    }
+  }, [showToast]);
 
   const handleDownload = useCallback(async (letter: ParentLetter) => {
     setDownloading(letter.id);
@@ -92,35 +114,31 @@ export default function ParentCommunicationScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.headerIconWrap}>
-            <Ionicons name="people" size={22} color={COLORS.white} />
+      <BrandedScreenHeader
+        title="Parent Communication"
+        subtitle="Teacher-facing letters, reports, and home resources, with the parent app kept as a separate family tool."
+        icon="people"
+        iconColor={COLORS.primary}
+        rightAction={(
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={styles.settingsBtn}
+              onPress={() => setShowSettings(true)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="settings-outline" size={20} color={COLORS.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.downloadAllBtn}
+              onPress={handleDownloadAll}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="download" size={16} color={COLORS.white} />
+              <Text style={styles.downloadAllText}>All</Text>
+            </TouchableOpacity>
           </View>
-          <View>
-            <Text style={styles.headerTitle}>Parent Communication</Text>
-            <Text style={styles.headerSub}>Letters, sheets &amp; templates</Text>
-          </View>
-        </View>
-        <View style={styles.headerActions}>
-          <TouchableOpacity
-            style={styles.settingsBtn}
-            onPress={() => setShowSettings(true)}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="settings-outline" size={20} color={COLORS.primary} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.downloadAllBtn}
-            onPress={handleDownloadAll}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="download" size={16} color={COLORS.white} />
-            <Text style={styles.downloadAllText}>All</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+        )}
+      />
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
         {/* Personalisation Banner */}
@@ -179,10 +197,22 @@ export default function ParentCommunicationScreen() {
           ) : null}
         </View>
 
+        <View style={styles.workflowCard}>
+          <View style={styles.workflowIcon}>
+            <Ionicons name="layers-outline" size={20} color={COLORS.primary} />
+          </View>
+          <View style={styles.workflowContent}>
+            <Text style={styles.workflowTitle}>Keep teacher tools here, open the parent app separately</Text>
+            <Text style={styles.workflowText}>
+              Use this screen for parent letters, home sheets, and progress reports. When you want families to continue at home, open the parent app as a separate tab below.
+            </Text>
+          </View>
+        </View>
+
         {/* Section Title */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Available Documents</Text>
-          <Text style={styles.sectionCount}>{PARENT_LETTERS.length} templates</Text>
+          <Text style={styles.sectionTitle}>Parent Letters & Reports</Text>
+          <Text style={styles.sectionCount}>{PARENT_LETTERS.length} teacher templates</Text>
         </View>
 
         {/* Letter Cards */}
@@ -253,6 +283,32 @@ export default function ParentCommunicationScreen() {
           );
         })}
 
+        <View style={styles.parentAppCard}>
+          <View style={styles.parentAppHeader}>
+            <View style={styles.parentAppIcon}>
+              <Ionicons name="open-outline" size={20} color={COLORS.primary} />
+            </View>
+            <View style={styles.parentAppCopy}>
+              <Text style={styles.parentAppTitle}>Cobie Parent App</Text>
+              <Text style={styles.parentAppText}>
+                Open the family app in a new tab for home emotion check-ins, calming ideas, and follow-up activities linked to the Cobie programme.
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.parentAppNotice}>
+            <Ionicons name="information-circle-outline" size={16} color={COLORS.info} />
+            <Text style={styles.parentAppNoticeText}>
+              Teacher tracker data does not automatically sync into the parent app yet. Right now, use it as a separate home-support tool.
+            </Text>
+          </View>
+
+          <TouchableOpacity style={styles.parentAppButton} onPress={openParentApp} activeOpacity={0.7}>
+            <Ionicons name="globe-outline" size={16} color={COLORS.white} />
+            <Text style={styles.parentAppButtonText}>Open Parent App</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Tips Section */}
         <View style={styles.tipsCard}>
           <View style={styles.tipsHeader}>
@@ -266,6 +322,7 @@ export default function ParentCommunicationScreen() {
               { icon: 'clipboard-outline', text: 'Send the sensory questionnaire early and allow 1-2 weeks for return' },
               { icon: 'calendar-outline', text: 'Use the progress report at the end of each half-term or as needed for individual children' },
               { icon: 'chatbubbles-outline', text: 'Personalise documents with your school and name for a professional touch' },
+              { icon: 'open-outline', text: 'Open the parent app separately when you want families to continue with home check-ins and calm strategies' },
               { icon: 'print-outline', text: 'All documents are A4-ready \u2013 use "Print / Save as PDF" for best results' },
             ].map((tip, i) => (
               <View key={i} style={styles.tipRow}>
@@ -280,7 +337,7 @@ export default function ParentCommunicationScreen() {
         <View style={styles.infoFooter}>
           <Ionicons name="information-circle-outline" size={16} color={COLORS.textMuted} />
           <Text style={styles.infoFooterText}>
-            All documents are designed to be printed on A4 paper. For best results, use the "Print / Save as PDF" button in the opened document. Documents open in a new browser tab.
+            All documents are designed to be printed on A4 paper. For best results, use the "Print / Save as PDF" button in the opened document. Parent documents open in a new browser tab, and the parent app remains a separate family-facing destination.
           </Text>
         </View>
 
@@ -504,27 +561,6 @@ export default function ParentCommunicationScreen() {
 /* ------------------------------------------------------------------ */
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.bgLight },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-    paddingBottom: SPACING.md,
-  },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
-  headerIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitle: { fontSize: FONT_SIZES.xl, fontWeight: '800', color: COLORS.text },
-  headerSub: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, marginTop: 1 },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   settingsBtn: {
     width: 36,
@@ -612,6 +648,28 @@ const styles = StyleSheet.create({
   },
   previewBadgeText: { fontSize: FONT_SIZES.xs, color: COLORS.success, fontWeight: '600' },
 
+  workflowCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.lg,
+    ...SHADOWS.small,
+    gap: SPACING.md,
+  },
+  workflowIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: COLORS.primary + '12',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  workflowContent: { flex: 1 },
+  workflowTitle: { fontSize: FONT_SIZES.md, fontWeight: '700', color: COLORS.text },
+  workflowText: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20, marginTop: 4 },
+
   // Section
   sectionHeader: {
     flexDirection: 'row',
@@ -692,6 +750,54 @@ const styles = StyleSheet.create({
   },
   downloadBtnDisabled: { opacity: 0.6 },
   downloadBtnText: { fontSize: FONT_SIZES.sm, fontWeight: '700', color: COLORS.white },
+
+  parentAppCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.primary + '20',
+    ...SHADOWS.small,
+  },
+  parentAppHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.md,
+  },
+  parentAppIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: COLORS.primary + '14',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  parentAppCopy: { flex: 1 },
+  parentAppTitle: { fontSize: FONT_SIZES.md, fontWeight: '700', color: COLORS.text },
+  parentAppText: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20, marginTop: 4 },
+  parentAppNotice: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
+    padding: SPACING.md,
+    backgroundColor: '#EAF4FB',
+    borderRadius: RADIUS.lg,
+  },
+  parentAppNoticeText: { flex: 1, fontSize: FONT_SIZES.xs, color: COLORS.info, lineHeight: 18 },
+  parentAppButton: {
+    marginTop: SPACING.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: COLORS.primary,
+    borderRadius: RADIUS.round,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+  },
+  parentAppButtonText: { fontSize: FONT_SIZES.sm, fontWeight: '700', color: COLORS.white },
 
   // Tips
   tipsCard: {

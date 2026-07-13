@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { openParentApp } from './lib/parentAppLinks';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+
+const PARENT_APP_URL = 'https://cobie-parent-app-nns9.vercel.app/';
 
 export default function GuideScreen() {
   return (
@@ -46,16 +47,19 @@ export default function GuideScreen() {
       </Text>
       <Text style={styles.section}>7. Home Support</Text>
       <Text style={styles.text}>
-  Send parent letters home and invite families to download the Cobie Parent App so they can continue emotional check-ins, calming strategies and home activities beyond the classroom.
-</Text>
-<TouchableOpacity
-  style={{ marginTop: 12, padding: 10, backgroundColor: "#4CAF50", borderRadius: 8 }}
-  onPress={() => openParentApp('home').catch(() => {})}
->
-  <Text style={{ color: "#fff", fontWeight: "600" }}>
-    Open the Cobie Parent App
-  </Text>
-</TouchableOpacity>
+        Send parent letters and reports from the teacher app, then invite families to open the Cobie Parent App for home check-ins, calming strategies, and follow-up activities.
+      </Text>
+      <Text style={styles.text}>
+        The parent app is a separate family tool. It does not automatically show live tracker progress yet.
+      </Text>
+      <TouchableOpacity
+        style={{ marginTop: 12, padding: 10, backgroundColor: "#4CAF50", borderRadius: 8 }}
+        onPress={() => Linking.openURL(PARENT_APP_URL)}
+      >
+        <Text style={{ color: "#fff", fontWeight: "600" }}>
+          Open the Cobie Parent App
+        </Text>
+      </TouchableOpacity>
 
       <View style={{ height: 60 }} />
     </ScrollView>
