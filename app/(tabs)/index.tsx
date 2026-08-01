@@ -26,7 +26,7 @@ import { useToast } from '../context/ToastContext';
 import { LESSONS } from '../data/lessons';
 import { ACTIVITIES } from '../data/activities';
 import { PRINTABLES } from '../data/printables';
-import { BRAND } from '../data/brand';
+import { BRAND, LOCAL_LOGO } from '../data/brand';
 import { openParentApp, ParentAppSection } from '../lib/parentAppLinks';
 
 const HERO_IMAGE = 'https://d64gsuwffb70l.cloudfront.net/69357762fff8f7f4abcd8985_1771287970946_68002315.png';
@@ -41,6 +41,12 @@ type QuickTileConfig = {
   externalSection?: ParentAppSection;
 };
 
+type HeaderLinkConfig = {
+  label: string;
+  route?: string;
+  externalSection?: ParentAppSection;
+};
+
 const QUICK_TILES: QuickTileConfig[] = [
   { title: 'Lessons', subtitle: '8 Core', icon: 'book', color: '#1B6B93', bgColor: '#E1F5FE', route: '/lessons' },
   { title: 'Activities', subtitle: '8 Optional', icon: 'color-palette', color: '#7BC67E', bgColor: '#E8F5E9', route: '/activities' },
@@ -49,6 +55,14 @@ const QUICK_TILES: QuickTileConfig[] = [
   { title: 'Parents', subtitle: 'Parent App', icon: 'people', color: '#1B6B93', bgColor: '#E1F5FE', externalSection: 'home' },
   { title: 'Emotions', subtitle: 'Interactive', icon: 'heart', color: '#F48FB1', bgColor: '#FCE4EC', route: '/tools' },
   { title: 'Calm Corner', subtitle: 'Builder', icon: 'leaf', color: '#81C784', bgColor: '#E8F5E9', route: '/calm' },
+];
+
+const HEADER_LINKS: HeaderLinkConfig[] = [
+  { label: 'Lessons', route: '/lessons' },
+  { label: 'Activities', route: '/activities' },
+  { label: 'Printables', route: '/printables' },
+  { label: 'Tracker', externalSection: 'tracker' },
+  { label: 'Parents', externalSection: 'home' },
 ];
 
 
@@ -335,6 +349,8 @@ export default function HomeScreen() {
   const [mounted, setMounted] = useState(false);
   const isCompactHero = width < 1320;
   const isTightHero = width < 1080;
+  const showDesktopNav = width >= 1100;
+  const showDesktopHero = width >= 980;
 
   useEffect(() => {
     setMounted(true);
@@ -351,14 +367,42 @@ export default function HomeScreen() {
     }
   };
 
+  const handleHeaderLinkPress = async (link: HeaderLinkConfig) => {
+    if (link.externalSection) {
+      await openParentApp(link.externalSection);
+      return;
+    }
+
+    if (link.route) {
+      router.push(link.route as any);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
 
 
       {/* App Header Bar with Many Petals branding */}
       <View style={styles.appHeader}>
-        <BrandLockup size="sm" mode="plain" />
+        <BrandLockup size={showDesktopNav ? 'md' : 'sm'} mode="plain" />
+        {showDesktopNav ? (
+          <View style={styles.headerNav}>
+            {HEADER_LINKS.map((link) => (
+              <TouchableOpacity
+                key={link.label}
+                style={styles.headerNavLink}
+                onPress={() => {
+                  handleHeaderLinkPress(link).catch(() => {});
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.headerNavText}>{link.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : null}
         <View style={styles.headerActions}>
+          {showDesktopNav ? <SENBanner compact /> : null}
           <TouchableOpacity
             style={styles.pricingBtn}
             onPress={() => setShowPricing(true)}
@@ -396,67 +440,83 @@ export default function HomeScreen() {
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
         {/* Hero Section */}
-        <View style={[styles.hero, isCompactHero && styles.heroCompact, isTightHero && styles.heroTight]}>
-          <Image
-            source={{ uri: HERO_IMAGE }}
-            style={styles.heroImage}
-            resizeMode="cover"
-          />
-          <View style={styles.heroOverlay}>
-            <View style={[styles.heroContent, isCompactHero && styles.heroContentCompact]}>
-              <Text style={styles.heroEyebrow}>Cobie Teacher Pack</Text>
-              <Text style={[styles.heroTitle, isCompactHero && styles.heroTitleCompact, isTightHero && styles.heroTitleTight]}>
-                Ready-to-teach emotional literacy for EYFS &amp; KS1
-              </Text>
-              <Text style={[styles.heroSubtitle, isTightHero && styles.heroSubtitleTight]}>
-                Use story-led lessons, classroom printables, and calm teaching prompts tomorrow with less prep.
-              </Text>
-              <Text style={styles.heroDescription}>
-                Built for busy teachers who want calm, classroom-ready support without extra planning time.
-              </Text>
+        <View style={styles.heroOuter}>
+          <View style={[styles.hero, isCompactHero && styles.heroCompact, isTightHero && styles.heroTight]}>
+            <View style={styles.heroGlowLeft} />
+            <View style={styles.heroGlowRight} />
+            <View style={[styles.heroInner, showDesktopHero && styles.heroInnerDesktop]}>
+              <View style={[styles.heroContent, isCompactHero && styles.heroContentCompact]}>
+                <Text style={styles.heroEyebrow}>Many Petals companion resource</Text>
+                <Text style={[styles.heroTitle, isCompactHero && styles.heroTitleCompact, isTightHero && styles.heroTitleTight]}>
+                  Teach emotional literacy with{'\n'}
+                  <Text style={styles.heroTitleAccent}>Cobie the Cactus</Text>
+                </Text>
+                <Text style={[styles.heroSubtitle, isTightHero && styles.heroSubtitleTight]}>
+                  Ready-to-teach emotional literacy for EYFS &amp; KS1, inspired by {BRAND.storyTitle}.
+                </Text>
 
-              <View style={styles.heroPoints}>
-                <View style={styles.heroPoint}>
-                  <Ionicons name="checkmark-circle" size={16} color={COLORS.accent} />
-                  <Text style={styles.heroPointText}>8 structured lessons</Text>
+                <View style={styles.heroButtons}>
+                  <TouchableOpacity
+                    style={styles.heroButton}
+                    onPress={() => router.push('/lessons')}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="play-circle" size={20} color={COLORS.white} />
+                    <Text style={styles.heroButtonText}>Start teaching</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.heroButtonSecondary}
+                    onPress={() => router.push('/activities')}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.heroButtonSecondaryText}>Explore activities</Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.heroPoint}>
-                  <Ionicons name="checkmark-circle" size={16} color={COLORS.accent} />
-                  <Text style={styles.heroPointText}>A4 printables included</Text>
-                </View>
-                <View style={styles.heroPoint}>
-                  <Ionicons name="checkmark-circle" size={16} color={COLORS.accent} />
-                  <Text style={styles.heroPointText}>SEN-aware classroom support</Text>
-                </View>
-              </View>
 
-              <View style={styles.heroButtons}>
+                <View style={styles.heroStatsRow}>
+                  <View style={styles.heroStat}>
+                    <Text style={styles.heroStatNumber}>8</Text>
+                    <Text style={styles.heroStatLabel}>core lessons</Text>
+                  </View>
+                  <View style={styles.heroStat}>
+                    <Text style={styles.heroStatNumber}>18</Text>
+                    <Text style={styles.heroStatLabel}>ready-to-print resources</Text>
+                  </View>
+                  <View style={styles.heroStat}>
+                    <Text style={styles.heroStatNumber}>EYFS + KS1</Text>
+                    <Text style={styles.heroStatLabel}>friendly</Text>
+                  </View>
+                </View>
+
                 <TouchableOpacity
-                  style={styles.heroButton}
-                  onPress={() => router.push('/lessons')}
+                  style={styles.heroTextLink}
+                  onPress={() => router.push('/guide' as any)}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="play-circle" size={20} color={COLORS.white} />
-                  <Text style={styles.heroButtonText}>Start Teaching</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.heroButtonLink}
-                  onPress={() => setShowPricing(true)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.heroButtonLinkText}>View Plans</Text>
-                  <Ionicons name="arrow-forward" size={14} color={COLORS.white} />
+                  <Text style={styles.heroTextLinkText}>How to use this programme</Text>
+                  <Ionicons name="arrow-forward" size={14} color={COLORS.primaryDark} />
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity
-                style={styles.heroTextLink}
-                onPress={() => router.push('/guide' as any)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.heroTextLinkText}>How to use this programme</Text>
-                <Ionicons name="arrow-forward" size={14} color={COLORS.white} />
-              </TouchableOpacity>
+              <View style={[styles.heroVisualWrap, !showDesktopHero && styles.heroVisualWrapStack]}>
+                <View style={styles.heroVisualCard}>
+                  <Image
+                    source={{ uri: HERO_IMAGE }}
+                    style={styles.heroVisualImage}
+                    resizeMode="cover"
+                  />
+                  <View style={styles.heroVisualBubble}>
+                    <Text style={styles.heroVisualBubbleText}>Big feelings are welcome here.</Text>
+                  </View>
+                </View>
+                {!showDesktopHero ? (
+                  <Image
+                    source={LOCAL_LOGO}
+                    style={styles.heroMascotBadge}
+                    resizeMode="contain"
+                  />
+                ) : null}
+              </View>
             </View>
           </View>
         </View>
@@ -485,7 +545,7 @@ export default function HomeScreen() {
                 <View style={styles.progressDivider} />
                 <TouchableOpacity style={styles.progressItem} onPress={() => setShowProfile(true)}>
                   <Ionicons name="bookmark" size={20} color={COLORS.primary} />
-                  <Text style={[styles.progressLabel, { color: COLORS.primary, fontWeight: '700' }]}>View All</Text>
+                  <Text style={[styles.progressLabel, { color: COLORS.primary, fontWeight: '700' }]}>Open profile</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -493,7 +553,7 @@ export default function HomeScreen() {
         ) : null}
 
         {/* SEN Mode Toggle */}
-        <SENBanner />
+        {!showDesktopNav ? <SENBanner /> : null}
 
         {/* Quick Access Grid */}
         <View style={styles.section}>
@@ -705,12 +765,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: SPACING.md,
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.xl,
     paddingTop: SPACING.md,
     paddingBottom: SPACING.md,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.lightGray,
+  },
+  headerNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xl,
+    flex: 1,
+    marginHorizontal: SPACING.xl,
+  },
+  headerNavLink: {
+    paddingVertical: SPACING.xs,
+  },
+  headerNavText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '600',
+    color: COLORS.textLight,
   },
   headerActions: {
     flexDirection: 'row',
@@ -773,15 +849,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   welcomeSection: {
-    paddingHorizontal: SPACING.lg,
-    marginTop: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    marginTop: SPACING.lg,
   },
   welcomeCard: {
     backgroundColor: COLORS.white,
     borderRadius: RADIUS.xl,
-    padding: SPACING.lg,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.accent,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
     ...SHADOWS.small,
   },
   welcomeTop: {
@@ -805,7 +881,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   progressNum: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: FONT_SIZES.md,
     fontWeight: '800',
     color: COLORS.text,
   },
@@ -819,112 +895,119 @@ const styles = StyleSheet.create({
     height: 30,
     backgroundColor: COLORS.lightGray,
   },
+  heroOuter: {
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.xl,
+  },
   hero: {
-    minHeight: 272,
+    minHeight: 440,
     position: 'relative',
     overflow: 'hidden',
+    backgroundColor: '#F8FBEF',
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: '#E7EFD7',
   },
   heroCompact: {
-    minHeight: 252,
+    minHeight: 420,
   },
   heroTight: {
-    minHeight: 236,
+    minHeight: 540,
   },
-  heroImage: {
-    width: '100%',
-    height: '100%',
+  heroGlowLeft: {
+    position: 'absolute',
+    top: -30,
+    left: -20,
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    backgroundColor: 'rgba(245,215,110,0.20)',
   },
-  heroOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(27, 107, 147, 0.82)',
-    justifyContent: 'center',
-    paddingTop: SPACING.lg,
-    paddingBottom: SPACING.md,
-    overflow: 'hidden',
+  heroGlowRight: {
+    position: 'absolute',
+    right: -40,
+    top: 30,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: 'rgba(27,107,147,0.10)',
+  },
+  heroInner: {
+    flexDirection: 'column',
+    gap: SPACING.xl,
+    paddingHorizontal: SPACING.xxxl,
+    paddingVertical: SPACING.xxxl,
+  },
+  heroInnerDesktop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   heroContent: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.md,
     width: '100%',
-    maxWidth: 680,
+    maxWidth: 620,
     minWidth: 0,
     alignSelf: 'flex-start',
   },
   heroContentCompact: {
-    maxWidth: 600,
+    maxWidth: 560,
   },
   heroEyebrow: {
     fontSize: FONT_SIZES.xs,
     fontWeight: '800',
-    color: COLORS.accent,
+    color: '#5F7B4D',
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: SPACING.xs,
   },
   heroTitle: {
-    fontSize: 28,
+    fontSize: 54,
     fontWeight: '800',
-    color: COLORS.white,
-    textShadowColor: 'rgba(0,0,0,0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
-    lineHeight: 34,
+    color: '#213A2E',
+    lineHeight: 60,
     maxWidth: '100%',
   },
+  heroTitleAccent: {
+    color: '#D59B13',
+  },
   heroTitleCompact: {
-    fontSize: 25,
-    lineHeight: 31,
+    fontSize: 46,
+    lineHeight: 52,
   },
   heroTitleTight: {
-    fontSize: 22,
-    lineHeight: 27,
+    fontSize: 40,
+    lineHeight: 46,
   },
   heroSubtitle: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: '700',
-    color: COLORS.white,
-    marginTop: 6,
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '500',
+    color: COLORS.textLight,
+    marginTop: SPACING.lg,
+    lineHeight: 28,
   },
   heroSubtitleTight: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: FONT_SIZES.md,
   },
   heroDescription: {
     fontSize: FONT_SIZES.sm,
-    color: 'rgba(255,255,255,0.9)',
+    color: COLORS.textLight,
     marginTop: 8,
     lineHeight: 18,
-  },
-  heroPoints: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm,
-    marginTop: SPACING.sm,
-  },
-  heroPoint: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  heroPointText: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: '700',
-    color: COLORS.white,
   },
   heroButtons: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
-    marginTop: SPACING.sm,
+    gap: SPACING.md,
+    marginTop: SPACING.xl,
     flexWrap: 'wrap',
   },
   heroButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: COLORS.secondary,
+    backgroundColor: '#1E5D44',
     paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.sm + 2,
+    paddingVertical: SPACING.md,
     borderRadius: RADIUS.round,
     ...SHADOWS.medium,
   },
@@ -933,20 +1016,24 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.white,
   },
-  heroButtonLink: {
+  heroButtonSecondary: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
+    justifyContent: 'center',
+    backgroundColor: COLORS.white,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.round,
+    borderWidth: 1,
+    borderColor: '#E5E2D7',
   },
-  heroButtonLinkText: {
-    fontSize: FONT_SIZES.sm,
+  heroButtonSecondaryText: {
+    fontSize: FONT_SIZES.md,
     fontWeight: '700',
-    color: COLORS.white,
+    color: COLORS.text,
   },
   heroTextLink: {
-    marginTop: SPACING.xs,
+    marginTop: SPACING.lg,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
@@ -955,11 +1042,72 @@ const styles = StyleSheet.create({
   heroTextLinkText: {
     fontSize: FONT_SIZES.sm,
     fontWeight: '700',
-    color: COLORS.white,
-    textDecorationLine: 'underline',
+    color: COLORS.primaryDark,
+  },
+  heroStatsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xl,
+    marginTop: SPACING.xxl,
+  },
+  heroStat: {
+    minWidth: 100,
+  },
+  heroStatNumber: {
+    fontSize: FONT_SIZES.xxl,
+    fontWeight: '800',
+    color: '#214335',
+  },
+  heroStatLabel: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    marginTop: 2,
+  },
+  heroVisualWrap: {
+    width: '100%',
+    maxWidth: 420,
+    alignSelf: 'center',
+  },
+  heroVisualWrapStack: {
+    maxWidth: '100%',
+  },
+  heroVisualCard: {
+    minHeight: 320,
+    borderRadius: 28,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.55)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.75)',
+    ...SHADOWS.large,
+  },
+  heroVisualImage: {
+    width: '100%',
+    height: '100%',
+  },
+  heroVisualBubble: {
+    position: 'absolute',
+    right: SPACING.lg,
+    bottom: SPACING.lg,
+    backgroundColor: COLORS.white,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.lg,
+    ...SHADOWS.small,
+  },
+  heroVisualBubbleText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '600',
+    color: COLORS.textLight,
+  },
+  heroMascotBadge: {
+    width: 88,
+    height: 88,
+    alignSelf: 'center',
+    marginTop: SPACING.lg,
   },
   section: {
-    marginTop: SPACING.lg,
+    marginTop: SPACING.xl,
+    paddingHorizontal: SPACING.xl,
   },
   sectionTitle: {
     fontSize: FONT_SIZES.xl,
