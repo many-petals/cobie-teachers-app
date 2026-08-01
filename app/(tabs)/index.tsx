@@ -384,7 +384,7 @@ export default function HomeScreen() {
 
       {/* App Header Bar with Many Petals branding */}
       <View style={styles.appHeader}>
-        <BrandLockup size={showDesktopNav ? 'md' : 'sm'} mode="plain" />
+        <BrandLockup size={showDesktopNav ? 'lg' : 'md'} mode="plain" />
         {showDesktopNav ? (
           <View style={styles.headerNav}>
             {HEADER_LINKS.map((link) => (
@@ -698,8 +698,7 @@ export default function HomeScreen() {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <BrandLockup size="sm" mode="plain" />
-          <Text style={styles.footerStory}>{BRAND.tagline}</Text>
+          <BrandLockup size="lg" mode="wordmark" showSubtitle={false} />
           <Text style={styles.footerText}>{BRAND.sharedPlatformLine}</Text>
           <Text style={styles.footerBookLine}>{BRAND.storyTitle}</Text>
           <View style={styles.footerLinks}>
@@ -765,28 +764,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: SPACING.md,
-    paddingHorizontal: SPACING.xl,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.md,
+    minHeight: 82,
+    paddingHorizontal: SPACING.xxl,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.lg,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.lightGray,
+    borderBottomColor: '#E8EEDC',
   },
   headerNav: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: SPACING.xl,
+    gap: SPACING.lg,
     flex: 1,
-    marginHorizontal: SPACING.xl,
+    marginHorizontal: SPACING.lg,
   },
   headerNavLink: {
     paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.xs,
   },
   headerNavText: {
     fontSize: FONT_SIZES.sm,
-    fontWeight: '600',
-    color: COLORS.textLight,
+    fontWeight: '700',
+    color: '#5A6F62',
   },
   headerActions: {
     flexDirection: 'row',

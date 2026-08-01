@@ -59,7 +59,7 @@ export default function WorkbookPromo({ compact = false }: WorkbookPromoProps) {
       </TouchableOpacity>
 
       <View style={styles.header}>
-        <BrandLockup size="sm" mode="pill" style={styles.brandLockup} />
+        <BrandLockup size="sm" mode="pill" showSubtitle={false} style={styles.brandLockup} />
         <View style={styles.newBadge}>
           <Ionicons name="book-outline" size={12} color={COLORS.white} />
           <Text style={styles.newBadgeText}>Companion Workbook</Text>

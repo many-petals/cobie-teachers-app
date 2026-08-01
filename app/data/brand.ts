@@ -18,7 +18,7 @@
 //      source={LOCAL_LOGO}
 // ============================================================
 
-export const LOCAL_LOGO = require('../assets/images/logo.png');
+export const LOCAL_LOGO = require('../assets/images/brand-mark-ui.png');
 export const LOCAL_WORDMARK = require('../assets/images/brand-wordmark.png');
 
 export const BRAND = {
