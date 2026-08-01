@@ -19,6 +19,7 @@
 // ============================================================
 
 export const LOCAL_LOGO = require('../assets/images/logo.png');
+export const LOCAL_WORDMARK = require('../assets/images/brand-wordmark.png');
 
 export const BRAND = {
   // ⬇️ REPLACE THIS URL WITH YOUR NEW LOGO IMAGE URL ⬇️
@@ -32,4 +33,5 @@ export const BRAND = {
   packDescription: 'EYFS & KS1 Teacher Resource Pack',
   copyright: 'All story and character content \u00A9 Many Petals Learning',
   helperLine: 'Story-led emotional literacy for EYFS & KS1 classrooms',
+  sharedPlatformLine: 'Ready-to-teach emotional literacy for EYFS & KS1',
 };

@@ -32,17 +32,17 @@ export default function WorkbookPromo({ compact = false }: WorkbookPromoProps) {
       <TouchableOpacity style={styles.compactCard} onPress={handleBuyNow} activeOpacity={0.7}>
         <View style={styles.compactLeft}>
           <View style={styles.compactBadge}>
-            <Ionicons name="book" size={14} color={COLORS.white} />
-            <Text style={styles.compactBadgeText}>WORKBOOK</Text>
+            <Ionicons name="book-outline" size={12} color={COLORS.primaryDark} />
+            <Text style={styles.compactBadgeText}>Official companion workbook</Text>
           </View>
           <Text style={styles.compactTitle}>Cobie Activity Workbook</Text>
           <Text style={styles.compactSubtitle}>
-            Story-linked print support for classroom follow-up and home links
+            Story-linked classroom follow-up, home links, and printable extension work
           </Text>
         </View>
         <View style={styles.compactRight}>
           <Text style={styles.compactPrice}>View book</Text>
-          <Ionicons name="arrow-forward-circle" size={20} color={COLORS.primary} />
+          <Ionicons name="arrow-forward-circle" size={20} color={COLORS.primaryDark} />
         </View>
       </TouchableOpacity>
     );
@@ -102,7 +102,7 @@ export default function WorkbookPromo({ compact = false }: WorkbookPromoProps) {
           </View>
 
           <View style={styles.priceRow}>
-            <Text style={styles.price}>£8.99</Text>
+            <Text style={styles.price}>GBP 8.99</Text>
             <Text style={styles.priceNote}>Paperback on Amazon</Text>
           </View>
 
@@ -256,11 +256,13 @@ const styles = StyleSheet.create({
   compactCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.bgWarm,
+    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
-    padding: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.accent + '40',
+    borderColor: COLORS.accent + '35',
+    ...SHADOWS.small,
   },
   compactLeft: {
     flex: 1,
@@ -268,22 +270,24 @@ const styles = StyleSheet.create({
   compactBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
-    backgroundColor: COLORS.accentOrange,
+    gap: 5,
+    backgroundColor: COLORS.bgWarm,
     alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: RADIUS.round,
-    marginBottom: 4,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: COLORS.accent + '45',
   },
   compactBadgeText: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: COLORS.white,
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.primaryDark,
   },
   compactTitle: {
     fontSize: FONT_SIZES.sm,
-    fontWeight: '700',
+    fontWeight: '800',
     color: COLORS.text,
   },
   compactSubtitle: {
@@ -299,6 +303,6 @@ const styles = StyleSheet.create({
   compactPrice: {
     fontSize: FONT_SIZES.sm,
     fontWeight: '800',
-    color: COLORS.primary,
+    color: COLORS.primaryDark,
   },
 });
