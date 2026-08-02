@@ -345,11 +345,12 @@ export default function HomeScreen() {
   const [showPricing, setShowPricing] = useState(false);
   // Track client-side mount to prevent hydration mismatch from auth state
   const [mounted, setMounted] = useState(false);
-  const isCompactHero = width < 1320;
-  const isTightHero = width < 1080;
-  const showDesktopNav = width >= 1100;
-  const showDesktopHero = width >= 980;
-  const showDesktopShell = width >= 1220;
+  const isCompactHero = width < 1220;
+  const isTightHero = width < 900;
+  const showDesktopNav = width >= 960;
+  const showDesktopHero = width >= 860;
+  const showDesktopShell = width >= 960;
+  const headerBrandSize = width < 420 ? 'sm' : 'md';
 
   useEffect(() => {
     setMounted(true);
@@ -383,7 +384,7 @@ export default function HomeScreen() {
 
       {/* App Header Bar with Many Petals branding */}
       <View style={[styles.appHeader, showDesktopShell && styles.appHeaderDesktop]}>
-        <BrandLockup size={showDesktopNav ? 'md' : 'sm'} mode="plain" />
+        <BrandLockup size={showDesktopNav ? 'md' : headerBrandSize} mode="plain" />
         {showDesktopNav ? (
           <View style={styles.headerNav}>
             {HEADER_LINKS.map((link) => (
@@ -656,10 +657,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: SPACING.md,
-    minHeight: 76,
-    paddingHorizontal: SPACING.xxl,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.md,
+    minHeight: 68,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.sm,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: '#E8EEDC',
@@ -668,6 +669,10 @@ const styles = StyleSheet.create({
     maxWidth: 1440,
     width: '100%',
     alignSelf: 'center',
+    minHeight: 76,
+    paddingHorizontal: SPACING.xxl,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.md,
   },
   headerNav: {
     flexDirection: 'row',
@@ -798,13 +803,13 @@ const styles = StyleSheet.create({
   },
   heroOuter: {
     paddingHorizontal: SPACING.xl,
-    paddingTop: SPACING.lg,
+    paddingTop: SPACING.md,
     maxWidth: 1440,
     width: '100%',
     alignSelf: 'center',
   },
   hero: {
-    minHeight: 335,
+    minHeight: 308,
     position: 'relative',
     overflow: 'hidden',
     backgroundColor: '#F6FBEA',
@@ -814,10 +819,10 @@ const styles = StyleSheet.create({
     ...SHADOWS.medium,
   },
   heroCompact: {
-    minHeight: 320,
+    minHeight: 292,
   },
   heroTight: {
-    minHeight: 350,
+    minHeight: 278,
   },
   heroGlowLeft: {
     position: 'absolute',
@@ -849,14 +854,16 @@ const styles = StyleSheet.create({
   heroInner: {
     flexDirection: 'column',
     gap: SPACING.lg,
-    paddingHorizontal: SPACING.xxxl,
-    paddingVertical: SPACING.xxl,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.xl,
   },
   heroInnerDesktop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: SPACING.xl,
+    paddingHorizontal: SPACING.xxxl,
+    paddingVertical: SPACING.xxl,
   },
   heroContent: {
     flex: 1,
@@ -877,10 +884,10 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   heroTitle: {
-    fontSize: 52,
+    fontSize: 48,
     fontWeight: '800',
     color: '#213A2E',
-    lineHeight: 56,
+    lineHeight: 52,
     maxWidth: '100%',
     letterSpacing: -1.1,
   },
@@ -888,12 +895,12 @@ const styles = StyleSheet.create({
     color: '#D89C19',
   },
   heroTitleCompact: {
-    fontSize: 44,
-    lineHeight: 48,
+    fontSize: 40,
+    lineHeight: 44,
   },
   heroTitleTight: {
-    fontSize: 36,
-    lineHeight: 40,
+    fontSize: 33,
+    lineHeight: 37,
   },
   heroSubtitle: {
     fontSize: FONT_SIZES.xl,
@@ -981,7 +988,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   heroVisualScene: {
-    minHeight: 310,
+    minHeight: 282,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
@@ -1022,8 +1029,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.68)',
   },
   heroCharacterWrap: {
-    width: 340,
-    height: 320,
+    width: 310,
+    height: 286,
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
