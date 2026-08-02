@@ -28,7 +28,7 @@ import { PRINTABLES } from '../data/printables';
 import { BRAND, LOCAL_LOGO } from '../data/brand';
 import { openParentApp, ParentAppSection } from '../lib/parentAppLinks';
 
-const HERO_BOOK_IMAGE = 'https://d64gsuwffb70l.cloudfront.net/6993b5b66d45d72ccfd31c24_1771291498634_bbc463f2.jpg';
+const HERO_CHARACTER_IMAGE = require('../assets/images/cobie-hero.png');
 
 type QuickTileConfig = {
   title: string;
@@ -49,11 +49,11 @@ type HeaderLinkConfig = {
 const QUICK_TILES: QuickTileConfig[] = [
   { title: 'Lessons', subtitle: '8 Core', icon: 'book', color: '#1B6B93', bgColor: '#E1F5FE', route: '/lessons' },
   { title: 'Activities', subtitle: '8 Optional', icon: 'color-palette', color: '#7BC67E', bgColor: '#E8F5E9', route: '/activities' },
-  { title: 'Tracker', subtitle: 'Parent App', icon: 'analytics', color: '#9C27B0', bgColor: '#F3E5F5', externalSection: 'tracker' },
-  { title: 'Printables', subtitle: '18 Resources', icon: 'print', color: '#F4A460', bgColor: '#FFF3E0', route: '/printables' },
-  { title: 'Parents', subtitle: 'Parent App', icon: 'people', color: '#1B6B93', bgColor: '#E1F5FE', externalSection: 'home' },
-  { title: 'Emotions', subtitle: 'Interactive', icon: 'heart', color: '#F48FB1', bgColor: '#FCE4EC', route: '/tools' },
-  { title: 'Calm Corner', subtitle: 'Builder', icon: 'leaf', color: '#81C784', bgColor: '#E8F5E9', route: '/calm' },
+  { title: 'Printables', subtitle: '18 A4', icon: 'print', color: '#F4A460', bgColor: '#FFF3E0', route: '/printables' },
+  { title: 'Tracker', subtitle: 'Progress', icon: 'analytics', color: '#9C27B0', bgColor: '#F3E5F5', externalSection: 'tracker' },
+  { title: 'Parents', subtitle: 'Letters Home', icon: 'people', color: '#1B6B93', bgColor: '#E1F5FE', externalSection: 'home' },
+  { title: 'Emotions', subtitle: 'Check-ins', icon: 'heart', color: '#F48FB1', bgColor: '#FCE4EC', route: '/tools' },
+  { title: 'Calm Corner', subtitle: 'Support Tools', icon: 'leaf', color: '#81C784', bgColor: '#E8F5E9', route: '/calm' },
 ];
 
 const HEADER_LINKS: HeaderLinkConfig[] = [
@@ -349,6 +349,7 @@ export default function HomeScreen() {
   const isTightHero = width < 1080;
   const showDesktopNav = width >= 1100;
   const showDesktopHero = width >= 980;
+  const showDesktopShell = width >= 1220;
 
   useEffect(() => {
     setMounted(true);
@@ -381,7 +382,7 @@ export default function HomeScreen() {
 
 
       {/* App Header Bar with Many Petals branding */}
-      <View style={styles.appHeader}>
+      <View style={[styles.appHeader, showDesktopShell && styles.appHeaderDesktop]}>
         <BrandLockup size={showDesktopNav ? 'md' : 'sm'} mode="plain" />
         {showDesktopNav ? (
           <View style={styles.headerNav}>
@@ -401,13 +402,15 @@ export default function HomeScreen() {
         ) : null}
         <View style={styles.headerActions}>
           {showDesktopNav ? <SENBanner compact /> : null}
-          <TouchableOpacity
-            style={styles.pricingBtn}
-            onPress={() => setShowPricing(true)}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="diamond-outline" size={16} color={COLORS.accentOrange} />
-          </TouchableOpacity>
+          {!showDesktopNav ? (
+            <TouchableOpacity
+              style={styles.pricingBtn}
+              onPress={() => setShowPricing(true)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="diamond-outline" size={16} color={COLORS.accentOrange} />
+            </TouchableOpacity>
+          ) : null}
           {mounted && user ? (
             <TouchableOpacity
               style={styles.profileBtn}
@@ -442,6 +445,7 @@ export default function HomeScreen() {
           <View style={[styles.hero, isCompactHero && styles.heroCompact, isTightHero && styles.heroTight]}>
             <View style={styles.heroGlowLeft} />
             <View style={styles.heroGlowRight} />
+            <View style={styles.heroGlowBottom} />
             <View style={[styles.heroInner, showDesktopHero && styles.heroInnerDesktop]}>
               <View style={[styles.heroContent, isCompactHero && styles.heroContentCompact]}>
                 <Text style={styles.heroEyebrow}>Many Petals companion resource</Text>
@@ -494,11 +498,13 @@ export default function HomeScreen() {
                 <View style={styles.heroVisualScene}>
                   <View style={styles.heroVisualGlow} />
                   <View style={styles.heroVisualSun} />
-                  <View style={styles.heroVisualCard}>
+                  <View style={styles.heroVisualCloud} />
+                  <View style={styles.heroVisualCloudSecondary} />
+                  <View style={styles.heroCharacterWrap}>
                     <Image
-                      source={{ uri: HERO_BOOK_IMAGE }}
-                      style={styles.heroVisualImage}
-                      resizeMode="cover"
+                      source={HERO_CHARACTER_IMAGE}
+                      style={styles.heroCharacterImage}
+                      resizeMode="contain"
                     />
                   </View>
                   <View style={styles.heroBadge}>
@@ -520,7 +526,8 @@ export default function HomeScreen() {
 
         {/* Quick Access Grid */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Access</Text>
+          <Text style={styles.sectionEyebrow}>Quick access</Text>
+          <Text style={styles.sectionTitle}>Open the part of the pack you need today</Text>
           <View style={styles.tileGrid}>
             {QUICK_TILES.map((tile) => (
               <View key={tile.title} style={styles.tileWrapper}>
@@ -656,6 +663,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: '#E8EEDC',
+  },
+  appHeaderDesktop: {
+    maxWidth: 1440,
+    width: '100%',
+    alignSelf: 'center',
   },
   headerNav: {
     flexDirection: 'row',
@@ -825,6 +837,15 @@ const styles = StyleSheet.create({
     borderRadius: 160,
     backgroundColor: 'rgba(198,234,255,0.42)',
   },
+  heroGlowBottom: {
+    position: 'absolute',
+    bottom: -90,
+    left: 160,
+    width: 360,
+    height: 220,
+    borderRadius: 180,
+    backgroundColor: 'rgba(211,242,207,0.55)',
+  },
   heroInner: {
     flexDirection: 'column',
     gap: SPACING.lg,
@@ -936,7 +957,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
   },
   heroStat: {
-    minWidth: 96,
+    minWidth: 104,
   },
   heroStatNumber: {
     fontSize: FONT_SIZES.xl,
@@ -950,7 +971,7 @@ const styles = StyleSheet.create({
   },
   heroVisualWrap: {
     width: '42%',
-    maxWidth: 460,
+    maxWidth: 420,
     minWidth: 300,
     alignSelf: 'center',
   },
@@ -982,17 +1003,31 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     backgroundColor: '#FFD85C',
   },
-  heroVisualCard: {
-    width: 240,
-    height: 310,
-    borderRadius: 24,
-    overflow: 'hidden',
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: '#E7EFD7',
-    ...SHADOWS.large,
+  heroVisualCloud: {
+    position: 'absolute',
+    top: 74,
+    left: 34,
+    width: 72,
+    height: 26,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.78)',
   },
-  heroVisualImage: {
+  heroVisualCloudSecondary: {
+    position: 'absolute',
+    top: 118,
+    right: 74,
+    width: 54,
+    height: 20,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.68)',
+  },
+  heroCharacterWrap: {
+    width: 340,
+    height: 320,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  heroCharacterImage: {
     width: '100%',
     height: '100%',
   },
@@ -1038,6 +1073,14 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
   },
+  sectionEyebrow: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
+    color: '#5F7B4D',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: SPACING.xs,
+  },
   sectionTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '700',
@@ -1053,11 +1096,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: SPACING.md,
-    marginTop: SPACING.sm,
+    marginTop: SPACING.md,
   },
   tileWrapper: {
     width: '31%',
-    minWidth: 100,
+    minWidth: 180,
   },
   flowContainer: {
     backgroundColor: COLORS.white,
