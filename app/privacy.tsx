@@ -169,7 +169,7 @@ const infoStyles = StyleSheet.create({
   },
 });
 
-function Paragraph({ children }: { children: string }) {
+function Paragraph({ children }: { children: React.ReactNode }) {
   return <Text style={paraStyle}>{children}</Text>;
 }
 

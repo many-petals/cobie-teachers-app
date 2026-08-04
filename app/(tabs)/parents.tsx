@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -17,6 +17,12 @@ import { PARENT_LETTERS, ParentLetter } from '../data/parentLetters';
 import { downloadParentLetter, downloadAllParentLetters } from '../lib/parentLetterGenerator';
 import BrandedScreenHeader from '../components/BrandedScreenHeader';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
+import {
+  loadParentProgressSummaries,
+  loadParentShareApprovals,
+} from '../lib/storage';
+import type { ParentProgressSummary, ParentShareApproval } from '../lib/parentSharing';
 
 const CATEGORY_ICONS: Record<string, string> = {
   letter: 'mail',
@@ -35,12 +41,48 @@ const CATEGORY_LABELS: Record<string, string> = {
 const PARENT_APP_URL = 'https://cobie-parent-app-nns9.vercel.app/';
 
 export default function ParentCommunicationScreen() {
+  const { user } = useAuth();
   const { showToast, showConfirm } = useToast();
   const [schoolName, setSchoolName] = useState('');
   const [teacherName, setTeacherName] = useState('');
   const [downloading, setDownloading] = useState<string | null>(null);
   const [previewLetter, setPreviewLetter] = useState<ParentLetter | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [shareApprovals, setShareApprovals] = useState<ParentShareApproval[]>([]);
+  const [approvedSummaries, setApprovedSummaries] = useState<ParentProgressSummary[]>([]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadSharingState = async () => {
+      if (!user) {
+        if (active) {
+          setShareApprovals([]);
+          setApprovedSummaries([]);
+        }
+        return;
+      }
+
+      const [approvals, summaries] = await Promise.all([
+        loadParentShareApprovals(user.id),
+        loadParentProgressSummaries(user.id),
+      ]);
+
+      if (active) {
+        setShareApprovals(approvals);
+        setApprovedSummaries(summaries);
+      }
+    };
+
+    loadSharingState();
+
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  const activeShares = shareApprovals.filter(approval => approval.status === 'active' && approval.sharingApproved);
+  const recentSharedCodes = activeShares.slice(0, 4).map(approval => approval.pupilCode);
 
   const openParentApp = useCallback(() => {
     try {
@@ -282,6 +324,48 @@ export default function ParentCommunicationScreen() {
             </View>
           );
         })}
+
+        <View style={styles.sharingStatusCard}>
+          <View style={styles.sharingStatusHeader}>
+            <View style={styles.sharingStatusIcon}>
+              <Ionicons name="git-network-outline" size={20} color={COLORS.primary} />
+            </View>
+            <View style={styles.sharingStatusCopy}>
+              <Text style={styles.sharingStatusTitle}>Parent sharing status</Text>
+              <Text style={styles.sharingStatusText}>
+                Teacher-approved summaries are stored here first. Live parent sync stays paused until the teacher and parent apps share one backend.
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.sharingStatusStats}>
+            <View style={styles.sharingStatPill}>
+              <Text style={styles.sharingStatValue}>{activeShares.length}</Text>
+              <Text style={styles.sharingStatLabel}>Approved children</Text>
+            </View>
+            <View style={styles.sharingStatPill}>
+              <Text style={styles.sharingStatValue}>{approvedSummaries.length}</Text>
+              <Text style={styles.sharingStatLabel}>Saved summaries</Text>
+            </View>
+          </View>
+
+          {recentSharedCodes.length > 0 ? (
+            <View style={styles.sharingCodesRow}>
+              {recentSharedCodes.map(code => (
+                <View key={code} style={styles.sharingCodeChip}>
+                  <Text style={styles.sharingCodeChipText}>{code}</Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.sharingEmptyState}>
+              <Ionicons name="shield-checkmark-outline" size={16} color={COLORS.textMuted} />
+              <Text style={styles.sharingEmptyText}>
+                No pupils are approved for parent sharing yet. Use the Pupil Tracker progress view to approve a child when you are ready.
+              </Text>
+            </View>
+          )}
+        </View>
 
         <View style={styles.parentAppCard}>
           <View style={styles.parentAppHeader}>
@@ -750,6 +834,77 @@ const styles = StyleSheet.create({
   },
   downloadBtnDisabled: { opacity: 0.6 },
   downloadBtnText: { fontSize: FONT_SIZES.sm, fontWeight: '700', color: COLORS.white },
+
+  sharingStatusCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.lg,
+    ...SHADOWS.small,
+  },
+  sharingStatusHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.md,
+  },
+  sharingStatusIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: COLORS.primary + '14',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sharingStatusCopy: { flex: 1 },
+  sharingStatusTitle: { fontSize: FONT_SIZES.md, fontWeight: '700', color: COLORS.text },
+  sharingStatusText: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20, marginTop: 4 },
+  sharingStatusStats: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
+  },
+  sharingStatPill: {
+    flex: 1,
+    backgroundColor: COLORS.bgLight,
+    borderRadius: RADIUS.lg,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    alignItems: 'center',
+  },
+  sharingStatValue: { fontSize: FONT_SIZES.xl, fontWeight: '800', color: COLORS.primary },
+  sharingStatLabel: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, marginTop: 4 },
+  sharingCodesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
+  },
+  sharingCodeChip: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.round,
+    backgroundColor: COLORS.bgGreen,
+  },
+  sharingCodeChipText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
+    color: COLORS.secondary,
+  },
+  sharingEmptyState: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
+    padding: SPACING.md,
+    backgroundColor: COLORS.bgLight,
+    borderRadius: RADIUS.lg,
+  },
+  sharingEmptyText: {
+    flex: 1,
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textMuted,
+    lineHeight: 18,
+  },
 
   parentAppCard: {
     backgroundColor: COLORS.white,

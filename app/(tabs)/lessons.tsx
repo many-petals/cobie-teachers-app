@@ -12,6 +12,7 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { LESSONS } from '../data/lessons';
 import { PRINTABLES } from '../data/printables';
+import BrandedScreenHeader from '../components/BrandedScreenHeader';
 
 import { useSEN } from '../context/SENContext';
 import { useAuth } from '../context/AuthContext';
@@ -24,29 +25,59 @@ export default function LessonsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <Ionicons name="book" size={24} color={COLORS.primary} />
-        <Text style={styles.headerTitle}>Core Lessons</Text>
-      </View>
-      
+      <BrandedScreenHeader
+        title="Core Lessons"
+        subtitle="Story-led Many Petals lessons designed to help you teach emotional literacy faster and more clearly."
+        icon="book"
+        iconColor={COLORS.primary}
+      />
 
-      <Text style={styles.intro}>
-      8 ready-to-teach emotional literacy lessons for EYFS and KS1.
-      </Text>
-
-      {!hasFullAccess && (  
-  <View style={styles.upgradeBanner}>
-    <Text style={styles.upgradeTitle}>Unlock all 8 emotional literacy lessons</Text>
-    <Text style={styles.upgradeText}>Full lesson plans - SEN differentiation - Printable resources</Text>
-    <TouchableOpacity
-      style={styles.upgradeButton}
-      onPress={() => router.push('/upgrade')}
-    >
-      <Text style={styles.upgradeButtonText}>Start 14-Day Trial</Text>
-    </TouchableOpacity>
-    </View>
-)}
       <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
+        <View style={styles.section}>
+          <View style={styles.overviewCard}>
+            <Text style={styles.sectionEyebrow}>Teach in sequence</Text>
+            <Text style={styles.sectionTitle}>Open one lesson, follow the steps, then use the linked printables</Text>
+            <Text style={styles.sectionSubtitle}>
+              Each Cobie lesson is built to reduce prep time while keeping objectives, materials, differentiation, and classroom follow-up in one clear flow.
+            </Text>
+
+            <View style={styles.statsRow}>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>8</Text>
+                <Text style={styles.statLabel}>core lessons</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>1 flow</Text>
+                <Text style={styles.statLabel}>story to printable</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>SEN</Text>
+                <Text style={styles.statLabel}>support built in</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {!hasFullAccess && (
+          <View style={styles.section}>
+            <View style={styles.upgradeBanner}>
+              <Text style={styles.sectionEyebrow}>Upgrade when ready</Text>
+              <Text style={styles.upgradeTitle}>Unlock all 8 emotional literacy lessons</Text>
+              <Text style={styles.upgradeText}>
+                Get the full lesson library, SEN differentiation support, and the matching printable classroom resources.
+              </Text>
+              <TouchableOpacity
+                style={styles.upgradeButton}
+                onPress={() => router.push('/upgrade')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.upgradeButtonText}>Start 14-Day Trial</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        <View style={styles.section}>
         {LESSONS.map((lesson) => {
           const isExpanded = expandedId === lesson.id;
           const completed = isLessonCompleted(lesson.id);
@@ -229,6 +260,7 @@ export default function LessonsScreen() {
             </View>
           );
         })}
+        </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -238,10 +270,63 @@ export default function LessonsScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.bgLight },
-  header: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg, paddingBottom: SPACING.sm },
-  headerTitle: { fontSize: FONT_SIZES.xxl, fontWeight: '800', color: COLORS.text },
-  intro: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 18, paddingHorizontal: SPACING.lg, marginBottom: 6 },
-  container: { flex: 1, paddingHorizontal: SPACING.lg },
+  container: { flex: 1 },
+  section: {
+    paddingHorizontal: SPACING.lg,
+    marginTop: SPACING.lg,
+  },
+  overviewCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.xxl,
+    padding: SPACING.xl,
+    borderWidth: 1,
+    borderColor: '#E3EDDA',
+    ...SHADOWS.small,
+  },
+  sectionEyebrow: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
+    color: '#5F7B4D',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: SPACING.xs,
+  },
+  sectionTitle: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.sm,
+  },
+  sectionSubtitle: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    lineHeight: 20,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginTop: SPACING.lg,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: COLORS.bgLight,
+    borderRadius: RADIUS.lg,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.sm,
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '800',
+    color: COLORS.primary,
+  },
+  statLabel: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '600',
+    color: COLORS.textLight,
+    marginTop: 2,
+    textAlign: 'center',
+  },
   lessonCard: { backgroundColor: COLORS.white, borderRadius: RADIUS.xl, marginBottom: SPACING.md, overflow: 'hidden', ...SHADOWS.small },
   lessonNumber: {
     width: 34,
@@ -271,33 +356,32 @@ const styles = StyleSheet.create({
   focusText: { fontSize: FONT_SIZES.xs, fontWeight: '600' },
   upgradeBanner: {
     backgroundColor: '#FFF7E6',
-    paddingVertical: 6,
-paddingHorizontal: 10,
-    borderRadius: 12,
-    marginBottom: 8
+    padding: SPACING.xl,
+    borderRadius: RADIUS.xxl,
+    borderWidth: 1,
+    borderColor: '#F3D598',
   },
-  
   upgradeTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 2
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.xs,
   },
-  
   upgradeText: {
-    fontSize: 14,
-    marginBottom: 10
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    lineHeight: 20,
+    marginBottom: SPACING.md,
   },
-  
   upgradeButton: {
     backgroundColor: '#6B46C1',
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center'
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.lg,
+    alignItems: 'center',
   },
-  
   upgradeButtonText: {
     color: '#fff',
-    fontWeight: '600'
+    fontWeight: '700',
   },
   expandedContent: { padding: SPACING.lg, paddingTop: 0, borderTopWidth: 1, borderTopColor: COLORS.lightGray },
   themeText: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20, marginTop: SPACING.md, fontStyle: 'italic' },

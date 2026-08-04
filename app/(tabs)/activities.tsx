@@ -14,6 +14,7 @@ import { ACTIVITIES } from '../data/activities';
 import SearchBar from '../components/SearchBar';
 import FilterChips from '../components/FilterChips';
 import SENBanner from '../components/SENBanner';
+import BrandedScreenHeader from '../components/BrandedScreenHeader';
 import { useSEN } from '../context/SENContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -33,6 +34,10 @@ export default function ActivitiesScreen() {
   const { toggleFavourite, isFavourite } = useAuth();
   const [search, setSearch] = useState('');
   const [skillFilter, setSkillFilter] = useState('all');
+  const skillTypeCount = useMemo(
+    () => new Set(ACTIVITIES.map((activity) => activity.skillType)).size,
+    []
+  );
 
   const filtered = useMemo(() => {
     return ACTIVITIES.filter((a) => {
@@ -48,16 +53,62 @@ export default function ActivitiesScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <Ionicons name="color-palette" size={24} color={COLORS.secondary} />
-        <Text style={styles.headerTitle}>Optional Activities</Text>
-      </View>
-      <SENBanner />
-
-      <SearchBar value={search} onChangeText={setSearch} placeholder="Search activities..." />
-      <FilterChips chips={SKILL_FILTERS} selected={skillFilter} onSelect={setSkillFilter} />
+      <BrandedScreenHeader
+        title="Optional Activities"
+        subtitle="Short follow-up ideas for circle time, regulation support, and lesson extension."
+        icon="color-palette"
+        iconColor={COLORS.secondary}
+      />
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
+        <View style={styles.section}>
+          <View style={styles.overviewCard}>
+            <Text style={styles.sectionEyebrow}>Use when needed</Text>
+            <Text style={styles.sectionTitle}>Pick a short follow-up activity that supports the lesson, the moment, or the child</Text>
+            <Text style={styles.sectionSubtitle}>
+              These quick activities are designed to help you extend learning, settle the room, and respond without needing to plan something new from scratch.
+            </Text>
+
+            <View style={styles.statsRow}>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{filtered.length}</Text>
+                <Text style={styles.statLabel}>showing now</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{ACTIVITIES.length}</Text>
+                <Text style={styles.statLabel}>total activities</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{skillTypeCount}</Text>
+                <Text style={styles.statLabel}>skill types</Text>
+              </View>
+            </View>
+
+            <View style={styles.senWrap}>
+              <SENBanner compact />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.controlsCard}>
+            <Text style={styles.controlsTitle}>Find the right activity quickly</Text>
+            <Text style={styles.controlsSubtitle}>
+              Search by title or choose the skill area you want to reinforce.
+            </Text>
+
+            <View style={styles.searchShell}>
+              <SearchBar value={search} onChangeText={setSearch} placeholder="Search activities..." />
+            </View>
+
+            <Text style={styles.filterLabel}>Filter by activity type</Text>
+            <View style={styles.chipsShell}>
+              <FilterChips chips={SKILL_FILTERS} selected={skillFilter} onSelect={setSkillFilter} />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.section}>
         {filtered.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="search" size={48} color={COLORS.mediumGray} />
@@ -132,6 +183,7 @@ export default function ActivitiesScreen() {
             );
           })
         )}
+        </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -141,9 +193,102 @@ export default function ActivitiesScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.bgLight },
-  header: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg, paddingBottom: SPACING.sm },
-  headerTitle: { fontSize: FONT_SIZES.xxl, fontWeight: '800', color: COLORS.text },
-  container: { flex: 1, paddingHorizontal: SPACING.lg },
+  container: { flex: 1 },
+  section: {
+    paddingHorizontal: SPACING.lg,
+    marginTop: SPACING.lg,
+  },
+  overviewCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.xxl,
+    padding: SPACING.xl,
+    borderWidth: 1,
+    borderColor: '#E3EDDA',
+    ...SHADOWS.small,
+  },
+  sectionEyebrow: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
+    color: '#5F7B4D',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: SPACING.xs,
+  },
+  sectionTitle: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.sm,
+  },
+  sectionSubtitle: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    lineHeight: 20,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginTop: SPACING.lg,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: COLORS.bgLight,
+    borderRadius: RADIUS.lg,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.sm,
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '800',
+    color: COLORS.secondary,
+  },
+  statLabel: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '600',
+    color: COLORS.textLight,
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  senWrap: {
+    marginTop: SPACING.lg,
+  },
+  controlsCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.xxl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: '#E6EEF5',
+    ...SHADOWS.small,
+  },
+  controlsTitle: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  controlsSubtitle: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    lineHeight: 20,
+    marginTop: SPACING.xs,
+  },
+  searchShell: {
+    marginTop: SPACING.md,
+    marginHorizontal: -SPACING.lg,
+  },
+  filterLabel: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginTop: SPACING.sm,
+    marginBottom: 2,
+  },
+  chipsShell: {
+    marginHorizontal: -SPACING.lg,
+    marginBottom: -SPACING.xs,
+  },
   emptyState: { alignItems: 'center', paddingVertical: SPACING.huge },
   emptyText: { fontSize: FONT_SIZES.lg, fontWeight: '600', color: COLORS.textLight, marginTop: SPACING.md },
   emptySubtext: { fontSize: FONT_SIZES.sm, color: COLORS.textMuted, marginTop: SPACING.xs },

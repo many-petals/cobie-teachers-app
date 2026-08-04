@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from './data/theme';
 import { supabase } from './lib/supabase';
 import { SavedWeeklyPlan, loadWeeklyPlans, addWeeklyPlan, removeWeeklyPlan } from './lib/storage';
+import BrandedScreenHeader from './components/BrandedScreenHeader';
 import RequireAuth from './components/RequireAuth';
 
 const FOCUS_AREAS = [
@@ -141,26 +142,29 @@ export default function PlannerScreen() {
       message="Weekly planning is a teacher workspace feature. Sign in to keep your saved plans tied to the right account."
     >
       <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
-        </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>Weekly Planner</Text>
-          <Text style={styles.headerSub}>AI-powered lesson planning</Text>
-        </View>
-        {savedPlans.length > 0 && step !== 'saved' && (
-          <TouchableOpacity
-            style={styles.savedBtn}
-            onPress={() => setStep('saved')}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="folder" size={18} color={COLORS.primary} />
-            <Text style={styles.savedBtnText}>{savedPlans.length}</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+        <BrandedScreenHeader
+          title="Weekly Planner"
+          subtitle="Build a calm, classroom-ready week from your Many Petals lessons, activities, and printables."
+          icon="calendar"
+          iconColor={COLORS.primary}
+          leftAction={(
+            <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
+              <Ionicons name="arrow-back" size={22} color={COLORS.text} />
+            </TouchableOpacity>
+          )}
+          rightAction={
+            savedPlans.length > 0 && step !== 'saved' ? (
+              <TouchableOpacity
+                style={styles.savedBtn}
+                onPress={() => setStep('saved')}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="folder" size={18} color={COLORS.primary} />
+                <Text style={styles.savedBtnText}>{savedPlans.length}</Text>
+              </TouchableOpacity>
+            ) : null
+          }
+        />
 
       {/* Config Step */}
       {step === 'config' && (
@@ -554,10 +558,7 @@ export default function PlannerScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.bgLight },
-  header: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md, backgroundColor: COLORS.white, borderBottomWidth: 1, borderBottomColor: COLORS.lightGray },
   backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.bgLight, justifyContent: 'center', alignItems: 'center' },
-  headerTitle: { fontSize: FONT_SIZES.lg, fontWeight: '800', color: COLORS.text },
-  headerSub: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
   savedBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.bgLight, paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: RADIUS.round, borderWidth: 1.5, borderColor: COLORS.primary + '30' },
   savedBtnText: { fontSize: FONT_SIZES.sm, fontWeight: '700', color: COLORS.primary },
   container: { flex: 1, paddingHorizontal: SPACING.lg },

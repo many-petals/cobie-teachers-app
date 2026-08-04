@@ -24,16 +24,14 @@ export default function AddPupilModal({ visible, onClose, onAdd, existingCodes }
   const [senStatus, setSenStatus] = useState(false);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const suggestedCode = `P${existingCodes.length + 1}`;
 
   const handleAdd = async () => {
-    if (submitting) return;
-
     const finalCode = (code.trim() || suggestedCode).toUpperCase();
     
-    if (existingCodes.some(existingCode => existingCode.toUpperCase() === finalCode)) {
+    if (existingCodes.includes(finalCode)) {
       setError('This code is already in use. Please choose a different one.');
       return;
     }
@@ -43,35 +41,33 @@ export default function AddPupilModal({ visible, onClose, onAdd, existingCodes }
       return;
     }
 
-    setSubmitting(true);
-    setError('');
+    setSaving(true);
 
-    try {
-      const result = await onAdd({
-        display_code: finalCode,
-        age_group: ageGroup,
-        sen_status: senStatus,
-        notes: notes.trim(),
-      });
+    const result = await onAdd({
+      display_code: finalCode,
+      age_group: ageGroup,
+      sen_status: senStatus,
+      notes: notes.trim(),
+    });
 
-      if (!result.success) {
-        setError(result.error || 'We could not add this pupil right now. Please try again.');
-        return;
-      }
+    setSaving(false);
 
-      setCode('');
-      setAgeGroup('EYFS');
-      setSenStatus(false);
-      setNotes('');
-      setError('');
-      onClose();
-    } finally {
-      setSubmitting(false);
+    if (!result.success) {
+      setError(result.error || 'Could not add this pupil. Please try again.');
+      return;
     }
+
+    // Reset form
+    setCode('');
+    setAgeGroup('EYFS');
+    setSenStatus(false);
+    setNotes('');
+    setError('');
+    onClose();
   };
 
   const handleClose = () => {
-    if (submitting) return;
+    if (saving) return;
     setCode('');
     setError('');
     setNotes('');
@@ -189,13 +185,13 @@ export default function AddPupilModal({ visible, onClose, onAdd, existingCodes }
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.addBtn, submitting && styles.addBtnDisabled]}
+                style={[styles.addBtn, saving && styles.addBtnDisabled]}
                 onPress={handleAdd}
                 activeOpacity={0.7}
-                disabled={submitting}
+                disabled={saving}
               >
-                <Ionicons name="add-circle" size={20} color={COLORS.white} />
-                <Text style={styles.addText}>{submitting ? 'Adding...' : 'Add Pupil'}</Text>
+                <Ionicons name={saving ? 'hourglass-outline' : 'add-circle'} size={20} color={COLORS.white} />
+                <Text style={styles.addText}>{saving ? 'Saving...' : 'Add Pupil'}</Text>
               </TouchableOpacity>
             </View>
 

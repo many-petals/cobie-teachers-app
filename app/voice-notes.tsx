@@ -15,7 +15,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from './data/theme';
 import { VoiceNote, loadVoiceNotes, addVoiceNote, updateVoiceNote, removeVoiceNote } from './lib/storage';
+import BrandedScreenHeader from './components/BrandedScreenHeader';
 import RequireAuth from './components/RequireAuth';
+import { useAuth } from './context/AuthContext';
 
 // Tags for categorising voice notes
 const TAGS = [
@@ -49,6 +51,7 @@ function formatDate(dateStr: string): string {
 
 export default function VoiceNotesScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const [notes, setNotes] = useState<VoiceNote[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -66,6 +69,7 @@ export default function VoiceNotesScreen() {
   const soundRef = useRef<any>(null);
   const timerRef = useRef<any>(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const userId = user?.id;
 
   useEffect(() => {
     loadNotes();
@@ -89,7 +93,7 @@ export default function VoiceNotesScreen() {
   }, [isRecording]);
 
   const loadNotes = async () => {
-    const loaded = await loadVoiceNotes();
+    const loaded = await loadVoiceNotes(userId);
     setNotes(loaded);
   };
 
@@ -165,6 +169,7 @@ export default function VoiceNotesScreen() {
   };
 
   const saveNewNote = async () => {
+    if (!userId) return;
     const data = recordingRef.current || { uri: '', duration: recordingDuration };
     const note = await addVoiceNote({
       title: newTitle || `Note ${notes.length + 1}`,
@@ -172,7 +177,7 @@ export default function VoiceNotesScreen() {
       duration: data.duration || recordingDuration,
       pupilCode: newPupilCode || undefined,
       tags: newTags,
-    });
+    }, userId);
 
     setNotes(prev => [note, ...prev]);
     setShowNewNoteForm(false);
@@ -231,6 +236,7 @@ export default function VoiceNotesScreen() {
   };
 
   const deleteNote = (note: VoiceNote) => {
+    if (!userId) return;
     Alert.alert(
       'Delete Voice Note',
       `Delete "${note.title}"? This cannot be undone.`,
@@ -240,7 +246,7 @@ export default function VoiceNotesScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            await removeVoiceNote(note.id);
+            await removeVoiceNote(note.id, userId);
             setNotes(prev => prev.filter(n => n.id !== note.id));
           },
         },
@@ -256,12 +262,12 @@ export default function VoiceNotesScreen() {
   };
 
   const saveEdit = async () => {
-    if (!editingNote) return;
+    if (!editingNote || !userId) return;
     await updateVoiceNote(editingNote, {
       title: editTitle,
       pupilCode: editPupilCode || undefined,
       tags: editTags,
-    });
+    }, userId);
     setNotes(prev => prev.map(n =>
       n.id === editingNote
         ? { ...n, title: editTitle, pupilCode: editPupilCode || undefined, tags: editTags }
@@ -288,28 +294,26 @@ export default function VoiceNotesScreen() {
       message="Voice notes are private teacher records. Sign in before recording or reopening them so they stay under the correct account."
     >
       <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
-        </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>Voice Notes</Text>
-          <Text style={styles.headerSub}>{notes.length} recording{notes.length !== 1 ? 's' : ''}</Text>
-        </View>
-        <View style={styles.headerIcon}>
-          <Ionicons name="mic" size={20} color={COLORS.error} />
-        </View>
-      </View>
+        <BrandedScreenHeader
+          title="Voice Notes"
+          subtitle={`${notes.length} recording${notes.length !== 1 ? 's' : ''} saved for quick observations, parent follow-up, and SEN notes.`}
+          icon="mic"
+          iconColor={COLORS.error}
+          leftAction={(
+            <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
+              <Ionicons name="arrow-back" size={22} color={COLORS.text} />
+            </TouchableOpacity>
+          )}
+        />
 
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
-        {/* Info Banner */}
-        <View style={styles.infoBanner}>
-          <Ionicons name="information-circle" size={18} color={COLORS.primary} />
-          <Text style={styles.infoText}>
-            Record quick observations during lessons. Tag notes by pupil or category for easy reference later.
-          </Text>
-        </View>
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
+          {/* Info Banner */}
+          <View style={styles.infoBanner}>
+            <Ionicons name="information-circle" size={18} color={COLORS.primary} />
+            <Text style={styles.infoText}>
+              Record quick observations during lessons. Tag notes by pupil or category for easy reference later.
+            </Text>
+          </View>
 
         {/* Recording Section */}
         <View style={styles.recordSection}>
@@ -588,8 +592,8 @@ export default function VoiceNotesScreen() {
           </View>
         </View>
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
+          <View style={{ height: 40 }} />
+        </ScrollView>
       </SafeAreaView>
     </RequireAuth>
   );
@@ -597,11 +601,7 @@ export default function VoiceNotesScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.bgLight },
-  header: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md, backgroundColor: COLORS.white, borderBottomWidth: 1, borderBottomColor: COLORS.lightGray },
   backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.bgLight, justifyContent: 'center', alignItems: 'center' },
-  headerTitle: { fontSize: FONT_SIZES.lg, fontWeight: '800', color: COLORS.text },
-  headerSub: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
-  headerIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFEBEE', justifyContent: 'center', alignItems: 'center' },
   container: { flex: 1 },
   infoBanner: { flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.sm, marginHorizontal: SPACING.lg, marginTop: SPACING.md, padding: SPACING.md, backgroundColor: COLORS.bgLight, borderRadius: RADIUS.md, borderLeftWidth: 3, borderLeftColor: COLORS.primary },
   infoText: { flex: 1, fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20 },

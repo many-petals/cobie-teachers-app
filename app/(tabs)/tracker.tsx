@@ -18,6 +18,11 @@ import { useToast } from '../context/ToastContext';
 import { useSEN } from '../context/SENContext';
 import { PARENT_LETTERS } from '../data/parentLetters';
 import { downloadParentLetter, type PrefilledProgressReportData } from '../lib/parentLetterGenerator';
+import {
+  buildParentProgressSummary,
+  type ParentProgressSummary,
+  type ParentShareApproval,
+} from '../lib/parentSharing';
 import { supabase } from '../lib/supabase';
 import BrandedScreenHeader from '../components/BrandedScreenHeader';
 import AddPupilModal from '../components/AddPupilModal';
@@ -25,7 +30,13 @@ import QuickAssess from '../components/QuickAssess';
 import ProgressView from '../components/ProgressView';
 import EmotionLogModal from '../components/EmotionLogModal';
 import RequireAuth from '../components/RequireAuth';
-import { clearAllLocalData } from '../lib/storage';
+import {
+  clearAllLocalData,
+  loadParentProgressSummaries,
+  loadParentShareApprovals,
+  upsertParentProgressSummary,
+  upsertParentShareApproval,
+} from '../lib/storage';
 
 interface Pupil {
   id: string;
@@ -79,6 +90,8 @@ const REPORT_STRATEGY_POOL = [
   'Small group work',
 ];
 
+const ACTIVE_MODULE_SLUG = 'cobie-the-cactus';
+
 export default function TrackerScreen() {
   const { user, profile, clearUserData } = useAuth();
   const { showToast, showConfirm } = useToast();
@@ -88,6 +101,8 @@ export default function TrackerScreen() {
   const [pupils, setPupils] = useState<Pupil[]>([]);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [emotionLogs, setEmotionLogs] = useState<EmotionLog[]>([]);
+  const [parentShareApprovals, setParentShareApprovals] = useState<ParentShareApproval[]>([]);
+  const [parentProgressSummaries, setParentProgressSummaries] = useState<ParentProgressSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -117,6 +132,8 @@ export default function TrackerScreen() {
       setPupils([]);
       setAssessments([]);
       setEmotionLogs([]);
+      setParentShareApprovals([]);
+      setParentProgressSummaries([]);
     }
   }, [user]);
 
@@ -124,14 +141,18 @@ export default function TrackerScreen() {
     if (!user) return;
     setLoading(true);
     try {
-      const [pupilRes, assessRes, emotionRes] = await Promise.all([
+      const [pupilRes, assessRes, emotionRes, shareApprovals, summaries] = await Promise.all([
         supabase.from('tracker_pupils').select('*').eq('user_id', user.id).order('created_at', { ascending: true }),
         supabase.from('tracker_assessments').select('*').eq('user_id', user.id),
         supabase.from('tracker_emotion_logs').select('*').eq('user_id', user.id).order('logged_at', { ascending: false }),
+        loadParentShareApprovals(user.id),
+        loadParentProgressSummaries(user.id),
       ]);
       if (pupilRes.data) setPupils(pupilRes.data);
       if (assessRes.data) setAssessments(assessRes.data);
       if (emotionRes.data) setEmotionLogs(emotionRes.data);
+      setParentShareApprovals(shareApprovals);
+      setParentProgressSummaries(summaries);
     } catch (err) {
       console.error('Error loading tracker data:', err);
     }
@@ -360,6 +381,16 @@ export default function TrackerScreen() {
     return 'Not yet assessed';
   };
 
+  const getParentShareApprovalForPupil = (pupil: Pupil) =>
+    parentShareApprovals.find(
+      approval => approval.pupilCode === pupil.display_code && approval.moduleSlug === ACTIVE_MODULE_SLUG,
+    ) || null;
+
+  const getParentSummaryForPupil = (pupil: Pupil) =>
+    parentProgressSummaries.find(
+      summary => summary.pupilCode === pupil.display_code && summary.moduleSlug === ACTIVE_MODULE_SLUG,
+    ) || null;
+
   const buildProgressReportData = (pupil: Pupil): PrefilledProgressReportData => {
     const latestAssessments = getLatestPupilAssessments(pupil.id);
     const pupilEmotionLogs = getPupilEmotionLogs(pupil.id);
@@ -479,6 +510,94 @@ export default function TrackerScreen() {
     };
   };
 
+  const persistApprovedParentSummary = async (pupil: Pupil, approvedAt: string) => {
+    if (!user) return null;
+
+    const summary = buildParentProgressSummary(buildProgressReportData(pupil), {
+      moduleSlug: ACTIVE_MODULE_SLUG,
+      approvedAt,
+    });
+
+    await upsertParentProgressSummary(summary, user.id);
+    setParentProgressSummaries(prev => {
+      const next = prev.filter(
+        item => !(item.pupilCode === summary.pupilCode && item.moduleSlug === summary.moduleSlug),
+      );
+      return [summary, ...next];
+    });
+
+    return summary;
+  };
+
+  const handleApproveParentShare = async (pupil: Pupil) => {
+    if (!user) return;
+
+    const approvedAt = new Date().toISOString();
+    const approval: ParentShareApproval = {
+      pupilCode: pupil.display_code,
+      moduleSlug: ACTIVE_MODULE_SLUG,
+      status: 'active',
+      sharingApproved: true,
+      approvedAt,
+      approvedByTeacherId: user.id,
+    };
+
+    await upsertParentShareApproval(approval, user.id);
+    setParentShareApprovals(prev => {
+      const next = prev.filter(
+        item => !(item.pupilCode === approval.pupilCode && item.moduleSlug === approval.moduleSlug),
+      );
+      return [approval, ...next];
+    });
+    await persistApprovedParentSummary(pupil, approvedAt);
+
+    showToast(
+      'Parent Sharing Approved',
+      `${pupil.display_code} now has an approved parent-safe summary saved in the teacher app.`,
+      'success',
+    );
+  };
+
+  const handleRefreshParentShare = async (pupil: Pupil) => {
+    const existingApproval = getParentShareApprovalForPupil(pupil);
+    if (!user || !existingApproval?.sharingApproved) return;
+
+    await persistApprovedParentSummary(pupil, existingApproval.approvedAt || new Date().toISOString());
+    showToast(
+      'Parent Summary Updated',
+      `The approved summary for ${pupil.display_code} has been refreshed from the latest tracker data.`,
+      'success',
+    );
+  };
+
+  const handleRevokeParentShare = async (pupil: Pupil) => {
+    if (!user) return;
+
+    const existingApproval = getParentShareApprovalForPupil(pupil);
+    if (!existingApproval) return;
+
+    const revokedApproval: ParentShareApproval = {
+      ...existingApproval,
+      status: 'revoked',
+      sharingApproved: false,
+      sharingRevokedAt: new Date().toISOString(),
+    };
+
+    await upsertParentShareApproval(revokedApproval, user.id);
+    setParentShareApprovals(prev => {
+      const next = prev.filter(
+        item => !(item.pupilCode === revokedApproval.pupilCode && item.moduleSlug === revokedApproval.moduleSlug),
+      );
+      return [revokedApproval, ...next];
+    });
+
+    showToast(
+      'Parent Sharing Turned Off',
+      `${pupil.display_code} is no longer approved for parent sharing until you re-enable it.`,
+      'info',
+    );
+  };
+
   const handleGenerateProgressReport = async (pupil: Pupil) => {
     const reportTemplate = PARENT_LETTERS.find(letter => letter.id === 'pl-4');
 
@@ -508,6 +627,10 @@ export default function TrackerScreen() {
           `The end-of-term report for ${pupil.display_code} has been downloaded.`,
           'success'
         );
+      }
+      const approval = getParentShareApprovalForPupil(pupil);
+      if (approval?.sharingApproved) {
+        await persistApprovedParentSummary(pupil, approval.approvedAt || new Date().toISOString());
       }
       return;
     }
@@ -885,12 +1008,33 @@ export default function TrackerScreen() {
           visible={!!progressPupil}
           onClose={() => setProgressPupil(null)}
           onGenerateReport={() => handleGenerateProgressReport(progressPupil)}
+          onApproveParentShare={() =>
+            showConfirm({
+              title: 'Approve Parent Summary',
+              message: `Save an approved parent-safe summary for ${progressPupil.display_code}? This will stay in the teacher app until live parent syncing is connected.`,
+              confirmText: 'Approve',
+              cancelText: 'Cancel',
+              onConfirm: () => handleApproveParentShare(progressPupil),
+            })
+          }
+          onRefreshParentShare={() => handleRefreshParentShare(progressPupil)}
+          onRevokeParentShare={() =>
+            showConfirm({
+              title: 'Turn Off Parent Sharing',
+              message: `Turn off parent sharing for ${progressPupil.display_code}? The saved summary will remain in teacher records, but it will no longer be treated as active.`,
+              confirmText: 'Turn Off',
+              cancelText: 'Cancel',
+              onConfirm: () => handleRevokeParentShare(progressPupil),
+            })
+          }
           pupilCode={progressPupil.display_code}
           ageGroup={progressPupil.age_group}
           senStatus={progressPupil.sen_status}
           assessments={assessments.filter(a => a.pupil_id === progressPupil.id)}
           emotionLogs={emotionLogs.filter(l => l.pupil_id === progressPupil.id)}
           onDeleteEmotionLog={handleDeleteEmotionLog}
+          parentShareStatus={getParentShareApprovalForPupil(progressPupil)?.status || 'disabled'}
+          latestParentSummaryAt={getParentSummaryForPupil(progressPupil)?.approvedAt}
         />
       ) : null}
       </SafeAreaView>

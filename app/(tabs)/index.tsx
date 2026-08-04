@@ -25,7 +25,8 @@ import { useToast } from '../context/ToastContext';
 import { LESSONS } from '../data/lessons';
 import { ACTIVITIES } from '../data/activities';
 import { PRINTABLES } from '../data/printables';
-import { BRAND, LOCAL_LOGO } from '../data/brand';
+import { BRAND } from '../data/brand';
+import { LITTLE_PETALS_BOOK_MODULES, LITTLE_PETALS_TARGET_BOOK_COUNT } from '../data/bookModules';
 import { openParentApp, ParentAppSection } from '../lib/parentAppLinks';
 
 const HERO_CHARACTER_IMAGE = require('../assets/images/cobie-hero.png');
@@ -63,6 +64,51 @@ const HEADER_LINKS: HeaderLinkConfig[] = [
   { label: 'Tracker', externalSection: 'tracker' },
   { label: 'Parents', externalSection: 'home' },
 ];
+
+const PETALS_WAY = [
+  {
+    letter: 'P',
+    title: 'Prep less',
+    text: 'One story-led flow with lessons, printables, and follow-up support already matched.',
+    color: '#6BBE72',
+    bg: '#F1FAED',
+  },
+  {
+    letter: 'E',
+    title: 'Execute tomorrow',
+    text: 'Use ready-to-teach classroom content without rebuilding the lesson from scratch.',
+    color: '#F0AF2F',
+    bg: '#FFF7E6',
+  },
+  {
+    letter: 'T',
+    title: 'Track progress',
+    text: 'Capture what children are showing so progress is easier to evidence and revisit.',
+    color: '#5AA7E6',
+    bg: '#EDF7FF',
+  },
+  {
+    letter: 'A',
+    title: 'Adapt for every learner',
+    text: 'Use calm routines, SEN support, and practical scaffolds that work in real classrooms.',
+    color: '#B589E5',
+    bg: '#F5EEFF',
+  },
+  {
+    letter: 'L',
+    title: 'Link with parents',
+    text: 'Turn classroom insight into parent-ready summaries and simple home follow-up.',
+    color: '#F08AA8',
+    bg: '#FFF0F5',
+  },
+  {
+    letter: 'S',
+    title: 'Show curriculum coverage',
+    text: 'Keep classroom delivery tied to purposeful emotional literacy and key EYFS / KS1 outcomes.',
+    color: '#4E8072',
+    bg: '#EEF8F4',
+  },
+] as const;
 
 
 // Safe date formatter that avoids hydration mismatches
@@ -345,12 +391,41 @@ export default function HomeScreen() {
   const [showPricing, setShowPricing] = useState(false);
   // Track client-side mount to prevent hydration mismatch from auth state
   const [mounted, setMounted] = useState(false);
-  const isCompactHero = width < 1220;
-  const isTightHero = width < 900;
-  const showDesktopNav = width >= 960;
-  const showDesktopHero = width >= 860;
-  const showDesktopShell = width >= 960;
+  const isCompactHero = width < 1160;
+  const isTightHero = width < 780;
+  const showHeroVisual = width >= 720;
+  const showDesktopNav = width >= 1024;
+  const showDesktopHero = width >= 980;
+  const showDesktopShell = width >= 1180;
+  const heroTitleBreak = width >= 1080 ? '\n' : ' ';
+  const tileWidth = width >= 1180 ? '23.5%' : width >= 840 ? '31.5%' : width >= 560 ? '48%' : '100%';
   const headerBrandSize = width < 420 ? 'sm' : 'md';
+  const petalsCardWidth = width >= 1180 ? '32%' : width >= 760 ? '48.5%' : '100%';
+  const platformCardWidth = width >= 1180 ? '48.5%' : '100%';
+  const plannedBooksCount = Math.max(LITTLE_PETALS_TARGET_BOOK_COUNT - LITTLE_PETALS_BOOK_MODULES.length, 0);
+  const collectionCards = [
+    {
+      title: 'Cobie the Cactus',
+      status: 'Live now',
+      description: 'Emotional literacy, calm tools, printables, and parent-ready support.',
+      color: '#6BBE72',
+      bg: '#F1FAED',
+    },
+    {
+      title: 'Darcy the Daisy',
+      status: 'In development',
+      description: 'The next Many Petals teacher pack using the same teacher-first classroom shell.',
+      color: '#F2C24E',
+      bg: '#FFF8E8',
+    },
+    {
+      title: `${plannedBooksCount} more Little Petals apps`,
+      status: 'Platform roadmap',
+      description: 'The same teacher system reused across the rest of the story collection for easier adoption in schools.',
+      color: '#8EB4C7',
+      bg: '#EEF7FB',
+    },
+  ];
 
   useEffect(() => {
     setMounted(true);
@@ -383,10 +458,10 @@ export default function HomeScreen() {
 
 
       {/* App Header Bar with Many Petals branding */}
-      <View style={[styles.appHeader, showDesktopShell && styles.appHeaderDesktop]}>
-        <BrandLockup size={showDesktopNav ? 'md' : headerBrandSize} mode="plain" />
-        {showDesktopNav ? (
-          <View style={styles.headerNav}>
+        <View style={[styles.appHeader, showDesktopShell && styles.appHeaderDesktop]}>
+          <BrandLockup size={showDesktopNav ? 'md' : headerBrandSize} mode="plain" />
+          {showDesktopNav ? (
+            <View style={styles.headerNav}>
             {HEADER_LINKS.map((link) => (
               <TouchableOpacity
                 key={link.label}
@@ -447,15 +522,17 @@ export default function HomeScreen() {
             <View style={styles.heroGlowLeft} />
             <View style={styles.heroGlowRight} />
             <View style={styles.heroGlowBottom} />
+            <View style={styles.heroWashLeft} />
+            <View style={styles.heroWashRight} />
             <View style={[styles.heroInner, showDesktopHero && styles.heroInnerDesktop]}>
               <View style={[styles.heroContent, isCompactHero && styles.heroContentCompact]}>
                 <Text style={styles.heroEyebrow}>Many Petals companion resource</Text>
                 <Text style={[styles.heroTitle, isCompactHero && styles.heroTitleCompact, isTightHero && styles.heroTitleTight]}>
-                  Teach emotional literacy{'\n'}
+                  Teach emotional literacy{heroTitleBreak}
                   <Text style={styles.heroTitleAccent}>with Cobie the Cactus</Text>
                 </Text>
                 <Text style={[styles.heroSubtitle, isTightHero && styles.heroSubtitleTight]}>
-                  Ready-to-teach emotional literacy for EYFS &amp; KS1, inspired by {BRAND.storyTitle}.
+                  Ready-to-teach emotional literacy for EYFS &amp; KS1, inspired by {BRAND.storyTitle}
                 </Text>
                 <Text style={styles.heroDescription}>
                   Use story-led lessons, classroom printables, and calm teaching prompts tomorrow with less prep.
@@ -475,49 +552,50 @@ export default function HomeScreen() {
                     onPress={() => router.push('/activities')}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.heroButtonSecondaryText}>Explore activities</Text>
+                    <Text style={styles.heroButtonSecondaryText}>View plans</Text>
                   </TouchableOpacity>
                 </View>
 
                 <View style={styles.heroStatsRow}>
                   <View style={styles.heroStat}>
                     <Text style={styles.heroStatNumber}>8</Text>
-                    <Text style={styles.heroStatLabel}>core lessons</Text>
+                    <Text style={styles.heroStatLabel}>structured lessons</Text>
                   </View>
                   <View style={styles.heroStat}>
                     <Text style={styles.heroStatNumber}>18</Text>
-                    <Text style={styles.heroStatLabel}>ready-to-print resources</Text>
+                    <Text style={styles.heroStatLabel}>A4 printables included</Text>
                   </View>
                   <View style={styles.heroStat}>
                     <Text style={styles.heroStatNumber}>EYFS + KS1</Text>
-                    <Text style={styles.heroStatLabel}>friendly</Text>
+                    <Text style={styles.heroStatLabel}>SEN-aware support</Text>
                   </View>
                 </View>
               </View>
 
-              <View style={[styles.heroVisualWrap, !showDesktopHero && styles.heroVisualWrapStack]}>
-                <View style={styles.heroVisualScene}>
-                  <View style={styles.heroVisualGlow} />
-                  <View style={styles.heroVisualSun} />
-                  <View style={styles.heroVisualCloud} />
-                  <View style={styles.heroVisualCloudSecondary} />
-                  <View style={styles.heroCharacterWrap}>
-                    <Image
-                      source={HERO_CHARACTER_IMAGE}
-                      style={styles.heroCharacterImage}
-                      resizeMode="contain"
-                    />
-                  </View>
-                  <View style={styles.heroBadge}>
-                    <Image source={LOCAL_LOGO} style={styles.heroBadgeImage} resizeMode="contain" />
+              {showHeroVisual ? (
+                <View style={[styles.heroVisualWrap, !showDesktopHero && styles.heroVisualWrapStack]}>
+                  <View style={styles.heroVisualScene}>
+                    <View style={styles.heroVisualPanel} />
+                    <View style={styles.heroVisualGlow} />
+                    <View style={styles.heroVisualSun} />
+                    <View style={styles.heroVisualCloud} />
+                    <View style={styles.heroVisualCloudSecondary} />
+                    <View style={styles.heroVisualGround} />
+                    <View style={styles.heroCharacterWrap}>
+                      <Image
+                        source={HERO_CHARACTER_IMAGE}
+                        style={styles.heroCharacterImage}
+                        resizeMode="contain"
+                      />
+                    </View>
+                    {showDesktopHero ? (
+                      <View style={styles.heroVisualBubble}>
+                        <Text style={styles.heroVisualBubbleText}>"Happy as I am."</Text>
+                      </View>
+                    ) : null}
                   </View>
                 </View>
-                {showDesktopHero ? (
-                  <View style={styles.heroVisualBubble}>
-                    <Text style={styles.heroVisualBubbleText}>Big feelings are welcome here.</Text>
-                  </View>
-                ) : null}
-              </View>
+              ) : null}
             </View>
           </View>
         </View>
@@ -527,11 +605,14 @@ export default function HomeScreen() {
 
         {/* Quick Access Grid */}
         <View style={styles.section}>
-          <Text style={styles.sectionEyebrow}>Quick access</Text>
-          <Text style={styles.sectionTitle}>Open the part of the pack you need today</Text>
+          <Text style={styles.sectionEyebrow}>Start here today</Text>
+          <Text style={styles.sectionTitle}>Open the part of the Cobie system you need next</Text>
+          <Text style={styles.sectionSubtitle}>
+            Go straight to lessons, activities, printables, tracker tools, or parent communication without hunting around the app.
+          </Text>
           <View style={styles.tileGrid}>
             {QUICK_TILES.map((tile) => (
-              <View key={tile.title} style={styles.tileWrapper}>
+              <View key={tile.title} style={[styles.tileWrapper, { width: tileWidth }]}>
                 <QuickTile
                   title={tile.title}
                   subtitle={tile.subtitle}
@@ -547,12 +628,67 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        <View style={styles.section}>
+          <View style={styles.blueprintCard}>
+            <View style={styles.blueprintIntro}>
+              <Text style={styles.sectionEyebrow}>Teach the PETALS way</Text>
+              <Text style={styles.sectionTitle}>A classroom method teachers can repeat with confidence</Text>
+              <Text style={styles.sectionSubtitle}>
+                Cobie is the first full Many Petals teacher-app shell: one repeatable way to prep less, teach clearly, and link classroom work with parent communication.
+              </Text>
+            </View>
+            <View style={styles.blueprintGrid}>
+              {PETALS_WAY.map((item) => (
+                <View key={item.letter} style={[styles.blueprintStepCard, { width: petalsCardWidth, backgroundColor: item.bg }]}>
+                  <View style={[styles.blueprintStepBadge, { backgroundColor: item.color }]}>
+                    <Text style={styles.blueprintStepLetter}>{item.letter}</Text>
+                  </View>
+                  <View style={styles.blueprintStepCopy}>
+                    <Text style={styles.blueprintStepTitle}>{item.title}</Text>
+                    <Text style={styles.blueprintStepText}>{item.text}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.collectionCard}>
+            <View style={styles.collectionIntro}>
+              <Text style={styles.sectionEyebrow}>Little Petals collection</Text>
+              <Text style={styles.sectionTitle}>One teacher platform, ready to scale across {LITTLE_PETALS_TARGET_BOOK_COUNT} companion apps</Text>
+              <Text style={styles.sectionSubtitle}>
+                Cobie leads the structure. Darcy follows next. Then the same teacher-first shell carries the rest of the story collection with shared navigation, pricing, tracking, and parent links.
+              </Text>
+            </View>
+            <View style={styles.collectionGrid}>
+              {collectionCards.map((card) => (
+                <View key={card.title} style={[styles.collectionItem, { width: platformCardWidth, backgroundColor: card.bg }]}>
+                  <View style={[styles.collectionStatusPill, { backgroundColor: card.color + '24' }]}>
+                    <Text style={[styles.collectionStatusText, { color: card.color }]}>{card.status}</Text>
+                  </View>
+                  <Text style={styles.collectionTitle}>{card.title}</Text>
+                  <Text style={styles.collectionText}>{card.description}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+
 
         {/* Today's Activity */}
-        <TodayActivity
-          style={{ marginBottom: 8 }}
-          onViewActivity={(id) => router.push(`/activity/${id}` as any)}
-        />
+        <View style={styles.section}>
+          <Text style={styles.sectionEyebrow}>Ready for tomorrow</Text>
+          <Text style={styles.sectionTitle}>One optional activity to use straight away</Text>
+          <Text style={styles.sectionSubtitle}>
+            Keep momentum high with one activity you can open now and use in a lesson, calm moment, or follow-up block.
+          </Text>
+          <TodayActivity
+            style={{ marginBottom: 8 }}
+            onViewActivity={(id) => router.push(`/activity/${id}` as any)}
+          />
+        </View>
 
         {/* Welcome back / progress for logged-in users */}
         {mounted && user ? (
@@ -561,9 +697,12 @@ export default function HomeScreen() {
               <View style={styles.welcomeTop}>
                 <Ionicons name="sparkles" size={18} color={COLORS.accent} />
                 <Text style={styles.welcomeTitle}>
-                  Welcome back, {profile?.name?.split(' ')[0] || 'Teacher'}!
+                  Teacher dashboard
                 </Text>
               </View>
+              <Text style={styles.welcomeHelper}>
+                Welcome back, {profile?.name?.split(' ')[0] || 'Teacher'}. Your saved items and completed lessons live here when you need a quick progress snapshot.
+              </Text>
               <View style={styles.progressRow}>
                 <View style={styles.progressItem}>
                   <Text style={styles.progressNum}>{completedLessons.length}/8</Text>
@@ -657,7 +796,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: SPACING.md,
-    minHeight: 68,
+    minHeight: 74,
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.sm,
     paddingBottom: SPACING.sm,
@@ -669,8 +808,8 @@ const styles = StyleSheet.create({
     maxWidth: 1440,
     width: '100%',
     alignSelf: 'center',
-    minHeight: 76,
-    paddingHorizontal: SPACING.xxl,
+    minHeight: 82,
+    paddingHorizontal: 40,
     paddingTop: SPACING.md,
     paddingBottom: SPACING.md,
   },
@@ -688,8 +827,8 @@ const styles = StyleSheet.create({
   },
   headerNavText: {
     fontSize: FONT_SIZES.sm,
-    fontWeight: '700',
-    color: '#5A6F62',
+    fontWeight: '600',
+    color: '#55665E',
   },
   headerActions: {
     flexDirection: 'row',
@@ -714,8 +853,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     backgroundColor: COLORS.primary,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
     borderRadius: RADIUS.round,
   },
   signInText: {
@@ -770,12 +909,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   welcomeTitle: {
     fontSize: FONT_SIZES.md,
     fontWeight: '700',
     color: COLORS.text,
+  },
+  welcomeHelper: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    lineHeight: 20,
+    marginBottom: SPACING.md,
   },
   progressRow: {
     flexDirection: 'row',
@@ -809,61 +954,75 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   hero: {
-    minHeight: 308,
+    minHeight: 320,
     position: 'relative',
     overflow: 'hidden',
-    backgroundColor: '#F6FBEA',
-    borderRadius: 32,
+    backgroundColor: '#F7FBEF',
+    borderRadius: 36,
     borderWidth: 1,
-    borderColor: '#E7EFD7',
+    borderColor: '#E5EDD9',
     ...SHADOWS.medium,
   },
   heroCompact: {
-    minHeight: 292,
+    minHeight: 296,
   },
   heroTight: {
-    minHeight: 278,
+    minHeight: 0,
   },
   heroGlowLeft: {
     position: 'absolute',
     top: -40,
-    left: -30,
+    left: -34,
     width: 260,
     height: 260,
     borderRadius: 130,
-    backgroundColor: 'rgba(251,219,120,0.34)',
+    backgroundColor: 'rgba(253,231,122,0.28)',
   },
   heroGlowRight: {
     position: 'absolute',
-    right: -60,
-    top: 18,
-    width: 320,
-    height: 320,
-    borderRadius: 160,
-    backgroundColor: 'rgba(198,234,255,0.42)',
+    right: -26,
+    top: 12,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: 'rgba(212,239,255,0.26)',
   },
   heroGlowBottom: {
     position: 'absolute',
-    bottom: -90,
-    left: 160,
-    width: 360,
-    height: 220,
-    borderRadius: 180,
-    backgroundColor: 'rgba(211,242,207,0.55)',
+    bottom: -82,
+    left: 180,
+    width: 320,
+    height: 180,
+    borderRadius: 160,
+    backgroundColor: 'rgba(214,243,208,0.42)',
+  },
+  heroWashLeft: {
+    position: 'absolute',
+    inset: 0,
+    right: '42%',
+    backgroundColor: '#FFFBE7',
+  },
+  heroWashRight: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    right: 0,
+    width: '44%',
+    backgroundColor: '#EEF9F5',
   },
   heroInner: {
     flexDirection: 'column',
-    gap: SPACING.lg,
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.xl,
+    gap: SPACING.md,
+    paddingHorizontal: 28,
+    paddingVertical: 28,
   },
   heroInnerDesktop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: SPACING.xl,
-    paddingHorizontal: SPACING.xxxl,
-    paddingVertical: SPACING.xxl,
+    paddingHorizontal: 48,
+    paddingVertical: 34,
   },
   heroContent: {
     flex: 1,
@@ -878,46 +1037,47 @@ const styles = StyleSheet.create({
   heroEyebrow: {
     fontSize: FONT_SIZES.xs,
     fontWeight: '800',
-    color: '#5F7B4D',
+    color: '#647A57',
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: SPACING.xs,
   },
   heroTitle: {
-    fontSize: 48,
+    fontSize: 50,
     fontWeight: '800',
     color: '#213A2E',
-    lineHeight: 52,
+    lineHeight: 56,
     maxWidth: '100%',
-    letterSpacing: -1.1,
+    letterSpacing: -1.4,
   },
   heroTitleAccent: {
     color: '#D89C19',
   },
   heroTitleCompact: {
-    fontSize: 40,
-    lineHeight: 44,
+    fontSize: 42,
+    lineHeight: 46,
   },
   heroTitleTight: {
-    fontSize: 33,
-    lineHeight: 37,
+    fontSize: 34,
+    lineHeight: 38,
   },
   heroSubtitle: {
-    fontSize: FONT_SIZES.xl,
+    fontSize: 20,
     fontWeight: '600',
-    color: COLORS.textLight,
+    color: '#55665E',
     marginTop: SPACING.sm,
-    lineHeight: 30,
+    lineHeight: 28,
   },
   heroSubtitleTight: {
     fontSize: FONT_SIZES.md,
+    lineHeight: 24,
   },
   heroDescription: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.textLight,
-    marginTop: SPACING.sm,
-    lineHeight: 24,
-    maxWidth: 520,
+    fontSize: FONT_SIZES.sm,
+    color: '#708077',
+    marginTop: SPACING.xs,
+    lineHeight: 22,
+    maxWidth: 500,
   },
   heroButtons: {
     flexDirection: 'row',
@@ -931,8 +1091,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
     backgroundColor: '#1E5D44',
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
     borderRadius: RADIUS.round,
     ...SHADOWS.medium,
   },
@@ -946,11 +1106,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.white,
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
     borderRadius: RADIUS.round,
     borderWidth: 1,
-    borderColor: '#E5E2D7',
+    borderColor: '#DCE6D4',
   },
   heroButtonSecondaryText: {
     fontSize: FONT_SIZES.md,
@@ -960,77 +1120,94 @@ const styles = StyleSheet.create({
   heroStatsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.xxl,
+    gap: SPACING.xl,
     marginTop: SPACING.lg,
   },
   heroStat: {
-    minWidth: 104,
+    minWidth: 110,
   },
   heroStatNumber: {
-    fontSize: FONT_SIZES.xl,
+    fontSize: FONT_SIZES.lg,
     fontWeight: '800',
     color: '#214335',
   },
   heroStatLabel: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textLight,
+    color: '#708077',
     marginTop: 2,
   },
   heroVisualWrap: {
-    width: '42%',
-    maxWidth: 420,
-    minWidth: 300,
+    width: '40%',
+    maxWidth: 430,
+    minWidth: 270,
     alignSelf: 'center',
   },
   heroVisualWrapStack: {
     maxWidth: '100%',
     width: '100%',
     minWidth: 0,
+    marginTop: SPACING.sm,
   },
   heroVisualScene: {
-    minHeight: 282,
+    minHeight: 290,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
+  heroVisualPanel: {
+    position: 'absolute',
+    inset: 0,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255,255,255,0.28)',
+    borderWidth: 1,
+    borderColor: 'rgba(76,142,80,0.08)',
+  },
   heroVisualGlow: {
     position: 'absolute',
-    width: 270,
-    height: 270,
-    borderRadius: 135,
-    backgroundColor: 'rgba(255,245,199,0.82)',
-    top: 16,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: 'rgba(255,245,199,0.9)',
+    top: 10,
   },
   heroVisualSun: {
     position: 'absolute',
-    top: 18,
-    right: 22,
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    top: 22,
+    right: 16,
+    width: 74,
+    height: 74,
+    borderRadius: 37,
     backgroundColor: '#FFD85C',
   },
   heroVisualCloud: {
     position: 'absolute',
-    top: 74,
-    left: 34,
-    width: 72,
-    height: 26,
+    top: 92,
+    left: 40,
+    width: 82,
+    height: 30,
     borderRadius: 18,
     backgroundColor: 'rgba(255,255,255,0.78)',
   },
   heroVisualCloudSecondary: {
     position: 'absolute',
-    top: 118,
-    right: 74,
-    width: 54,
-    height: 20,
+    top: 126,
+    right: 72,
+    width: 62,
+    height: 22,
     borderRadius: 16,
     backgroundColor: 'rgba(255,255,255,0.68)',
   },
+  heroVisualGround: {
+    position: 'absolute',
+    bottom: 16,
+    width: 210,
+    height: 34,
+    borderRadius: 18,
+    backgroundColor: 'rgba(155,199,130,0.26)',
+  },
   heroCharacterWrap: {
-    width: 310,
-    height: 286,
+    width: 330,
+    height: 266,
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
@@ -1038,34 +1215,16 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  heroBadge: {
-    position: 'absolute',
-    left: 12,
-    top: 26,
-    width: 64,
-    height: 64,
-    borderRadius: 18,
-    backgroundColor: COLORS.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E7EFD7',
-    ...SHADOWS.small,
-  },
-  heroBadgeImage: {
-    width: 48,
-    height: 48,
-  },
   heroVisualBubble: {
     position: 'absolute',
-    right: 0,
-    bottom: SPACING.md,
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    right: 18,
+    bottom: 22,
+    backgroundColor: 'rgba(255,255,255,0.96)',
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: '#E7EFD7',
+    borderColor: 'rgba(76,142,80,0.14)',
     ...SHADOWS.small,
   },
   heroVisualBubbleText: {
@@ -1099,6 +1258,104 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     marginBottom: SPACING.md,
   },
+  blueprintCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.xxl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: '#E3EDDA',
+    ...SHADOWS.small,
+  },
+  blueprintIntro: {
+    maxWidth: 760,
+  },
+  blueprintGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
+  },
+  blueprintStepCard: {
+    borderRadius: RADIUS.xl,
+    padding: SPACING.sm,
+    minWidth: 200,
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    alignItems: 'flex-start',
+  },
+  blueprintStepBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  blueprintStepLetter: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '800',
+    color: COLORS.white,
+  },
+  blueprintStepCopy: {
+    flex: 1,
+  },
+  blueprintStepTitle: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '800',
+    color: COLORS.text,
+    marginBottom: 2,
+  },
+  blueprintStepText: {
+    fontSize: FONT_SIZES.xs,
+    lineHeight: 17,
+    color: COLORS.textLight,
+  },
+  collectionCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.xxl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: '#E3EDDA',
+    ...SHADOWS.small,
+  },
+  collectionIntro: {
+    maxWidth: 760,
+  },
+  collectionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
+  },
+  collectionItem: {
+    minWidth: 220,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.md,
+  },
+  collectionStatusPill: {
+    alignSelf: 'flex-start',
+    borderRadius: RADIUS.round,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 6,
+    marginBottom: SPACING.sm,
+  },
+  collectionStatusText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  collectionTitle: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '800',
+    color: COLORS.text,
+    marginBottom: SPACING.xs,
+  },
+  collectionText: {
+    fontSize: FONT_SIZES.sm,
+    lineHeight: 20,
+    color: COLORS.textLight,
+  },
   tileGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -1106,7 +1363,6 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   tileWrapper: {
-    width: '31%',
     minWidth: 180,
   },
   flowContainer: {

@@ -14,6 +14,7 @@ import EmotionCard from '../components/EmotionCard';
 import CheckInScreen from '../components/CheckInScreen';
 import EmotionHistory from '../components/EmotionHistory';
 import SENBanner from '../components/SENBanner';
+import BrandedScreenHeader from '../components/BrandedScreenHeader';
 import { loadEmotionLogs, removeEmotionLog, type LocalEmotionLog } from '../lib/storage';
 
 type Tab = 'emotions' | 'checkin' | 'history';
@@ -41,10 +42,12 @@ export default function ToolsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <Ionicons name="heart" size={24} color={COLORS.pink} />
-        <Text style={styles.headerTitle}>Emotion Tools</Text>
-      </View>
+      <BrandedScreenHeader
+        title="Emotion Tools"
+        subtitle="Daily check-ins, feeling cards, and reflection tools for calm classroom conversations."
+        icon="heart"
+        iconColor={COLORS.pink}
+      />
       <SENBanner />
 
       {/* Tab Switcher */}
@@ -148,19 +151,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.bgLight,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-    paddingBottom: SPACING.sm,
-  },
-  headerTitle: {
-    fontSize: FONT_SIZES.xxl,
-    fontWeight: '800',
-    color: COLORS.text,
   },
   tabBar: {
     flexDirection: 'row',

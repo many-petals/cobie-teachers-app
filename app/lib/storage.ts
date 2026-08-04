@@ -1,8 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { ParentProgressSummary, ParentShareApproval } from './parentSharing';
 
-// Storage keys
-const getKey = (key: string, userId?: string) =>
-  userId ? `${key}_${userId}` : key;
+const getKey = (key: string, userId?: string) => (userId ? `${key}_${userId}` : key);
 
 const KEYS = {
   FAVOURITES: (userId?: string) => getKey('@cobie_favourites', userId),
@@ -13,10 +12,10 @@ const KEYS = {
   VOICE_NOTES: (userId?: string) => getKey('@cobie_voice_notes', userId),
   WEEKLY_PLANS: (userId?: string) => getKey('@cobie_weekly_plans', userId),
   EMOTION_LOGS: (userId?: string) => getKey('@cobie_emotion_logs', userId),
+  PARENT_SHARE_APPROVALS: (userId?: string) => getKey('@cobie_parent_share_approvals', userId),
+  PARENT_PROGRESS_SUMMARIES: (userId?: string) => getKey('@cobie_parent_progress_summaries', userId),
 } as const;
 
-
-// Types matching AuthContext
 export interface LocalFavourite {
   id: string;
   resource_type: 'lesson' | 'activity' | 'printable';
@@ -41,7 +40,7 @@ export interface VoiceNote {
   id: string;
   title: string;
   uri: string;
-  duration: number; // seconds
+  duration: number;
   pupilCode?: string;
   tags: string[];
   transcript?: string;
@@ -56,12 +55,20 @@ export interface SavedWeeklyPlan {
   created_at: string;
 }
 
-// Generate a simple unique ID for local records
-function generateLocalId(): string {
-  return 'local_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 8);
+export interface LocalEmotionLog {
+  id: string;
+  pupil_id?: string;
+  pupil_code?: string;
+  emotion_id: string;
+  emotion_name: string;
+  context: string;
+  notes: string;
+  logged_at: string;
 }
 
-// ─── Generic helpers ────────────────────────────────────────────────
+function generateLocalId(): string {
+  return `local_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 8)}`;
+}
 
 async function getJSON<T>(key: string, fallback: T): Promise<T> {
   try {
@@ -82,8 +89,6 @@ async function setJSON<T>(key: string, value: T): Promise<void> {
   }
 }
 
-// ─── Favourites ─────────────────────────────────────────────────────
-
 export async function loadFavourites(userId?: string): Promise<LocalFavourite[]> {
   return getJSON<LocalFavourite[]>(KEYS.FAVOURITES(userId), []);
 }
@@ -91,7 +96,12 @@ export async function loadFavourites(userId?: string): Promise<LocalFavourite[]>
 export async function saveFavourites(favourites: LocalFavourite[], userId?: string): Promise<void> {
   return setJSON(KEYS.FAVOURITES(userId), favourites);
 }
-export async function addFavourite(resourceType: 'lesson' | 'activity' | 'printable', resourceId: string, userId?: string): Promise<LocalFavourite> {
+
+export async function addFavourite(
+  resourceType: 'lesson' | 'activity' | 'printable',
+  resourceId: string,
+  userId?: string,
+): Promise<LocalFavourite> {
   const favourites = await loadFavourites(userId);
   const newFav: LocalFavourite = {
     id: generateLocalId(),
@@ -105,11 +115,11 @@ export async function addFavourite(resourceType: 'lesson' | 'activity' | 'printa
 
 export async function removeFavourite(id: string, userId?: string): Promise<void> {
   const favourites = await loadFavourites(userId);
-  const filtered = favourites.filter(f => f.id !== id);
-  await saveFavourites(filtered, userId);
+  await saveFavourites(
+    favourites.filter(favourite => favourite.id !== id),
+    userId,
+  );
 }
-
-// ─── Completed Lessons ──────────────────────────────────────────────
 
 export async function loadCompletedLessons(userId?: string): Promise<LocalCompletedLesson[]> {
   return getJSON<LocalCompletedLesson[]>(KEYS.COMPLETED_LESSONS(userId), []);
@@ -121,8 +131,9 @@ export async function saveCompletedLessons(lessons: LocalCompletedLesson[], user
 
 export async function addCompletedLesson(lessonId: string, userId?: string): Promise<LocalCompletedLesson> {
   const lessons = await loadCompletedLessons(userId);
-  const existing = lessons.find(l => l.lesson_id === lessonId);
+  const existing = lessons.find(lesson => lesson.lesson_id === lessonId);
   if (existing) return existing;
+
   const newLesson: LocalCompletedLesson = {
     lesson_id: lessonId,
     completed_at: new Date().toISOString(),
@@ -140,7 +151,10 @@ export async function saveCalmConfigs(configs: LocalCalmConfig[], userId?: strin
   return setJSON(KEYS.CALM_CONFIGS(userId), configs);
 }
 
-export async function addCalmConfig(config: { name: string; emotion: string; noise: string; time_available: number }, userId?: string): Promise<LocalCalmConfig> {
+export async function addCalmConfig(
+  config: { name: string; emotion: string; noise: string; time_available: number },
+  userId?: string,
+): Promise<LocalCalmConfig> {
   const configs = await loadCalmConfigs(userId);
   const newConfig: LocalCalmConfig = {
     id: generateLocalId(),
@@ -154,11 +168,11 @@ export async function addCalmConfig(config: { name: string; emotion: string; noi
 
 export async function removeCalmConfig(id: string, userId?: string): Promise<void> {
   const configs = await loadCalmConfigs(userId);
-  const filtered = configs.filter(c => c.id !== id);
-  await saveCalmConfigs(filtered, userId);
+  await saveCalmConfigs(
+    configs.filter(config => config.id !== id),
+    userId,
+  );
 }
-
-// ─── SEN Mode ───────────────────────────────────────────────────────
 
 export async function loadSENMode(userId?: string): Promise<boolean> {
   return getJSON<boolean>(KEYS.SEN_MODE(userId), false);
@@ -167,8 +181,6 @@ export async function loadSENMode(userId?: string): Promise<boolean> {
 export async function saveSENMode(enabled: boolean, userId?: string): Promise<void> {
   return setJSON(KEYS.SEN_MODE(userId), enabled);
 }
-
-// ─── Voice Notes ────────────────────────────────────────────────────
 
 export async function loadVoiceNotes(userId?: string): Promise<VoiceNote[]> {
   return getJSON<VoiceNote[]>(KEYS.VOICE_NOTES(userId), []);
@@ -192,20 +204,20 @@ export async function addVoiceNote(note: Omit<VoiceNote, 'id' | 'created_at'>, u
 
 export async function updateVoiceNote(id: string, updates: Partial<VoiceNote>, userId: string): Promise<void> {
   const notes = await loadVoiceNotes(userId);
-  const idx = notes.findIndex(n => n.id === id);
-  if (idx >= 0) {
-    notes[idx] = { ...notes[idx], ...updates };
+  const index = notes.findIndex(note => note.id === id);
+  if (index >= 0) {
+    notes[index] = { ...notes[index], ...updates };
     await saveVoiceNotes(notes, userId);
   }
 }
 
 export async function removeVoiceNote(id: string, userId: string): Promise<void> {
   const notes = await loadVoiceNotes(userId);
-  const filtered = notes.filter(n => n.id !== id);
-  await saveVoiceNotes(filtered, userId);
+  await saveVoiceNotes(
+    notes.filter(note => note.id !== id),
+    userId,
+  );
 }
-
-// ─── Weekly Plans ───────────────────────────────────────────────────
 
 export async function loadWeeklyPlans(userId?: string): Promise<SavedWeeklyPlan[]> {
   return getJSON<SavedWeeklyPlan[]>(KEYS.WEEKLY_PLANS(userId), []);
@@ -215,7 +227,10 @@ export async function saveWeeklyPlans(plans: SavedWeeklyPlan[], userId?: string)
   return setJSON(KEYS.WEEKLY_PLANS(userId), plans);
 }
 
-export async function addWeeklyPlan(plan: Omit<SavedWeeklyPlan, 'id' | 'created_at'>, userId?: string): Promise<SavedWeeklyPlan> {
+export async function addWeeklyPlan(
+  plan: Omit<SavedWeeklyPlan, 'id' | 'created_at'>,
+  userId?: string,
+): Promise<SavedWeeklyPlan> {
   const plans = await loadWeeklyPlans(userId);
   const newPlan: SavedWeeklyPlan = {
     id: generateLocalId(),
@@ -229,29 +244,17 @@ export async function addWeeklyPlan(plan: Omit<SavedWeeklyPlan, 'id' | 'created_
 
 export async function removeWeeklyPlan(id: string, userId?: string): Promise<void> {
   const plans = await loadWeeklyPlans(userId);
-  const filtered = plans.filter(p => p.id !== id);
-  await saveWeeklyPlans(filtered, userId);
-}
-
-// ─── Emotion Logs (local fallback for check-in history) ─────────────
-
-
-export interface LocalEmotionLog {
-  id: string;
-  pupil_id?: string;
-  pupil_code?: string;
-  emotion_id: string;
-  emotion_name: string;
-  context: string;
-  notes: string;
-  logged_at: string;
+  await saveWeeklyPlans(
+    plans.filter(plan => plan.id !== id),
+    userId,
+  );
 }
 
 export async function loadEmotionLogs(userId?: string): Promise<LocalEmotionLog[]> {
   return getJSON<LocalEmotionLog[]>(KEYS.EMOTION_LOGS(userId), []);
 }
 
-export async function saveEmotionLogs(logs: LocalEmotionLog[], userId?: string      ): Promise<void> {
+export async function saveEmotionLogs(logs: LocalEmotionLog[], userId?: string): Promise<void> {
   return setJSON(KEYS.EMOTION_LOGS(userId), logs);
 }
 
@@ -268,21 +271,55 @@ export async function addEmotionLog(log: Omit<LocalEmotionLog, 'id'>, userId?: s
 
 export async function removeEmotionLog(id: string, userId?: string): Promise<void> {
   const logs = await loadEmotionLogs(userId);
-  const filtered = logs.filter(l => l.id !== id);
-  await saveEmotionLogs(filtered, userId);
+  await saveEmotionLogs(
+    logs.filter(log => log.id !== id),
+    userId,
+  );
 }
 
 export async function getEmotionLogsForPupil(pupilId: string, userId?: string): Promise<LocalEmotionLog[]> {
   const logs = await loadEmotionLogs(userId);
-  return logs.filter(l => l.pupil_id === pupilId);
+  return logs.filter(log => log.pupil_id === pupilId);
 }
 
-// ─── Clear all local data ───────────────────────────────────────────
+export async function loadParentShareApprovals(userId?: string): Promise<ParentShareApproval[]> {
+  return getJSON<ParentShareApproval[]>(KEYS.PARENT_SHARE_APPROVALS(userId), []);
+}
+
+export async function saveParentShareApprovals(approvals: ParentShareApproval[], userId?: string): Promise<void> {
+  return setJSON(KEYS.PARENT_SHARE_APPROVALS(userId), approvals);
+}
+
+export async function upsertParentShareApproval(approval: ParentShareApproval, userId?: string): Promise<void> {
+  const approvals = await loadParentShareApprovals(userId);
+  const next = approvals.filter(
+    item => !(item.pupilCode === approval.pupilCode && item.moduleSlug === approval.moduleSlug),
+  );
+  next.unshift(approval);
+  await saveParentShareApprovals(next, userId);
+}
+
+export async function loadParentProgressSummaries(userId?: string): Promise<ParentProgressSummary[]> {
+  return getJSON<ParentProgressSummary[]>(KEYS.PARENT_PROGRESS_SUMMARIES(userId), []);
+}
+
+export async function saveParentProgressSummaries(summaries: ParentProgressSummary[], userId?: string): Promise<void> {
+  return setJSON(KEYS.PARENT_PROGRESS_SUMMARIES(userId), summaries);
+}
+
+export async function upsertParentProgressSummary(summary: ParentProgressSummary, userId?: string): Promise<void> {
+  const summaries = await loadParentProgressSummaries(userId);
+  const next = summaries.filter(
+    item => !(item.pupilCode === summary.pupilCode && item.moduleSlug === summary.moduleSlug),
+  );
+  next.unshift(summary);
+  await saveParentProgressSummaries(next, userId);
+}
 
 export async function clearAllLocalData(userId?: string | null): Promise<void> {
   try {
     await AsyncStorage.multiRemove([
-      ...Object.values(KEYS).map((keyFactory) => keyFactory(userId ?? undefined)),
+      ...Object.values(KEYS).map(keyFactory => keyFactory(userId ?? undefined)),
       '@cobie_favourites',
       '@cobie_completed_lessons',
       '@cobie_calm_configs',
@@ -291,12 +328,12 @@ export async function clearAllLocalData(userId?: string | null): Promise<void> {
       '@cobie_voice_notes',
       '@cobie_weekly_plans',
       '@cobie_emotion_logs',
+      '@cobie_parent_share_approvals',
+      '@cobie_parent_progress_summaries',
     ]);
   } catch (err) {
     console.warn('[Storage] Failed to clear data:', err);
   }
 }
-  
-// ─── Export keys for debugging ──────────────────────────────────────
 
 export { KEYS as STORAGE_KEYS };

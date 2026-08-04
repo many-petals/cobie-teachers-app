@@ -19,7 +19,7 @@
 // ============================================================
 
 export const LOCAL_LOGO = require('../assets/images/brand-mark-ui.png');
-export const LOCAL_WORDMARK = require('../assets/images/brand-wordmark.png');
+export const LOCAL_WORDMARK = require('../assets/images/brand-wordmark-ui.png');
 
 export const BRAND = {
   // ⬇️ REPLACE THIS URL WITH YOUR NEW LOGO IMAGE URL ⬇️

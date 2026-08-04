@@ -80,8 +80,8 @@ export default function BrandLockup({
     );
   }
 
-  const titleColor = mode === 'hero' ? COLORS.white : '#4C8E50';
-  const subtitleColor = mode === 'hero' ? 'rgba(255,255,255,0.82)' : COLORS.textMuted;
+  const titleColor = mode === 'hero' ? '#213A2E' : '#213A2E';
+  const subtitleColor = mode === 'hero' ? '#6F7F76' : '#7C8A81';
 
   return (
     <View style={[styles.base, mode === 'pill' && styles.pill, mode === 'hero' && styles.hero, style]}>
@@ -143,22 +143,22 @@ const styles = StyleSheet.create({
   },
   pill: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255,255,255,0.97)',
+    backgroundColor: 'rgba(255,255,255,0.98)',
     borderRadius: RADIUS.xl,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderWidth: 1,
-    borderColor: 'rgba(27,107,147,0.12)',
+    borderColor: 'rgba(33,58,46,0.08)',
     ...SHADOWS.small,
   },
   hero: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(9,37,56,0.24)',
+    backgroundColor: 'rgba(255,255,255,0.78)',
     borderRadius: RADIUS.xl,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(33,58,46,0.08)',
   },
   markWrap: {
     alignItems: 'center',
@@ -169,12 +169,12 @@ const styles = StyleSheet.create({
   markWrapDefault: {
     backgroundColor: '#FFF8E7',
     borderWidth: 1,
-    borderColor: 'rgba(76,142,80,0.14)',
+    borderColor: 'rgba(216,156,25,0.18)',
   },
   markWrapHero: {
-    backgroundColor: 'rgba(255,255,255,0.18)',
+    backgroundColor: '#FFF8E7',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.16)',
+    borderColor: 'rgba(216,156,25,0.18)',
   },
   mark: {
     width: '100%',
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
   },
   heroHelper: {
-    color: 'rgba(255,255,255,0.72)',
+    color: '#7C8A81',
   },
   wordmark: {
     alignSelf: 'flex-start',

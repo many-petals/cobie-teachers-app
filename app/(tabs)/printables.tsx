@@ -13,6 +13,7 @@ import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { PRINTABLES } from '../data/printables';
 import SearchBar from '../components/SearchBar';
 import FilterChips from '../components/FilterChips';
+import BrandedScreenHeader from '../components/BrandedScreenHeader';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { downloadPrintable, downloadAllPrintables } from '../lib/printableGenerator';
@@ -44,6 +45,10 @@ export default function PrintablesScreen() {
   const visiblePrintables = useMemo(
     () => PRINTABLES.filter((printable) => printable.id !== 'p-10'),
     []
+  );
+  const categoryCount = useMemo(
+    () => new Set(visiblePrintables.map((printable) => printable.category)).size,
+    [visiblePrintables]
   );
 
   const filtered = useMemo(() => {
@@ -122,32 +127,73 @@ export default function PrintablesScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Ionicons name="print" size={24} color={COLORS.accentOrange} />
-          <Text style={styles.headerTitle}>Printables</Text>
-        </View>
-        <TouchableOpacity style={styles.downloadAllBtn} onPress={handleDownloadAll} activeOpacity={0.7}>
-          <Ionicons name="download" size={18} color={COLORS.white} />
-          <Text style={styles.downloadAllText}>All</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={{ marginHorizontal: 16, marginBottom: 6 }}>
-  <SearchBar value={search} onChangeText={setSearch} placeholder="Search printables..." />
-</View>
-<View style={{ marginBottom: 4 }}>
-  <FilterChips chips={CATEGORY_FILTERS} selected={categoryFilter} onSelect={setCategoryFilter} />
-</View>
-<View style={{ marginBottom: 6 }}>
-  <FilterChips chips={AGE_FILTERS} selected={ageFilter} onSelect={setAgeFilter} />
-</View>
-
-      <Text style={styles.resultCount}>
-        {filtered.length} resource{filtered.length !== 1 ? 's' : ''} found
-      </Text>
+      <BrandedScreenHeader
+        title="Printables"
+        subtitle="Official Many Petals classroom cards, posters, worksheets, and teacher sheets."
+        icon="print"
+        iconColor={COLORS.accentOrange}
+        rightAction={(
+          <TouchableOpacity style={styles.downloadAllBtn} onPress={handleDownloadAll} activeOpacity={0.7}>
+            <Ionicons name="download" size={18} color={COLORS.white} />
+            <Text style={styles.downloadAllText}>All</Text>
+          </TouchableOpacity>
+        )}
+      />
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
+        <View style={styles.section}>
+          <View style={styles.overviewCard}>
+            <Text style={styles.sectionEyebrow}>Print with confidence</Text>
+            <Text style={styles.sectionTitle}>Open ready-to-use classroom resources that are designed to print cleanly and work fast</Text>
+            <Text style={styles.sectionSubtitle}>
+              Use these printables for lessons, displays, calm support, tracking, and parent communication without needing to remake anything yourself.
+            </Text>
+
+            <View style={styles.statsRow}>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{filtered.length}</Text>
+                <Text style={styles.statLabel}>showing now</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{visiblePrintables.length}</Text>
+                <Text style={styles.statLabel}>classroom files</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{categoryCount}</Text>
+                <Text style={styles.statLabel}>resource types</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.controlsCard}>
+            <Text style={styles.controlsTitle}>Find the printable you need quickly</Text>
+            <Text style={styles.controlsSubtitle}>
+              Search by title, then narrow by resource type or age stage.
+            </Text>
+
+            <View style={styles.searchShell}>
+              <SearchBar value={search} onChangeText={setSearch} placeholder="Search printables..." />
+            </View>
+
+            <Text style={styles.filterLabel}>Filter by printable type</Text>
+            <View style={styles.chipsShell}>
+              <FilterChips chips={CATEGORY_FILTERS} selected={categoryFilter} onSelect={setCategoryFilter} />
+            </View>
+
+            <Text style={styles.filterLabel}>Filter by age stage</Text>
+            <View style={styles.chipsShell}>
+              <FilterChips chips={AGE_FILTERS} selected={ageFilter} onSelect={setAgeFilter} />
+            </View>
+
+            <Text style={styles.resultCount}>
+              {filtered.length} resource{filtered.length !== 1 ? 's' : ''} found
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
         {filtered.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="document-outline" size={48} color={COLORS.mediumGray} />
@@ -245,6 +291,7 @@ export default function PrintablesScreen() {
             );
           })
         )}
+        </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -254,13 +301,106 @@ export default function PrintablesScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.bgLight },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg, paddingBottom: SPACING.sm },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
-  headerTitle: { fontSize: FONT_SIZES.xxl, fontWeight: '800', color: COLORS.text },
   downloadAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.primary, paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: RADIUS.round },
   downloadAllText: { fontSize: FONT_SIZES.sm, fontWeight: '700', color: COLORS.white },
-  resultCount: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, paddingHorizontal: SPACING.lg, marginBottom: SPACING.sm },
-  container: { flex: 1, paddingHorizontal: SPACING.lg },
+  container: { flex: 1 },
+  section: {
+    paddingHorizontal: SPACING.lg,
+    marginTop: SPACING.lg,
+  },
+  overviewCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.xxl,
+    padding: SPACING.xl,
+    borderWidth: 1,
+    borderColor: '#E3EDDA',
+    ...SHADOWS.small,
+  },
+  sectionEyebrow: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
+    color: '#8A6B1A',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: SPACING.xs,
+  },
+  sectionTitle: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.sm,
+  },
+  sectionSubtitle: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    lineHeight: 20,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginTop: SPACING.lg,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: COLORS.bgLight,
+    borderRadius: RADIUS.lg,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.sm,
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '800',
+    color: COLORS.accentOrange,
+  },
+  statLabel: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '600',
+    color: COLORS.textLight,
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  controlsCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.xxl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: '#E6EEF5',
+    ...SHADOWS.small,
+  },
+  controlsTitle: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  controlsSubtitle: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    lineHeight: 20,
+    marginTop: SPACING.xs,
+  },
+  searchShell: {
+    marginTop: SPACING.md,
+    marginHorizontal: -SPACING.lg,
+  },
+  filterLabel: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginTop: SPACING.sm,
+    marginBottom: 2,
+  },
+  chipsShell: {
+    marginHorizontal: -SPACING.lg,
+    marginBottom: -SPACING.xs,
+  },
+  resultCount: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textMuted,
+    marginTop: SPACING.sm,
+  },
   emptyState: { alignItems: 'center', paddingVertical: SPACING.huge },
   emptyText: { fontSize: FONT_SIZES.lg, fontWeight: '600', color: COLORS.textLight, marginTop: SPACING.md },
   card: { backgroundColor: COLORS.white, borderRadius: RADIUS.xl, paddingVertical: 12, paddingHorizontal: 14, marginBottom: 10, borderLeftWidth: 4, ...SHADOWS.small },  cardHeader: { flexDirection: 'row', alignItems: 'center' },

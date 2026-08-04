@@ -41,12 +41,17 @@ interface Props {
   visible: boolean;
   onClose: () => void;
   onGenerateReport?: () => void;
+  onApproveParentShare?: () => void;
+  onRefreshParentShare?: () => void;
+  onRevokeParentShare?: () => void;
   pupilCode: string;
   ageGroup: 'EYFS' | 'KS1';
   senStatus: boolean;
   assessments: AssessmentData[];
   emotionLogs?: EmotionLogData[];
   onDeleteEmotionLog?: (id: string) => void;
+  parentShareStatus?: 'disabled' | 'pending-link' | 'active' | 'revoked';
+  latestParentSummaryAt?: string;
 }
 
 type ViewTab = 'milestones' | 'emotions';
@@ -55,12 +60,17 @@ export default function ProgressView({
   visible,
   onClose,
   onGenerateReport,
+  onApproveParentShare,
+  onRefreshParentShare,
+  onRevokeParentShare,
   pupilCode,
   ageGroup,
   senStatus,
   assessments,
   emotionLogs = [],
   onDeleteEmotionLog,
+  parentShareStatus = 'disabled',
+  latestParentSummaryAt,
 }: Props) {
   const [selectedTerm, setSelectedTerm] = useState<string | 'all'>('all');
   const [activeTab, setActiveTab] = useState<ViewTab>('milestones');
@@ -105,6 +115,32 @@ export default function ProgressView({
   };
 
   const overallLabel = getRatingLabel(avgRating);
+  const parentShareState =
+    parentShareStatus === 'active'
+      ? {
+          label: 'Approved for parent sharing',
+          color: COLORS.success,
+          bgColor: COLORS.bgGreen,
+          icon: 'checkmark-circle' as const,
+          helper: latestParentSummaryAt
+            ? `Latest approved summary saved ${new Date(latestParentSummaryAt).toLocaleDateString('en-GB')}.`
+            : 'This child has an approved parent-safe summary ready for future linking.',
+        }
+      : parentShareStatus === 'revoked'
+        ? {
+            label: 'Sharing turned off',
+            color: COLORS.warning,
+            bgColor: COLORS.bgWarm,
+            icon: 'pause-circle' as const,
+            helper: 'You can re-approve sharing when you are ready to send an updated summary home.',
+          }
+        : {
+            label: 'Not shared with parents yet',
+            color: COLORS.primary,
+            bgColor: COLORS.bgLight,
+            icon: 'people-circle' as const,
+            helper: 'Keep sharing off until you want a parent-safe summary available for this child.',
+          };
 
   // Check for improvement between terms
   const getTermComparison = (areaId: string): { improved: boolean; change: number } | null => {
@@ -232,6 +268,56 @@ export default function ProgressView({
                         </Text>
                       ) : null}
                     </View>
+                  </View>
+                </View>
+
+                <View style={styles.parentShareCard}>
+                  <View style={styles.parentShareHeader}>
+                    <View style={[styles.parentShareIconWrap, { backgroundColor: parentShareState.bgColor }]}>
+                      <Ionicons name={parentShareState.icon} size={18} color={parentShareState.color} />
+                    </View>
+                    <View style={styles.parentShareCopy}>
+                      <Text style={styles.parentShareTitle}>Parent sharing</Text>
+                      <Text style={[styles.parentShareStatus, { color: parentShareState.color }]}>
+                        {parentShareState.label}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.parentShareHelper}>{parentShareState.helper}</Text>
+                  <View style={styles.parentShareActions}>
+                    {parentShareStatus === 'active' ? (
+                      <>
+                        {onRefreshParentShare ? (
+                          <TouchableOpacity
+                            onPress={onRefreshParentShare}
+                            style={styles.parentShareSecondaryBtn}
+                            activeOpacity={0.7}
+                          >
+                            <Ionicons name="refresh" size={15} color={COLORS.primary} />
+                            <Text style={styles.parentShareSecondaryBtnText}>Update Summary</Text>
+                          </TouchableOpacity>
+                        ) : null}
+                        {onRevokeParentShare ? (
+                          <TouchableOpacity
+                            onPress={onRevokeParentShare}
+                            style={styles.parentShareDangerBtn}
+                            activeOpacity={0.7}
+                          >
+                            <Ionicons name="close-circle-outline" size={15} color={COLORS.error} />
+                            <Text style={styles.parentShareDangerBtnText}>Turn Off</Text>
+                          </TouchableOpacity>
+                        ) : null}
+                      </>
+                    ) : onApproveParentShare ? (
+                      <TouchableOpacity
+                        onPress={onApproveParentShare}
+                        style={styles.parentSharePrimaryBtn}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="checkmark-circle-outline" size={15} color={COLORS.white} />
+                        <Text style={styles.parentSharePrimaryBtnText}>Approve Parent Summary</Text>
+                      </TouchableOpacity>
+                    ) : null}
                   </View>
                 </View>
 
@@ -470,6 +556,96 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     fontWeight: '700',
     color: COLORS.primary,
+  },
+  parentShareCard: {
+    marginTop: SPACING.md,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    ...SHADOWS.small,
+  },
+  parentShareHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  parentShareIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  parentShareCopy: {
+    flex: 1,
+  },
+  parentShareTitle: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  parentShareStatus: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  parentShareHelper: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    lineHeight: 20,
+    marginTop: SPACING.sm,
+  },
+  parentShareActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
+  },
+  parentSharePrimaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: COLORS.primary,
+    borderRadius: RADIUS.round,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+  parentSharePrimaryBtnText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '700',
+    color: COLORS.white,
+  },
+  parentShareSecondaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: COLORS.bgLight,
+    borderRadius: RADIUS.round,
+    borderWidth: 1,
+    borderColor: COLORS.primary + '20',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+  parentShareSecondaryBtnText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+  parentShareDangerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.round,
+    borderWidth: 1,
+    borderColor: COLORS.error + '30',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+  parentShareDangerBtnText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '700',
+    color: COLORS.error,
   },
   // Tab bar
   tabBar: {

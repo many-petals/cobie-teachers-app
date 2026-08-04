@@ -21,7 +21,6 @@ export default function FilterChips({ chips, selected, onSelect }: FilterChipsPr
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      style={styles.scroll}
       contentContainerStyle={styles.container}
     >
       {chips.map((chip) => {
@@ -40,9 +39,9 @@ export default function FilterChips({ chips, selected, onSelect }: FilterChipsPr
             {chip.icon && (
               <Ionicons
                 name={chip.icon as any}
-                size={12}
+                size={14}
                 color={isSelected ? COLORS.white : COLORS.textLight}
-                style={styles.icon}
+                style={{ marginRight: 4 }}
               />
             )}
             <Text
@@ -61,45 +60,33 @@ export default function FilterChips({ chips, selected, onSelect }: FilterChipsPr
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    flexGrow: 0,
-    maxHeight: 48,
-  },
   container: {
     paddingHorizontal: SPACING.lg,
-    paddingVertical: 0,
-    gap: 6,
-    alignItems: 'center',
-    minHeight: 40,
+    paddingVertical: SPACING.sm,
+    gap: SPACING.sm,
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
-    flexShrink: 0,
-    height: 40,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 20,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.round,
     backgroundColor: COLORS.white,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: COLORS.lightGray,
-    marginRight: 6,
+    marginRight: SPACING.sm,
   },
   chipSelected: {
     backgroundColor: COLORS.primary,
     borderColor: COLORS.primary,
   },
   chipText: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: '600',
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '500',
     color: COLORS.textLight,
   },
   chipTextSelected: {
     color: COLORS.white,
-    fontWeight: '700',
-  },
-  icon: {
-    marginRight: 4,
+    fontWeight: '600',
   },
 });

@@ -91,59 +91,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setHasFullAccess(Boolean(user?.email && TESTER_EMAILS.includes(user.email)));
   }, [user]);
 
-  const ensureTeacherProfile = useCallback(async (authUser: any) => {
-    if (!authUser?.id) {
-      return null;
-    }
-
-    const { data: existingProfile } = await supabase
-      .from('teachers')
-      .select('*')
-      .eq('user_id', authUser.id)
-      .maybeSingle();
-
-    if (existingProfile) {
-      return existingProfile as TeacherProfile;
-    }
-
-    const fallbackNameSource =
-      authUser.user_metadata?.name ||
-      authUser.user_metadata?.full_name ||
-      authUser.email?.split('@')[0] ||
-      'Teacher';
-
-    const fallbackName =
-      typeof fallbackNameSource === 'string' && fallbackNameSource.trim()
-        ? fallbackNameSource.trim()
-        : 'Teacher';
-
-    const { data: createdProfile, error } = await supabase
-      .from('teachers')
-      .insert({
-        user_id: authUser.id,
-        name: fallbackName,
-        school: '',
-        role: 'Teacher',
-      })
-      .select('*')
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    return createdProfile as TeacherProfile;
-  }, []);
-
   const loadAndMergeUserData = useCallback(async (userId: string) => {
     try {
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
-
-      const profileData = authUser?.id === userId
-        ? await ensureTeacherProfile(authUser)
-        : null;
+      const { data: profileData } = await supabase
+        .from('teachers')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
 
       setProfile(profileData ?? null);
 
@@ -256,7 +210,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error('Error loading/merging user data:', err);
     }
-  }, [ensureTeacherProfile]);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -387,14 +341,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     const currentUserId = getStorageUserId();
     setLoading(true);
-    resetAuthState();
-    setShowAuthModal(false);
 
     try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.warn('Sign out failed:', error);
+      await supabase.auth.signOut({ scope: 'global' });
     } finally {
+      resetAuthState();
+      setShowAuthModal(false);
       await LocalStorage.clearAllLocalData(currentUserId);
       await LocalStorage.clearAllLocalData(null);
       setLoading(false);
@@ -427,13 +379,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: firstError.message };
       }
 
-        resetAuthState();
-        setShowAuthModal(false);
-        await LocalStorage.clearAllLocalData(currentUserId);
-        await LocalStorage.clearAllLocalData(null);
-        await supabase.auth.signOut();
+      resetAuthState();
+      setShowAuthModal(false);
+      await LocalStorage.clearAllLocalData(currentUserId);
+      await LocalStorage.clearAllLocalData(null);
+      await supabase.auth.signOut({ scope: 'global' });
 
-        return { error: null };
+      return { error: null };
     } catch (error: any) {
       return { error: error?.message || 'Failed to delete your data.' };
     } finally {
