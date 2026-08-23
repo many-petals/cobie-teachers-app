@@ -8,6 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { EMOTIONS } from '../data/emotions';
 import EmotionCard from '../components/EmotionCard';
@@ -20,6 +21,7 @@ import { loadEmotionLogs, removeEmotionLog, type LocalEmotionLog } from '../lib/
 type Tab = 'emotions' | 'checkin' | 'history';
 
 export default function ToolsScreen() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('emotions');
   const [expandedEmotion, setExpandedEmotion] = useState<string | null>(null);
   const [emotionLogs, setEmotionLogs] = useState<LocalEmotionLog[]>([]);
@@ -100,6 +102,23 @@ export default function ToolsScreen() {
       </View>
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
+        <TouchableOpacity
+          style={styles.voiceNotesCard}
+          onPress={() => router.push('/voice-notes' as any)}
+          activeOpacity={0.75}
+        >
+          <View style={styles.voiceNotesIcon}>
+            <Ionicons name="mic-outline" size={22} color={COLORS.error} />
+          </View>
+          <View style={styles.voiceNotesCopy}>
+            <Text style={styles.voiceNotesTitle}>Voice Notes</Text>
+            <Text style={styles.voiceNotesText}>
+              Record private teacher notes after lessons, check-ins, or parent conversations.
+            </Text>
+          </View>
+          <Ionicons name="arrow-forward" size={18} color={COLORS.primary} />
+        </TouchableOpacity>
+
         {activeTab === 'emotions' ? (
           <View style={styles.emotionsList}>
             <Text style={styles.intro}>
@@ -183,6 +202,41 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  voiceNotesCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.lg,
+    padding: SPACING.md,
+    borderRadius: RADIUS.xl,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: '#FAD7DA',
+    ...SHADOWS.small,
+  },
+  voiceNotesIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFEBEE',
+  },
+  voiceNotesCopy: {
+    flex: 1,
+  },
+  voiceNotesTitle: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '800',
+    color: COLORS.text,
+    marginBottom: 2,
+  },
+  voiceNotesText: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    lineHeight: 19,
   },
   emotionsList: {
     padding: SPACING.lg,

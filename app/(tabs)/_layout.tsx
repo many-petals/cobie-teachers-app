@@ -78,6 +78,16 @@ export default function TabLayout() {
         }}
      
       />
+
+      <Tabs.Screen
+        name="tools"
+        options={{
+          title: '',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="construct" size={size} color={color} />
+          ),
+        }}
+      />
       
       <Tabs.Screen
         name="calm"
@@ -86,6 +96,23 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="leaf" size={size} color={color} />
           ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="tracker"
+        options={{
+          title: '',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="analytics" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="parents"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

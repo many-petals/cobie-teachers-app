@@ -196,8 +196,8 @@ export default function ProgressView({
             <View style={styles.headerActions}>
               {onGenerateReport ? (
                 <TouchableOpacity onPress={onGenerateReport} style={styles.reportBtn} activeOpacity={0.7}>
-                  <Ionicons name="document-text-outline" size={16} color={COLORS.primary} />
-                  <Text style={styles.reportBtnText}>Report</Text>
+                  <Ionicons name="mail-open-outline" size={16} color={COLORS.primary} />
+                  <Text style={styles.reportBtnText}>Parent Letter</Text>
                 </TouchableOpacity>
               ) : null}
               <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
@@ -277,14 +277,29 @@ export default function ProgressView({
                       <Ionicons name={parentShareState.icon} size={18} color={parentShareState.color} />
                     </View>
                     <View style={styles.parentShareCopy}>
-                      <Text style={styles.parentShareTitle}>Parent sharing</Text>
+                      <Text style={styles.parentShareTitle}>Parent progress summary</Text>
                       <Text style={[styles.parentShareStatus, { color: parentShareState.color }]}>
                         {parentShareState.label}
                       </Text>
                     </View>
                   </View>
                   <Text style={styles.parentShareHelper}>{parentShareState.helper}</Text>
+                  {onGenerateReport ? (
+                    <Text style={styles.parentShareHelperStrong}>
+                      Use Parent Letter to open a pre-filled end-of-term report from this pupil's tracker data.
+                    </Text>
+                  ) : null}
                   <View style={styles.parentShareActions}>
+                    {onGenerateReport ? (
+                      <TouchableOpacity
+                        onPress={onGenerateReport}
+                        style={styles.parentLetterBtn}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="mail-open-outline" size={15} color={COLORS.white} />
+                        <Text style={styles.parentLetterBtnText}>Open Pre-filled Parent Letter</Text>
+                      </TouchableOpacity>
+                    ) : null}
                     {parentShareStatus === 'active' ? (
                       <>
                         {onRefreshParentShare ? (
@@ -315,7 +330,7 @@ export default function ProgressView({
                         activeOpacity={0.7}
                       >
                         <Ionicons name="checkmark-circle-outline" size={15} color={COLORS.white} />
-                        <Text style={styles.parentSharePrimaryBtnText}>Approve Parent Summary</Text>
+                        <Text style={styles.parentSharePrimaryBtnText}>Approve for Parent App Later</Text>
                       </TouchableOpacity>
                     ) : null}
                   </View>
@@ -595,11 +610,32 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginTop: SPACING.sm,
   },
+  parentShareHelperStrong: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.text,
+    fontWeight: '700',
+    lineHeight: 20,
+    marginTop: SPACING.xs,
+  },
   parentShareActions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: SPACING.sm,
     marginTop: SPACING.md,
+  },
+  parentLetterBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: COLORS.primary,
+    borderRadius: RADIUS.round,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+  parentLetterBtnText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '700',
+    color: COLORS.white,
   },
   parentSharePrimaryBtn: {
     flexDirection: 'row',

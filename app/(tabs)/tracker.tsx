@@ -92,6 +92,21 @@ const REPORT_STRATEGY_POOL = [
 
 const ACTIVE_MODULE_SLUG = 'cobie-the-cactus';
 
+const wait = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds));
+
+const isRecoverableStorageLockError = (err: any) => {
+  const message = String(err?.message || err?.name || err || '').toLowerCase();
+  return message.includes('lock broken') || message.includes('aborterror');
+};
+
+const getFriendlyTrackerError = (err: any, fallback: string) => {
+  if (isRecoverableStorageLockError(err)) {
+    return 'The tracker was busy saving in another tab or request. Please try again now.';
+  }
+
+  return err?.message || fallback;
+};
+
 export default function TrackerScreen() {
   const { user, profile, clearUserData } = useAuth();
   const { showToast, showConfirm } = useToast();
@@ -179,12 +194,27 @@ export default function TrackerScreen() {
         return { success: false, error: 'This code is already in use. Please choose a different one.' };
       }
 
-      const { data, error } = await supabase.from('tracker_pupils').insert({
-        user_id: user.id,
-        ...pupilData,
-        display_code: normalizedCode,
-      }).select('*').single();
-      if (error) throw error;
+      let data: Pupil | null = null;
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          const result = await supabase.from('tracker_pupils').insert({
+            user_id: user.id,
+            ...pupilData,
+            display_code: normalizedCode,
+          }).select('*').single();
+
+          if (result.error) throw result.error;
+          data = result.data;
+          break;
+        } catch (err) {
+          if (attempt === 0 && isRecoverableStorageLockError(err)) {
+            await wait(450);
+            continue;
+          }
+
+          throw err;
+        }
+      }
 
       if (data) {
         setPupils(prev => [...prev, data]);
@@ -194,8 +224,8 @@ export default function TrackerScreen() {
 
       return { success: false, error: 'The pupil was not saved. Please try again.' };
     } catch (err: any) {
-      const message = err?.message || 'Failed to add pupil';
-      showToast('Error', message, 'error');
+      const message = getFriendlyTrackerError(err, 'Failed to add pupil');
+      showToast('Could Not Save Pupil', message, 'error');
       return { success: false, error: message };
     }
   };
@@ -701,20 +731,31 @@ export default function TrackerScreen() {
           </Text>
         </View>
 
-        {/* Info Card */}
-        <View style={styles.infoCard}>
-          <View style={styles.infoHeader}>
-            <Ionicons name="information-circle" size={20} color={COLORS.primary} />
-            <Text style={styles.infoTitle}>Quick Assessment Guide</Text>
+        {/* Workflow Card */}
+        <View style={styles.workflowCard}>
+          <View style={styles.workflowHeader}>
+            <Ionicons name="sparkles" size={20} color={COLORS.primary} />
+            <View style={styles.workflowHeaderCopy}>
+              <Text style={styles.workflowTitle}>Track progress in three simple steps</Text>
+              <Text style={styles.workflowText}>
+                Use anonymous pupil codes, record quick observations, then create a parent-ready progress summary when you are ready to share.
+              </Text>
+            </View>
           </View>
-          <Text style={styles.infoText}>
-            Track each pupil against {MILESTONE_AREAS.length} development areas with {MILESTONE_AREAS.reduce((s, a) => s + a.milestones.length, 0)} milestones aligned to EYFS Development Matters and KS1 PSHE curriculum. Now includes emotion tracking for holistic wellbeing monitoring.
-          </Text>
-          <View style={styles.ratingKeyRow}>
-            {RATING_LABELS.map(r => (
-              <View key={r.value} style={[styles.ratingKeyItem, { backgroundColor: r.bgColor }]}>
-                <View style={[styles.ratingKeyDot, { backgroundColor: r.color }]} />
-                <Text style={[styles.ratingKeyLabel, { color: r.color }]}>{r.label}</Text>
+          <View style={styles.workflowSteps}>
+            {[
+              { icon: 'person-add-outline', title: '1. Add pupil', text: 'Use P1, P2 or your own anonymous code.' },
+              { icon: 'clipboard-outline', title: '2. Assess progress', text: 'Tick quick milestones when you notice them.' },
+              { icon: 'document-text-outline', title: '3. Share summary', text: 'Generate a pre-filled letter/report for parents.' },
+            ].map(step => (
+              <View key={step.title} style={styles.workflowStep}>
+                <View style={styles.workflowStepIcon}>
+                  <Ionicons name={step.icon as any} size={17} color={COLORS.primary} />
+                </View>
+                <View style={styles.workflowStepCopy}>
+                  <Text style={styles.workflowStepTitle}>{step.title}</Text>
+                  <Text style={styles.workflowStepText}>{step.text}</Text>
+                </View>
               </View>
             ))}
           </View>
@@ -895,7 +936,7 @@ export default function TrackerScreen() {
                       activeOpacity={0.7}
                     >
                       <Ionicons name="heart" size={16} color={COLORS.white} />
-                      <Text style={styles.emotionBtnText}>Log Emotion</Text>
+                      <Text style={styles.emotionBtnText}>Emotion</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.assessBtn}
@@ -911,7 +952,7 @@ export default function TrackerScreen() {
                       activeOpacity={0.7}
                     >
                       <Ionicons name="bar-chart" size={16} color={COLORS.primary} />
-                      <Text style={styles.progressBtnText}>Progress</Text>
+                      <Text style={styles.progressBtnText}>Summary</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.deleteBtn}
@@ -927,26 +968,11 @@ export default function TrackerScreen() {
           </View>
         )}
 
-        {/* Milestone Areas Reference */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Milestone Areas</Text>
-          <Text style={styles.sectionSub}>
-            Based on EYFS Development Matters 2021 and KS1 PSHE National Curriculum
+        <View style={styles.curriculumNote}>
+          <Ionicons name="school-outline" size={17} color={COLORS.primary} />
+          <Text style={styles.curriculumNoteText}>
+            Assessment milestones are built into each pupil's Assess button and aligned to EYFS / KS1 emotional literacy, sensory awareness, communication, self-regulation, and inclusion.
           </Text>
-          <View style={styles.areaGrid}>
-            {MILESTONE_AREAS.map(area => (
-              <View key={area.id} style={[styles.areaRefCard, { borderLeftColor: area.color }]}>
-                <View style={[styles.areaRefIcon, { backgroundColor: area.bgColor }]}>
-                  <Ionicons name={area.icon as any} size={18} color={area.color} />
-                </View>
-                <View style={styles.areaRefInfo}>
-                  <Text style={styles.areaRefTitle}>{area.title}</Text>
-                  <Text style={styles.areaRefSrc}>{area.source}</Text>
-                  <Text style={styles.areaRefCount}>{area.milestones.length} milestones</Text>
-                </View>
-              </View>
-            ))}
-          </View>
         </View>
 
         {/* GDPR Footer */}
@@ -1222,6 +1248,73 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   // Info card
+  workflowCard: {
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.md,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: '#DDEEDD',
+    ...SHADOWS.small,
+  },
+  workflowHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  workflowHeaderCopy: {
+    flex: 1,
+  },
+  workflowTitle: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '800',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  workflowText: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    lineHeight: 20,
+  },
+  workflowSteps: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+  },
+  workflowStep: {
+    flex: 1,
+    minWidth: 180,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+    backgroundColor: COLORS.bgLight,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+  },
+  workflowStepIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  workflowStepCopy: {
+    flex: 1,
+  },
+  workflowStepTitle: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '800',
+    color: COLORS.text,
+    marginBottom: 2,
+  },
+  workflowStepText: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textLight,
+    lineHeight: 17,
+  },
   infoCard: {
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.md,
@@ -1516,7 +1609,7 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   progressBtn: {
-    flex: 1.5,
+    flex: 2.1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1531,6 +1624,7 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     fontWeight: '700',
     color: COLORS.primary,
+    textAlign: 'center',
   },
   deleteBtn: {
     width: 40,
@@ -1620,5 +1714,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
     marginBottom: SPACING.sm,
+  },
+  curriculumNote: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.xl,
+    padding: SPACING.md,
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.bgLight,
+    borderWidth: 1,
+    borderColor: COLORS.primary + '20',
+  },
+  curriculumNoteText: {
+    flex: 1,
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textLight,
+    lineHeight: 18,
   },
 });

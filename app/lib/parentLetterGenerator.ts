@@ -534,6 +534,10 @@ function getLetterContent(
                 <div class="write-line" style="position:relative;"><span style="position:absolute; top:2px; left:0; color:#444; font-size:10pt;">${reportPeriod}</span></div>
               </div>
               <div class="question-block">
+                <label>Date:</label>
+                <div class="write-line" style="position:relative;"><span style="position:absolute; top:2px; left:0; color:#444; font-size:10pt;">${dateStr}</span></div>
+              </div>
+              <div class="question-block">
                 <label>Teacher:</label>
                 <div class="write-line" style="position:relative;"><span style="position:absolute; top:2px; left:0; color:#444; font-size:10pt;">${teacherLabel}</span></div>
               </div>
@@ -620,6 +624,10 @@ function getLetterContent(
             <div class="question-block">
               <label>Report Period:</label>
               <div class="write-line"></div>
+            </div>
+            <div class="question-block">
+              <label>Date:</label>
+              <div class="write-line" style="position:relative;"><span style="position:absolute; top:2px; left:0; color:#aaa; font-size:10pt;">${dateStr}</span></div>
             </div>
             <div class="question-block">
               <label>Teacher:</label>
@@ -816,9 +824,11 @@ function downloadAsFile(html: string, filename: string): boolean {
 }
 
 function openHTML(html: string, filename: string): { success: boolean; method: string } {
-  if (openViaDocumentWrite(html)) return { success: true, method: 'tab' };
+  // Some in-app/mobile browsers open a blank tab but block document.write into it.
+  // Use a real generated URL first so the report content reliably loads.
   if (openViaBlobURL(html)) return { success: true, method: 'tab' };
   if (openViaDataURI(html)) return { success: true, method: 'tab' };
+  if (openViaDocumentWrite(html)) return { success: true, method: 'tab' };
   if (downloadAsFile(html, filename)) return { success: true, method: 'file' };
   return { success: false, method: 'none' };
 }

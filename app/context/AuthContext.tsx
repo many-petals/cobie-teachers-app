@@ -61,6 +61,20 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 const TESTER_EMAILS = ['caroline_marklew@hotmail.com', 'mand1984@yahoo.co.uk'];
+const SESSION_TIMEOUT_MS = 8000;
+const USER_DATA_TIMEOUT_MS = 10000;
+
+function withTimeout<T>(promise: PromiseLike<T>, milliseconds: number, label: string): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout>;
+
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`${label} timed out`));
+    }, milliseconds);
+  });
+
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<any | null>(null);
@@ -219,7 +233,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const {
           data: { session },
-        } = await supabase.auth.getSession();
+        } = await withTimeout(
+          supabase.auth.getSession(),
+          SESSION_TIMEOUT_MS,
+          'Session check',
+        );
 
         if (!active) {
           return;
@@ -227,8 +245,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (session?.user) {
           setUser(session.user);
-          await loadAndMergeUserData(session.user.id);
+          await withTimeout(
+            loadAndMergeUserData(session.user.id),
+            USER_DATA_TIMEOUT_MS,
+            'User data load',
+          );
         } else {
+          resetAuthState();
+        }
+      } catch (err) {
+        console.warn('Session check failed:', err);
+        if (active) {
           resetAuthState();
         }
       } finally {
@@ -249,7 +276,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (session?.user) {
         setUser(session.user);
-        await loadAndMergeUserData(session.user.id);
+        try {
+          await withTimeout(
+            loadAndMergeUserData(session.user.id),
+            USER_DATA_TIMEOUT_MS,
+            'User data load',
+          );
+        } catch (err) {
+          console.warn('User data load failed:', err);
+        }
       } else {
         resetAuthState();
         await LocalStorage.clearAllLocalData(null);

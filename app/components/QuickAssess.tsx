@@ -40,6 +40,14 @@ interface Props {
   existingAssessments: ExistingAssessment[];
 }
 
+const ASSESSMENT_CHOICES = [
+  { value: 1, label: 'Needs support', shortLabel: 'Support' },
+  { value: 2, label: 'Building', shortLabel: 'Building' },
+  { value: 3, label: 'On track', shortLabel: 'On track' },
+];
+
+const QUICK_RATING_LABELS = RATING_LABELS.filter(r => r.value <= 3);
+
 export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGroup, existingAssessments }: Props) {
   const { senMode } = useSEN();
   const [ratings, setRatings] = useState<Record<string, number>>({});
@@ -74,6 +82,36 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
       }
       return { ...prev, [milestoneId]: rating };
     });
+  };
+
+  const setAreaRating = (areaId: string, rating: number) => {
+    const targetArea = areas.find(area => area.id === areaId);
+    if (!targetArea) return;
+
+    setRatings(prev => {
+      const next = { ...prev };
+      targetArea.milestones.forEach(milestone => {
+        next[milestone.id] = rating;
+      });
+      return next;
+    });
+    setExpandedArea(areaId);
+  };
+
+  const setAllRatings = (rating: number) => {
+    setRatings(() => {
+      const next: Record<string, number> = {};
+      areas.forEach(area => {
+        area.milestones.forEach(milestone => {
+          next[milestone.id] = rating;
+        });
+      });
+      return next;
+    });
+  };
+
+  const clearRatings = () => {
+    setRatings({});
   };
 
   const handleSave = () => {
@@ -127,12 +165,14 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
 
           {/* Rating Key */}
           <View style={styles.ratingKey}>
-            {RATING_LABELS.map(r => (
+            {QUICK_RATING_LABELS.map(r => (
               <View key={r.value} style={[styles.keyItem, { backgroundColor: r.bgColor }]}>
                 <View style={[styles.keyDot, { backgroundColor: r.color }]}>
                   <Text style={styles.keyDotText}>{r.shortLabel}</Text>
                 </View>
-                <Text style={[styles.keyLabel, { color: r.color }]}>{r.label}</Text>
+                <Text style={[styles.keyLabel, { color: r.color }]}>
+                  {ASSESSMENT_CHOICES.find(choice => choice.value === r.value)?.label ?? r.label}
+                </Text>
               </View>
             ))}
           </View>
@@ -145,6 +185,36 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
 
           {/* Milestone Areas */}
           <ScrollView style={styles.scrollArea} showsVerticalScrollIndicator={true}>
+            <View style={styles.quickStartCard}>
+              <View style={styles.quickStartTitleRow}>
+                <Ionicons name="flash" size={18} color={COLORS.secondary} />
+                <Text style={styles.quickStartTitle}>Fast route</Text>
+              </View>
+              <Text style={styles.quickStartCopy}>
+                Choose one level for each area, then open an area only if you need to tweak individual milestones.
+              </Text>
+              <View style={styles.quickFillRow}>
+                {QUICK_RATING_LABELS.map(r => {
+                  const choice = ASSESSMENT_CHOICES.find(c => c.value === r.value);
+                  return (
+                    <TouchableOpacity
+                      key={r.value}
+                      style={[styles.quickFillBtn, { borderColor: r.color, backgroundColor: r.bgColor }]}
+                      onPress={() => setAllRatings(r.value)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.quickFillText, { color: r.color }]}>
+                        All {choice?.shortLabel ?? r.shortLabel}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+                <TouchableOpacity style={styles.clearBtn} onPress={clearRatings} activeOpacity={0.7}>
+                  <Text style={styles.clearText}>Clear</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
             {areas.map(area => {
               const isExpanded = expandedArea === area.id;
               const areaRated = area.milestones.filter(m => ratings[m.id]).length;
@@ -161,7 +231,7 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
                     </View>
                     <View style={styles.areaInfo}>
                       <Text style={styles.areaTitle}>{senMode ? area.shortTitle : area.title}</Text>
-                      <Text style={styles.areaSub}>{areaRated}/{area.milestones.length} rated</Text>
+                      <Text style={styles.areaSub}>{areaRated}/{area.milestones.length} rated - tap a level below to fill this area</Text>
                     </View>
                     {/* Mini progress dots */}
                     <View style={styles.miniDots}>
@@ -186,6 +256,24 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
                     />
                   </TouchableOpacity>
 
+                  <View style={styles.areaQuickRow}>
+                    {QUICK_RATING_LABELS.map(r => {
+                      const choice = ASSESSMENT_CHOICES.find(c => c.value === r.value);
+                      return (
+                        <TouchableOpacity
+                          key={r.value}
+                          style={[styles.areaQuickBtn, { borderColor: r.color }]}
+                          onPress={() => setAreaRating(area.id, r.value)}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={[styles.areaQuickText, { color: r.color }]}>
+                            {choice?.shortLabel ?? r.shortLabel}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+
                   {isExpanded && (
                     <View style={styles.milestonesContainer}>
                       {area.milestones.map(milestone => {
@@ -199,7 +287,7 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
                               <Text style={styles.milestoneDesc}>{milestone.description}</Text>
                             ) : null}
                             <View style={styles.ratingRow}>
-                              {RATING_LABELS.map(r => (
+                              {QUICK_RATING_LABELS.map(r => (
                                 <TouchableOpacity
                                   key={r.value}
                                   style={[
@@ -217,7 +305,7 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
                                       currentRating === r.value && { color: COLORS.white },
                                     ]}
                                   >
-                                    {r.shortLabel}
+                                    {ASSESSMENT_CHOICES.find(choice => choice.value === r.value)?.shortLabel ?? r.shortLabel}
                                   </Text>
                                 </TouchableOpacity>
                               ))}
@@ -346,6 +434,7 @@ const styles = StyleSheet.create({
   keyLabel: {
     fontSize: 10,
     fontWeight: '600',
+    flex: 1,
   },
   progressBar: {
     height: 4,
@@ -370,6 +459,59 @@ const styles = StyleSheet.create({
   scrollArea: {
     flex: 1,
     paddingHorizontal: SPACING.xl,
+  },
+  quickStartCard: {
+    backgroundColor: COLORS.bgLight,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
+  },
+  quickStartTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginBottom: 4,
+  },
+  quickStartTitle: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '800',
+    color: COLORS.text,
+  },
+  quickStartCopy: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textMuted,
+    lineHeight: 18,
+    marginBottom: SPACING.sm,
+  },
+  quickFillRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+  },
+  quickFillBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.round,
+    borderWidth: 1.5,
+  },
+  quickFillText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
+  },
+  clearBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.round,
+    borderWidth: 1.5,
+    borderColor: COLORS.lightGray,
+    backgroundColor: COLORS.white,
+  },
+  clearText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
+    color: COLORS.textMuted,
   },
   areaCard: {
     backgroundColor: COLORS.white,
@@ -404,6 +546,24 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.xs,
     color: COLORS.textMuted,
     marginTop: 1,
+  },
+  areaQuickRow: {
+    flexDirection: 'row',
+    gap: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.md,
+  },
+  areaQuickBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: RADIUS.md,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+  },
+  areaQuickText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
   },
   miniDots: {
     flexDirection: 'row',
@@ -453,7 +613,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   ratingBtnText: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: FONT_SIZES.xs,
     fontWeight: '700',
   },
   footer: {

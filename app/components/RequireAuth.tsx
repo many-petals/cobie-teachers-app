@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -14,13 +14,52 @@ interface RequireAuthProps {
 export default function RequireAuth({ title, message, children }: RequireAuthProps) {
   const router = useRouter();
   const { user, loading, setShowAuthModal } = useAuth();
+  const [sessionTakingTooLong, setSessionTakingTooLong] = useState(false);
+
+  useEffect(() => {
+    if (!loading) {
+      setSessionTakingTooLong(false);
+      return;
+    }
+
+    const timer = setTimeout(() => setSessionTakingTooLong(true), 9000);
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.centered}>
           <ActivityIndicator color={COLORS.primary} />
-          <Text style={styles.loadingText}>Checking your session...</Text>
+          <Text style={styles.loadingText}>
+            {sessionTakingTooLong ? 'Still checking your session...' : 'Checking your session...'}
+          </Text>
+          {sessionTakingTooLong ? (
+            <>
+              <Text style={styles.recoveryText}>
+                This is taking longer than expected. Refreshing usually clears a browser session lock.
+              </Text>
+              <TouchableOpacity
+                style={styles.primaryButton}
+                onPress={() => {
+                  if (typeof window !== 'undefined') {
+                    window.location.reload();
+                  }
+                }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="refresh" size={20} color={COLORS.white} />
+                <Text style={styles.primaryButtonText}>Refresh App</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.secondaryButton}
+                onPress={() => router.replace('/')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.secondaryButtonText}>Back to Home</Text>
+              </TouchableOpacity>
+            </>
+          ) : null}
         </View>
       </SafeAreaView>
     );
@@ -73,6 +112,15 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textMuted,
+  },
+  recoveryText: {
+    maxWidth: 360,
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.lg,
   },
   lockedContainer: {
     flex: 1,

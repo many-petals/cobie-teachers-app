@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -15,9 +15,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import SENBanner from '../components/SENBanner';
-import QuickTile from '../components/QuickTile';
-import TodayActivity from '../components/TodayActivity';
-import WorkbookPromo from '../components/WorkbookPromo';
 import PricingSection from '../components/PricingSection';
 import BrandLockup from '../components/BrandLockup';
 import { useAuth } from '../context/AuthContext';
@@ -26,36 +23,16 @@ import { LESSONS } from '../data/lessons';
 import { ACTIVITIES } from '../data/activities';
 import { PRINTABLES } from '../data/printables';
 import { BRAND } from '../data/brand';
-import { LITTLE_PETALS_BOOK_MODULES, LITTLE_PETALS_TARGET_BOOK_COUNT } from '../data/bookModules';
+import { LITTLE_PETALS_BOOK_MODULES } from '../data/bookModules';
 import { openParentApp, ParentAppSection } from '../lib/parentAppLinks';
 
 const HERO_CHARACTER_IMAGE = require('../assets/images/cobie-hero.png');
-
-type QuickTileConfig = {
-  title: string;
-  subtitle: string;
-  icon: string;
-  color: string;
-  bgColor: string;
-  route?: string;
-  externalSection?: ParentAppSection;
-};
 
 type HeaderLinkConfig = {
   label: string;
   route?: string;
   externalSection?: ParentAppSection;
 };
-
-const QUICK_TILES: QuickTileConfig[] = [
-  { title: 'Lessons', subtitle: '8 Core', icon: 'book', color: '#1B6B93', bgColor: '#E1F5FE', route: '/lessons' },
-  { title: 'Activities', subtitle: '8 Optional', icon: 'color-palette', color: '#7BC67E', bgColor: '#E8F5E9', route: '/activities' },
-  { title: 'Printables', subtitle: '18 A4', icon: 'print', color: '#F4A460', bgColor: '#FFF3E0', route: '/printables' },
-  { title: 'Tracker', subtitle: 'Progress', icon: 'analytics', color: '#9C27B0', bgColor: '#F3E5F5', externalSection: 'tracker' },
-  { title: 'Parents', subtitle: 'Letters Home', icon: 'people', color: '#1B6B93', bgColor: '#E1F5FE', externalSection: 'home' },
-  { title: 'Emotions', subtitle: 'Check-ins', icon: 'heart', color: '#F48FB1', bgColor: '#FCE4EC', route: '/tools' },
-  { title: 'Calm Corner', subtitle: 'Support Tools', icon: 'leaf', color: '#81C784', bgColor: '#E8F5E9', route: '/calm' },
-];
 
 const HEADER_LINKS: HeaderLinkConfig[] = [
   { label: 'Lessons', route: '/lessons' },
@@ -65,48 +42,26 @@ const HEADER_LINKS: HeaderLinkConfig[] = [
   { label: 'Parents', externalSection: 'home' },
 ];
 
-const PETALS_WAY = [
+const TEACHER_FLOW = [
   {
-    letter: 'P',
-    title: 'Prep less',
-    text: 'One story-led flow with lessons, printables, and follow-up support already matched.',
-    color: '#6BBE72',
-    bg: '#F1FAED',
+    icon: 'book-outline',
+    title: 'Teach the story',
+    text: 'Open the matching lesson pack for the book your class is using.',
   },
   {
-    letter: 'E',
-    title: 'Execute tomorrow',
-    text: 'Use ready-to-teach classroom content without rebuilding the lesson from scratch.',
-    color: '#F0AF2F',
-    bg: '#FFF7E6',
+    icon: 'print-outline',
+    title: 'Print what you need',
+    text: 'Use A4 classroom resources without rebuilding worksheets from scratch.',
   },
   {
-    letter: 'T',
+    icon: 'analytics-outline',
     title: 'Track progress',
-    text: 'Capture what children are showing so progress is easier to evidence and revisit.',
-    color: '#5AA7E6',
-    bg: '#EDF7FF',
+    text: 'Capture simple observations that can become evidence and summaries.',
   },
   {
-    letter: 'A',
-    title: 'Adapt for every learner',
-    text: 'Use calm routines, SEN support, and practical scaffolds that work in real classrooms.',
-    color: '#B589E5',
-    bg: '#F5EEFF',
-  },
-  {
-    letter: 'L',
-    title: 'Link with parents',
-    text: 'Turn classroom insight into parent-ready summaries and simple home follow-up.',
-    color: '#F08AA8',
-    bg: '#FFF0F5',
-  },
-  {
-    letter: 'S',
-    title: 'Show curriculum coverage',
-    text: 'Keep classroom delivery tied to purposeful emotional literacy and key EYFS / KS1 outcomes.',
-    color: '#4E8072',
-    bg: '#EEF8F4',
+    icon: 'people-outline',
+    title: 'Share the next step',
+    text: 'Turn classroom work into parent-friendly follow-up when it is ready.',
   },
 ] as const;
 
@@ -387,8 +342,10 @@ export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const router = useRouter();
   const { user, profile, setShowAuthModal, completedLessons, favourites } = useAuth();
+  const scrollViewRef = useRef<ScrollView | null>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
+  const [bookSectionY, setBookSectionY] = useState(0);
   // Track client-side mount to prevent hydration mismatch from auth state
   const [mounted, setMounted] = useState(false);
   const isCompactHero = width < 1160;
@@ -397,50 +354,13 @@ export default function HomeScreen() {
   const showDesktopNav = width >= 1024;
   const showDesktopHero = width >= 980;
   const showDesktopShell = width >= 1180;
-  const heroTitleBreak = width >= 1080 ? '\n' : ' ';
-  const tileWidth = width >= 1180 ? '23.5%' : width >= 840 ? '31.5%' : width >= 560 ? '48%' : '100%';
   const headerBrandSize = width < 420 ? 'sm' : 'md';
-  const petalsCardWidth = width >= 1180 ? '32%' : width >= 760 ? '48.5%' : '100%';
-  const platformCardWidth = width >= 1180 ? '48.5%' : '100%';
-  const plannedBooksCount = Math.max(LITTLE_PETALS_TARGET_BOOK_COUNT - LITTLE_PETALS_BOOK_MODULES.length, 0);
-  const collectionCards = [
-    {
-      title: 'Cobie the Cactus',
-      status: 'Live now',
-      description: 'Emotional literacy, calm tools, printables, and parent-ready support.',
-      color: '#6BBE72',
-      bg: '#F1FAED',
-    },
-    {
-      title: 'Darcy the Daisy',
-      status: 'In development',
-      description: 'The next Many Petals teacher pack using the same teacher-first classroom shell.',
-      color: '#F2C24E',
-      bg: '#FFF8E8',
-    },
-    {
-      title: `${plannedBooksCount} more Little Petals apps`,
-      status: 'Platform roadmap',
-      description: 'The same teacher system reused across the rest of the story collection for easier adoption in schools.',
-      color: '#8EB4C7',
-      bg: '#EEF7FB',
-    },
-  ];
+  const bookCardWidth = width >= 1180 ? '31.7%' : width >= 760 ? '48.5%' : '100%';
+  const flowCardWidth = width >= 980 ? '23.5%' : width >= 560 ? '48.5%' : '100%';
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const handleTilePress = async (tile: QuickTileConfig) => {
-    if (tile.externalSection) {
-      await openParentApp(tile.externalSection);
-      return;
-    }
-
-    if (tile.route) {
-      router.push(tile.route as any);
-    }
-  };
 
   const handleHeaderLinkPress = async (link: HeaderLinkConfig) => {
     if (link.externalSection) {
@@ -451,6 +371,13 @@ export default function HomeScreen() {
     if (link.route) {
       router.push(link.route as any);
     }
+  };
+
+  const scrollToBookSection = () => {
+    scrollViewRef.current?.scrollTo({
+      y: Math.max(bookSectionY - 12, 0),
+      animated: true,
+    });
   };
 
   return (
@@ -515,27 +442,21 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
-        {/* Hero Section */}
+      <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={true}>
         <View style={styles.heroOuter}>
           <View style={[styles.hero, isCompactHero && styles.heroCompact, isTightHero && styles.heroTight]}>
             <View style={styles.heroGlowLeft} />
             <View style={styles.heroGlowRight} />
-            <View style={styles.heroGlowBottom} />
             <View style={styles.heroWashLeft} />
             <View style={styles.heroWashRight} />
             <View style={[styles.heroInner, showDesktopHero && styles.heroInnerDesktop]}>
               <View style={[styles.heroContent, isCompactHero && styles.heroContentCompact]}>
-                <Text style={styles.heroEyebrow}>Many Petals companion resource</Text>
+                <Text style={styles.heroEyebrow}>Little Petals teacher companion apps</Text>
                 <Text style={[styles.heroTitle, isCompactHero && styles.heroTitleCompact, isTightHero && styles.heroTitleTight]}>
-                  Teach emotional literacy{heroTitleBreak}
-                  <Text style={styles.heroTitleAccent}>with Cobie the Cactus</Text>
+                  Choose the book. Teach the lesson. Share the next step.
                 </Text>
                 <Text style={[styles.heroSubtitle, isTightHero && styles.heroSubtitleTight]}>
-                  Ready-to-teach emotional literacy for EYFS &amp; KS1, inspired by {BRAND.storyTitle}
-                </Text>
-                <Text style={styles.heroDescription}>
-                  Use story-led lessons, classroom printables, and calm teaching prompts tomorrow with less prep.
+                  Story-led emotional literacy packs for EYFS &amp; KS1 teachers who need ready-to-teach lessons, A4 printables, tracker tools, and parent support.
                 </Text>
 
                 <View style={styles.heroButtons}>
@@ -544,30 +465,30 @@ export default function HomeScreen() {
                     onPress={() => router.push('/lessons')}
                     activeOpacity={0.7}
                   >
-                    <Ionicons name="play-circle" size={20} color={COLORS.white} />
-                    <Text style={styles.heroButtonText}>Start teaching</Text>
+                    <Ionicons name="book-outline" size={20} color={COLORS.white} />
+                    <Text style={styles.heroButtonText}>Continue Cobie app</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.heroButtonSecondary}
-                    onPress={() => router.push('/activities')}
+                    onPress={scrollToBookSection}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.heroButtonSecondaryText}>View plans</Text>
+                    <Text style={styles.heroButtonSecondaryText}>View all apps</Text>
                   </TouchableOpacity>
                 </View>
 
                 <View style={styles.heroStatsRow}>
                   <View style={styles.heroStat}>
-                    <Text style={styles.heroStatNumber}>8</Text>
-                    <Text style={styles.heroStatLabel}>structured lessons</Text>
-                  </View>
-                  <View style={styles.heroStat}>
-                    <Text style={styles.heroStatNumber}>18</Text>
-                    <Text style={styles.heroStatLabel}>A4 printables included</Text>
+                    <Text style={styles.heroStatNumber}>6</Text>
+                    <Text style={styles.heroStatLabel}>book companions</Text>
                   </View>
                   <View style={styles.heroStat}>
                     <Text style={styles.heroStatNumber}>EYFS + KS1</Text>
-                    <Text style={styles.heroStatLabel}>SEN-aware support</Text>
+                    <Text style={styles.heroStatLabel}>classroom-ready</Text>
+                  </View>
+                  <View style={styles.heroStat}>
+                    <Text style={styles.heroStatNumber}>A4</Text>
+                    <Text style={styles.heroStatLabel}>printables included</Text>
                   </View>
                 </View>
               </View>
@@ -575,7 +496,6 @@ export default function HomeScreen() {
               {showHeroVisual ? (
                 <View style={[styles.heroVisualWrap, !showDesktopHero && styles.heroVisualWrapStack]}>
                   <View style={styles.heroVisualScene}>
-                    <View style={styles.heroVisualPanel} />
                     <View style={styles.heroVisualGlow} />
                     <View style={styles.heroVisualSun} />
                     <View style={styles.heroVisualCloud} />
@@ -590,7 +510,7 @@ export default function HomeScreen() {
                     </View>
                     {showDesktopHero ? (
                       <View style={styles.heroVisualBubble}>
-                        <Text style={styles.heroVisualBubbleText}>"Happy as I am."</Text>
+                        <Text style={styles.heroVisualBubbleText}>Cobie app live now</Text>
                       </View>
                     ) : null}
                   </View>
@@ -600,109 +520,112 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* SEN Mode Toggle */}
         {!showDesktopNav ? <SENBanner /> : null}
 
-        {/* Quick Access Grid */}
-        <View style={styles.section}>
-          <Text style={styles.sectionEyebrow}>Start here today</Text>
-          <Text style={styles.sectionTitle}>Open the part of the Cobie system you need next</Text>
+        <View
+          style={styles.section}
+          onLayout={(event) => setBookSectionY(event.nativeEvent.layout.y)}
+        >
+          <Text style={styles.sectionEyebrow}>Choose your companion app</Text>
+          <Text style={styles.sectionTitle}>Each Little Petals book becomes a ready-to-use classroom pack</Text>
           <Text style={styles.sectionSubtitle}>
-            Go straight to lessons, activities, printables, tracker tools, or parent communication without hunting around the app.
+            Cobie is live first. Darcy and the next four books will follow the same simple pattern, so teachers do not have to relearn the app each time.
           </Text>
-          <View style={styles.tileGrid}>
-            {QUICK_TILES.map((tile) => (
-              <View key={tile.title} style={[styles.tileWrapper, { width: tileWidth }]}>
-                <QuickTile
-                  title={tile.title}
-                  subtitle={tile.subtitle}
-                  icon={tile.icon}
-                  color={tile.color}
-                  bgColor={tile.bgColor}
-                  onPress={() => {
-                    handleTilePress(tile).catch(() => {});
-                  }}
-                />
-              </View>
-            ))}
+          <View style={styles.bookGrid}>
+            {LITTLE_PETALS_BOOK_MODULES.map((module) => {
+              const isLive = module.status === 'live';
+              const isDarcy = module.id === 'darcy';
+
+              return (
+                <View
+                  key={module.id}
+                  style={[
+                    styles.bookCard,
+                    { width: bookCardWidth, borderTopColor: module.themeColor },
+                    !isLive && styles.bookCardMuted,
+                  ]}
+                >
+                  <View style={styles.bookCardTop}>
+                    <View style={[styles.bookIcon, { backgroundColor: module.themeColor + '20' }]}>
+                      <Text style={[styles.bookIconText, { color: module.themeColor }]}>{module.shortName.charAt(0)}</Text>
+                    </View>
+                    <View style={[styles.bookStatusPill, { backgroundColor: module.themeColor + '20' }]}>
+                      <Text style={[styles.bookStatusText, { color: module.themeColor }]}>{module.appStatusLabel}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.bookTitle}>{module.displayName}</Text>
+                  <Text style={styles.bookSubtitle}>{module.bookTitle}</Text>
+                  <Text style={styles.bookFocus}>{module.teachingFocus}</Text>
+                  <Text style={styles.bookPromise}>{module.teacherPromise}</Text>
+
+                  <View style={styles.bookMetaRow}>
+                    <View style={styles.bookMetaPill}>
+                      <Ionicons name="school-outline" size={13} color={COLORS.primary} />
+                      <Text style={styles.bookMetaText}>{module.stageLabel}</Text>
+                    </View>
+                    <View style={styles.bookMetaPill}>
+                      <Ionicons name="time-outline" size={13} color={COLORS.primary} />
+                      <Text style={styles.bookMetaText}>{isLive ? 'Use now' : 'Planned'}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.bookActions}>
+                    <TouchableOpacity
+                      style={[styles.bookPrimaryButton, !isLive && styles.bookButtonDisabled]}
+                      onPress={() => {
+                        if (isLive) router.push('/lessons');
+                      }}
+                      disabled={!isLive}
+                      activeOpacity={0.75}
+                    >
+                      <Text style={[styles.bookPrimaryButtonText, !isLive && styles.bookButtonDisabledText]}>
+                        {isLive ? 'Open app' : isDarcy ? 'App in development' : 'Coming soon'}
+                      </Text>
+                      {isLive ? <Ionicons name="arrow-forward" size={15} color={COLORS.white} /> : null}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.bookSecondaryButton}
+                      onPress={() => {}}
+                      disabled
+                    >
+                      <Text style={styles.bookSecondaryButtonText}>Book link coming soon</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              );
+            })}
           </View>
         </View>
 
         <View style={styles.section}>
-          <View style={styles.blueprintCard}>
-            <View style={styles.blueprintIntro}>
-              <Text style={styles.sectionEyebrow}>Teach the PETALS way</Text>
-              <Text style={styles.sectionTitle}>A classroom method teachers can repeat with confidence</Text>
-              <Text style={styles.sectionSubtitle}>
-                Cobie is the first full Many Petals teacher-app shell: one repeatable way to prep less, teach clearly, and link classroom work with parent communication.
-              </Text>
+          <View style={styles.flowBand}>
+            <View style={styles.flowIntro}>
+              <Text style={styles.sectionEyebrow}>How teachers use it</Text>
+              <Text style={styles.sectionTitle}>A repeatable classroom route for every book</Text>
             </View>
-            <View style={styles.blueprintGrid}>
-              {PETALS_WAY.map((item) => (
-                <View key={item.letter} style={[styles.blueprintStepCard, { width: petalsCardWidth, backgroundColor: item.bg }]}>
-                  <View style={[styles.blueprintStepBadge, { backgroundColor: item.color }]}>
-                    <Text style={styles.blueprintStepLetter}>{item.letter}</Text>
+            <View style={styles.flowGrid}>
+              {TEACHER_FLOW.map((item) => (
+                <View key={item.title} style={[styles.flowCard, { width: flowCardWidth }]}>
+                  <View style={styles.flowCardIcon}>
+                    <Ionicons name={item.icon as any} size={20} color={COLORS.primary} />
                   </View>
-                  <View style={styles.blueprintStepCopy}>
-                    <Text style={styles.blueprintStepTitle}>{item.title}</Text>
-                    <Text style={styles.blueprintStepText}>{item.text}</Text>
-                  </View>
+                  <Text style={styles.flowCardTitle}>{item.title}</Text>
+                  <Text style={styles.flowCardText}>{item.text}</Text>
                 </View>
               ))}
             </View>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <View style={styles.collectionCard}>
-            <View style={styles.collectionIntro}>
-              <Text style={styles.sectionEyebrow}>Little Petals collection</Text>
-              <Text style={styles.sectionTitle}>One teacher platform, ready to scale across {LITTLE_PETALS_TARGET_BOOK_COUNT} companion apps</Text>
-              <Text style={styles.sectionSubtitle}>
-                Cobie leads the structure. Darcy follows next. Then the same teacher-first shell carries the rest of the story collection with shared navigation, pricing, tracking, and parent links.
-              </Text>
-            </View>
-            <View style={styles.collectionGrid}>
-              {collectionCards.map((card) => (
-                <View key={card.title} style={[styles.collectionItem, { width: platformCardWidth, backgroundColor: card.bg }]}>
-                  <View style={[styles.collectionStatusPill, { backgroundColor: card.color + '24' }]}>
-                    <Text style={[styles.collectionStatusText, { color: card.color }]}>{card.status}</Text>
-                  </View>
-                  <Text style={styles.collectionTitle}>{card.title}</Text>
-                  <Text style={styles.collectionText}>{card.description}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        </View>
-
-
-        {/* Today's Activity */}
-        <View style={styles.section}>
-          <Text style={styles.sectionEyebrow}>Ready for tomorrow</Text>
-          <Text style={styles.sectionTitle}>One optional activity to use straight away</Text>
-          <Text style={styles.sectionSubtitle}>
-            Keep momentum high with one activity you can open now and use in a lesson, calm moment, or follow-up block.
-          </Text>
-          <TodayActivity
-            style={{ marginBottom: 8 }}
-            onViewActivity={(id) => router.push(`/activity/${id}` as any)}
-          />
-        </View>
-
-        {/* Welcome back / progress for logged-in users */}
         {mounted && user ? (
           <View style={styles.welcomeSection}>
             <View style={styles.welcomeCard}>
               <View style={styles.welcomeTop}>
                 <Ionicons name="sparkles" size={18} color={COLORS.accent} />
                 <Text style={styles.welcomeTitle}>
-                  Teacher dashboard
+                  Cobie progress snapshot
                 </Text>
               </View>
-              <Text style={styles.welcomeHelper}>
-                Welcome back, {profile?.name?.split(' ')[0] || 'Teacher'}. Your saved items and completed lessons live here when you need a quick progress snapshot.
-              </Text>
               <View style={styles.progressRow}>
                 <View style={styles.progressItem}>
                   <Text style={styles.progressNum}>{completedLessons.length}/8</Text>
@@ -722,11 +645,6 @@ export default function HomeScreen() {
             </View>
           </View>
         ) : null}
-
-        {/* Companion Workbook */}
-        <View style={styles.section}>
-          <WorkbookPromo compact />
-        </View>
 
         {/* Footer */}
         <View style={styles.footer}>
@@ -957,8 +875,8 @@ const styles = StyleSheet.create({
     minHeight: 320,
     position: 'relative',
     overflow: 'hidden',
-    backgroundColor: '#F7FBEF',
-    borderRadius: 36,
+    backgroundColor: '#F4FAEA',
+    borderRadius: 28,
     borderWidth: 1,
     borderColor: '#E5EDD9',
     ...SHADOWS.medium,
@@ -1000,7 +918,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     inset: 0,
     right: '42%',
-    backgroundColor: '#FFFBE7',
+    backgroundColor: '#F8FCEB',
   },
   heroWashRight: {
     position: 'absolute',
@@ -1008,7 +926,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     right: 0,
     width: '44%',
-    backgroundColor: '#EEF9F5',
+    backgroundColor: '#E9F8F4',
   },
   heroInner: {
     flexDirection: 'column',
@@ -1043,12 +961,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   heroTitle: {
-    fontSize: 50,
+    fontSize: 48,
     fontWeight: '800',
     color: '#213A2E',
-    lineHeight: 56,
+    lineHeight: 54,
     maxWidth: '100%',
-    letterSpacing: -1.4,
+    letterSpacing: 0,
   },
   heroTitleAccent: {
     color: '#D89C19',
@@ -1257,6 +1175,181 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     color: COLORS.textLight,
     marginBottom: SPACING.md,
+  },
+  bookGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.md,
+    marginTop: SPACING.md,
+  },
+  bookCard: {
+    minWidth: 230,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.xl,
+    borderWidth: 1,
+    borderColor: '#E2EBDD',
+    borderTopWidth: 5,
+    padding: SPACING.lg,
+    ...SHADOWS.small,
+  },
+  bookCardMuted: {
+    backgroundColor: '#FBFCFA',
+  },
+  bookCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  bookIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bookIconText: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '900',
+  },
+  bookStatusPill: {
+    borderRadius: RADIUS.round,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 6,
+  },
+  bookStatusText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+  },
+  bookTitle: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '800',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  bookSubtitle: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '700',
+    color: '#5F7B4D',
+    marginBottom: SPACING.sm,
+  },
+  bookFocus: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '700',
+    color: COLORS.text,
+    lineHeight: 20,
+    marginBottom: SPACING.xs,
+  },
+  bookPromise: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    lineHeight: 20,
+  },
+  bookMetaRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
+  },
+  bookMetaPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    borderRadius: RADIUS.round,
+    backgroundColor: COLORS.bgLight,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 7,
+  },
+  bookMetaText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+  bookActions: {
+    marginTop: SPACING.lg,
+    gap: SPACING.sm,
+  },
+  bookPrimaryButton: {
+    minHeight: 44,
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+  },
+  bookPrimaryButtonText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '800',
+    color: COLORS.white,
+  },
+  bookButtonDisabled: {
+    backgroundColor: '#E9EFE7',
+  },
+  bookButtonDisabledText: {
+    color: '#6F7F76',
+  },
+  bookSecondaryButton: {
+    minHeight: 40,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: '#DDE7D7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.md,
+    backgroundColor: COLORS.white,
+  },
+  bookSecondaryButtonText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
+    color: COLORS.textMuted,
+  },
+  flowBand: {
+    borderRadius: RADIUS.xl,
+    backgroundColor: '#F7FAF2',
+    borderWidth: 1,
+    borderColor: '#DFEAD8',
+    padding: SPACING.lg,
+  },
+  flowIntro: {
+    maxWidth: 720,
+  },
+  flowGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.md,
+    marginTop: SPACING.md,
+  },
+  flowCard: {
+    minWidth: 180,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#E5EDD9',
+  },
+  flowCardIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: COLORS.bgLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.sm,
+  },
+  flowCardTitle: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '800',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  flowCardText: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textLight,
+    lineHeight: 17,
   },
   blueprintCard: {
     backgroundColor: COLORS.white,

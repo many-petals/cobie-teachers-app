@@ -26,9 +26,18 @@ export default function AddPupilModal({ visible, onClose, onAdd, existingCodes }
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const suggestedCode = `P${existingCodes.length + 1}`;
+  const suggestedCode = (() => {
+    const usedCodes = new Set(existingCodes.map(item => item.toUpperCase()));
+    let index = 1;
+    while (usedCodes.has(`P${index}`)) {
+      index += 1;
+    }
+    return `P${index}`;
+  })();
 
   const handleAdd = async () => {
+    if (saving) return;
+
     const finalCode = (code.trim() || suggestedCode).toUpperCase();
     
     if (existingCodes.includes(finalCode)) {
