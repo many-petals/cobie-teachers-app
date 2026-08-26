@@ -46,9 +46,9 @@ export const LITTLE_PETALS_BOOK_MODULES: BookModuleDefinition[] = [
   {
     id: 'lyleen',
     slug: 'lyleen-the-lotus',
-    displayName: 'Lyleen the Lotus',
-    shortName: 'Lyleen',
-    bookTitle: 'Lyleen the Lotus Dances in Two Languages',
+    displayName: 'Livleen the Lotus',
+    shortName: 'Livleen',
+    bookTitle: 'Livleen the Lotus Dances in Two Languages',
     teachingFocus: 'Language, identity, belonging, and confidence',
     teacherPromise: 'A future companion pack for supporting bilingual identity and classroom inclusion.',
     stageLabel: 'EYFS + KS1',
