@@ -45,23 +45,23 @@ const HEADER_LINKS: HeaderLinkConfig[] = [
 const TEACHER_FLOW = [
   {
     icon: 'book-outline',
-    title: 'Teach the story',
-    text: 'Open the matching lesson pack for the book your class is using.',
+    title: 'Teach the lesson',
+    text: 'Open the matching story-led lesson pack. The steps, objective, and outcome are already written for you.',
   },
   {
     icon: 'print-outline',
     title: 'Print what you need',
-    text: 'Use A4 classroom resources without rebuilding worksheets from scratch.',
+    text: 'Use branded A4 worksheets, cards, posters, and classroom prompts without rebuilding resources from scratch.',
   },
   {
     icon: 'analytics-outline',
     title: 'Track progress',
-    text: 'Capture simple observations that can become evidence and summaries.',
+    text: 'Tap simple progress ratings for each pupil. The app turns observations into useful classroom evidence.',
   },
   {
     icon: 'people-outline',
-    title: 'Share the next step',
-    text: 'Turn classroom work into parent-friendly follow-up when it is ready.',
+    title: 'Send parent follow-up',
+    text: 'Generate pre-filled parent letters and progress summaries from tracker data when you are ready to share.',
   },
 ] as const;
 
@@ -522,6 +522,29 @@ export default function HomeScreen() {
 
         {!showDesktopNav ? <SENBanner /> : null}
 
+        <View style={styles.section}>
+          <View style={styles.flowBand}>
+            <View style={styles.flowIntro}>
+              <Text style={styles.sectionEyebrow}>Built into every companion app</Text>
+              <Text style={styles.sectionTitle}>Lesson, printable, tracker, and parent letter - already done for you</Text>
+              <Text style={styles.sectionSubtitle}>
+                Teachers do not need to build extra templates, spreadsheets, or letters. Each book app gives one clear route: teach the story, print the resource, track progress, then share the next step.
+              </Text>
+            </View>
+            <View style={styles.flowGrid}>
+              {TEACHER_FLOW.map((item) => (
+                <View key={item.title} style={[styles.flowCard, { width: flowCardWidth }]}>
+                  <View style={styles.flowCardIcon}>
+                    <Ionicons name={item.icon as any} size={20} color={COLORS.primary} />
+                  </View>
+                  <Text style={styles.flowCardTitle}>{item.title}</Text>
+                  <Text style={styles.flowCardText}>{item.text}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+
         <View
           style={styles.section}
           onLayout={(event) => setBookSectionY(event.nativeEvent.layout.y)}
@@ -594,26 +617,6 @@ export default function HomeScreen() {
                 </View>
               );
             })}
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.flowBand}>
-            <View style={styles.flowIntro}>
-              <Text style={styles.sectionEyebrow}>How teachers use it</Text>
-              <Text style={styles.sectionTitle}>A repeatable classroom route for every book</Text>
-            </View>
-            <View style={styles.flowGrid}>
-              {TEACHER_FLOW.map((item) => (
-                <View key={item.title} style={[styles.flowCard, { width: flowCardWidth }]}>
-                  <View style={styles.flowCardIcon}>
-                    <Ionicons name={item.icon as any} size={20} color={COLORS.primary} />
-                  </View>
-                  <Text style={styles.flowCardTitle}>{item.title}</Text>
-                  <Text style={styles.flowCardText}>{item.text}</Text>
-                </View>
-              ))}
-            </View>
           </View>
         </View>
 
