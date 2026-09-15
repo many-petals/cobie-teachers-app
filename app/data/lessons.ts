@@ -138,7 +138,7 @@ export const LESSONS: Lesson[] = [
     steps: [
       {
         title: 'Story Connection',
-        instruction: 'Read the page where Cobie finds a quieter space with Tilly. Ask: "What helped Cobie feel calm? What do you notice about the space?"',
+        instruction: 'Return to the part where Tilly sits quietly near Cobie. What does Tilly do that seems to help?',
         tips: ['Point to the illustration', 'Model answers such as: "It looks quiet", "It feels safe"'],
         duration: 5,
       },
@@ -371,7 +371,7 @@ export const LESSONS: Lesson[] = [
     steps: [
       {
         title: 'Story Connection',
-        instruction: 'Read the page where Cobie is calming down (e.g. breathing, slowing body).\nAsk: "What is Cobie doing to feel calm?"\nAsk: "What helps you feel calm?"',
+        instruction: 'Think about the moments when everything feels too much for Cobie. What might help our bodies feel calmer?\nIntroduce the breathing visual as a classroom strategy inspired by the story.',
         duration: 5,
       },
       {
@@ -423,7 +423,7 @@ export const LESSONS: Lesson[] = [
     steps: [
       {
         title: 'Story Connection',
-        instruction: 'Read the page where Cobie worries.\nAsk: "What is Cobie worried about? How can we tell?"',
+        instruction: 'Return to a moment when Cobie seems unsure or overwhelmed. What clues can we notice?\nIntroduce the Worry Box as a follow-up classroom activity inspired by the story.',
         duration: 5,
       },
       {
