@@ -7,6 +7,7 @@ import {
   StyleSheet,
   SafeAreaView,
   Linking,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -23,7 +24,7 @@ export default function LessonPlayerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { senMode } = useSEN();
- const { hasFullAccess, markLessonComplete, isLessonCompleted, toggleFavourite, isFavourite } = useAuth();
+ const { user, loading, hasFullAccess, billingLoading, billingError, refreshBilling, markLessonComplete, isLessonCompleted, toggleFavourite, isFavourite } = useAuth();
   const { showToast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
   const [showSEN, setShowSEN] = useState(senMode);
@@ -52,9 +53,26 @@ if (isLocked) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.errorContainer}>
-        <Ionicons name="lock-closed" size={48} color={COLORS.error} />
-        <Text style={styles.errorText}>This content is included in Full Access.</Text>
-        <Text style={styles.errorText}>Your Free Preview includes Lesson 1 and the Free Resource Library.</Text>
+        {loading || billingLoading ? (
+          <>
+            <ActivityIndicator accessibilityLabel="Checking lesson access" />
+            <Text style={styles.errorText}>Checking your access…</Text>
+          </>
+        ) : (
+          <>
+            <Ionicons name="lock-closed" size={48} color={COLORS.error} />
+            <Text style={styles.errorText}>{billingError || 'This content is included in Full Access.'}</Text>
+            <Text style={styles.errorText}>Your Free Preview includes Lesson 1 and the Free Resource Library.</Text>
+            {user && billingError ? (
+              <TouchableOpacity accessibilityRole="button" onPress={() => void refreshBilling()} style={styles.backButton}>
+                <Text style={styles.backButtonText}>Check access again</Text>
+              </TouchableOpacity>
+            ) : null}
+            <TouchableOpacity accessibilityRole="button" onPress={() => router.push('/upgrade')} style={styles.backButton}>
+              <Text style={styles.backButtonText}>View access and billing</Text>
+            </TouchableOpacity>
+          </>
+        )}
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Text style={styles.backButtonText}>Back to Free Preview</Text>
         </TouchableOpacity>

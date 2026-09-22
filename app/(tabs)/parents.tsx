@@ -537,7 +537,7 @@ export default function ParentCommunicationScreen() {
                   <View style={styles.contentPreview}>
                     <Text style={styles.modalSectionTitle}>Report Sections</Text>
                     {[
-                      'Progress ratings across 6 key areas (1\u20134 scale)',
+                      'Teacher observations across 6 areas',
                       'Key Strengths \u2013 space for personalised observations',
                       'Areas for Development \u2013 next steps for the child',
                       'Strategies Used in School \u2013 checklist of interventions',

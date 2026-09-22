@@ -400,14 +400,14 @@ function getContentHTML(
         </div>
       `;
 
-    case 'p-8': // Assessment Checklist
+    case 'p-8': // Observation Checklist
       return `
         <div class="content">
           ${nameDate}
           <div class="instruction">Use this checklist to observe and record children's development across key areas. Tick when consistently observed. Date each observation.</div>
           ${[
             { title: 'Emotional Literacy', items: ['Can name at least 4 emotions', 'Recognises emotions in others', 'Uses words to express feelings', 'Shows empathy towards peers'] },
-            { title: 'Sensory Awareness', items: ['Can describe sensory preferences', 'Uses calming strategies independently', 'Tolerates a range of sensory input', 'Seeks appropriate sensory input'] },
+            { title: 'Sensory Awareness', items: ['Can describe sensory preferences', 'Uses calming strategies independently', 'Participates in sensory environments using appropriate support or strategies when needed', 'Seeks appropriate sensory input'] },
             { title: 'Communication', items: ['Takes turns in conversation', 'Uses appropriate voice volume', 'Asks for help when needed', "Listens to others' perspectives"] },
             { title: 'Self-Regulation', items: ['Can identify when feeling overwhelmed', 'Uses breathing techniques', 'Transitions between activities calmly', 'Returns to calm after upset'] },
           ].map(section => `

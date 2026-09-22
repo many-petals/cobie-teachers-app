@@ -1,0 +1,11 @@
+# Observation scale correction — release gate
+
+The four approved entry labels are prepared in `OBSERVATION_LABELS`. Numeric values remain 1–4. The historical `RATING_LABELS` is intentionally retained for existing record displays. The user approved a hidden `scale_version` database field as an exception to the no-new-fields constraint.
+
+Do not deploy this intermediate change. The migration in `migrations/20260916_observation_scale.sql` has been prepared but has NOT been applied or verified against the actual database schema. No authenticated database administration connection is available in this task. Verify column types, constraints, RLS and the authenticated role before applying it.
+
+Version 1 is the database default, so existing records and inserts from older clients keep historical meaning. Version 2 is explicitly supplied by the new editor. Historical entries display their previous label without selecting a new-scale button. Untouched entries keep their marker. Selecting a new status explicitly replaces that observation's meaning. Bulk clear preserves historical entries. The RPC saves in one transaction under caller permissions; a failed save leaves the editor open. Term switching loads the correct records.
+
+Per-indicator displays are scale-aware. Item 3 removes aggregate bands, numeric development bars and term-to-term score comparisons. Generated report data now contains observation counts and individual statuses instead of averaged ratings; the report shape retains a zero-valued compatibility property which is no longer rendered as a score. Parent summaries no longer infer steady progress from an area's position in the list. Item 17 still requires the remaining parent/carer report wording and blank-template corrections. Verify mixed old/new records, saving an unchanged historical record, concurrent clients, failure rollback, and cross-user access against a test database before production release.
+
+Related approved work: item 3 removes averaged attainment bands; item 17 updates parent/carer reports. No production data or database schema was changed for this draft.

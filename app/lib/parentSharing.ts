@@ -56,13 +56,7 @@ function dedupeAndTrim(items: string[], maxItems: number): string[] {
 }
 
 function buildSummaryLine(reportData: PrefilledProgressReportData): string {
-  const strongestArea = reportData.progressAreas[0]?.area;
-
-  if (strongestArea) {
-    return `${reportData.childLabel} is making steady progress in ${strongestArea.toLowerCase()} with classroom support and consistent practice.`;
-  }
-
-  return `${reportData.childLabel} is engaging with the programme and building emotional literacy skills over time.`;
+  return `This summary brings together teacher observations recorded for ${reportData.childLabel} during the Many Petals programme. It does not measure attainment or rate of development.`;
 }
 
 export function buildParentProgressSummary(

@@ -546,22 +546,15 @@ function getLetterContent(
             <p>Dear Parent/Carer,</p>
             <p>This report provides an update on ${childLabel}&rsquo;s progress in emotional literacy and wellbeing, based on tracker observations recorded as part of the Cobie programme at ${escapeHTML(schoolName || 'our school')}.</p>
 
-            <h2>Progress Overview</h2>
-            <p style="font-size:10pt; color:#888; margin-bottom:3mm;">Rating scale: 1 = Emerging &bull; 2 = Developing &bull; 3 = Secure &bull; 4 = Exceeding</p>
+            <h2>Observation Overview</h2>
+            <p style="font-size:10pt; color:#666;">This summary reflects teacher observations recorded while using the Many Petals programme. It is not a statutory assessment or diagnostic report.</p>
+            <p style="font-size:10pt; color:#888; margin-bottom:3mm;">Counts show observations recorded, not attainment. Entries marked “previous scale” retain their original meaning.</p>
 
             <div class="progress-grid">
               ${report.progressAreas.map(item => `
                 <div class="progress-item">
                   <h4>${escapeHTML(item.area)}</h4>
                   <p style="font-size:9pt; color:#888; margin:2px 0 6px;">${escapeHTML(item.description)}</p>
-                  <div class="rating">
-                    ${[1, 2, 3, 4].map(value => `
-                      <div style="text-align:center;">
-                        <div class="dot" style="${value <= item.rating ? `background:${primaryColor}; border-color:${primaryColor};` : ''}"></div>
-                        <div class="dot-label">${value}</div>
-                      </div>
-                    `).join('')}
-                  </div>
                   <p style="font-size:9pt; color:${primaryColor}; font-weight:700; margin-top:6px;">${escapeHTML(item.ratingLabel)}</p>
                 </div>
               `).join('')}
@@ -638,8 +631,9 @@ function getLetterContent(
           <p>Dear Parent/Carer,</p>
           <p>This report provides an update on your child&rsquo;s progress in emotional literacy and wellbeing, as part of the Cobie programme at ${schoolName || 'our school'}.</p>
 
-          <h2>Progress Overview</h2>
-          <p style="font-size:10pt; color:#888; margin-bottom:3mm;">Rating scale: 1 = Emerging &bull; 2 = Developing &bull; 3 = Secure &bull; 4 = Exceeding</p>
+          <h2>Observation Overview</h2>
+          <p style="font-size:10pt; color:#666;">This summary reflects teacher observations recorded while using the Many Petals programme. It is not a statutory assessment or diagnostic report.</p>
+          <p style="font-size:10pt; color:#888; margin-bottom:3mm;">Counts show observations recorded, not attainment. Entries marked “previous scale” retain their original meaning.</p>
 
           <div class="progress-grid">
             ${[

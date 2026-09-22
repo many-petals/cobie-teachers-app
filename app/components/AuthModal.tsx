@@ -349,7 +349,7 @@ export default function AuthModal() {
             <View style={styles.gdprNotice}>
               <Ionicons name="shield-checkmark-outline" size={16} color={COLORS.textMuted} />
               <Text style={styles.gdprText}>
-                GDPR-safe. No child data is collected. Your account stores only your teaching preferences.
+                Your account stores your profile and saved teaching records. Use pupil codes, keep identifying details out of notes, and obtain school approval before entering pupil information.
               </Text>
             </View>
 

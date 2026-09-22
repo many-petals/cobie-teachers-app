@@ -43,7 +43,7 @@ export default function LessonsScreen() {
 
             <View style={styles.statsRow}>
               <View style={styles.statCard}>
-                <Text style={styles.statNumber}>8</Text>
+                <Text style={styles.statNumber}>{LESSONS.length}</Text>
                 <Text style={styles.statLabel}>core lessons</Text>
               </View>
               <View style={styles.statCard}>
@@ -58,11 +58,11 @@ export default function LessonsScreen() {
           </View>
         </View>
 
-        {!hasFullAccess && (
+        {(
           <View style={styles.section}>
             <View style={styles.upgradeBanner}>
-              <Text style={styles.sectionEyebrow}>Upgrade when ready</Text>
-              <Text style={styles.upgradeTitle}>Unlock all 8 emotional literacy lessons</Text>
+              <Text style={styles.sectionEyebrow}>{hasFullAccess ? 'Your subscription' : 'Upgrade when ready'}</Text>
+              <Text style={styles.upgradeTitle}>{hasFullAccess ? 'Your full lesson library is unlocked' : `Unlock all ${LESSONS.length} emotional literacy lessons`}</Text>
               <Text style={styles.upgradeText}>
                 Get the full lesson library, SEN differentiation support, and the matching printable classroom resources.
               </Text>
@@ -71,7 +71,7 @@ export default function LessonsScreen() {
                 onPress={() => router.push('/upgrade')}
                 activeOpacity={0.7}
               >
-                <Text style={styles.upgradeButtonText}>Start 14-Day Trial</Text>
+                <Text style={styles.upgradeButtonText}>{hasFullAccess ? 'Manage access and billing' : 'View upgrade options'}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -81,20 +81,14 @@ export default function LessonsScreen() {
         {LESSONS.map((lesson) => {
           const isExpanded = expandedId === lesson.id;
           const completed = isLessonCompleted(lesson.id);
-          const locked = !hasFullAccess && lesson.number !== 1 && lesson.number !== 5;
+          const locked = !hasFullAccess && lesson.access !== 'free';
           const favourited = isFavourite('lesson', lesson.id);
 
           return (
             <View key={lesson.id} style={styles.lessonCard}>
               <TouchableOpacity
                 style={[styles.lessonHeader, { borderLeftColor: lesson.color }]}
-                onPress={() => {
-                  if (locked) {
-                    router.push('/upgrade');
-                  } else {
-                    setExpandedId(isExpanded ? null : lesson.id);
-                  }
-                }}
+                onPress={() => setExpandedId(isExpanded ? null : lesson.id)}
                 activeOpacity={0.7}
               >
 <View style={[styles.lessonNumber, { backgroundColor: locked ? COLORS.mediumGray : lesson.color }]}>

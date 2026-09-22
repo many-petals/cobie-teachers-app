@@ -11,7 +11,7 @@ import {
 
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
-import { MILESTONE_AREAS, RATING_LABELS, getMilestonesForAgeGroup, getCurrentTerm, getCurrentAcademicYear } from '../data/milestones';
+import { MILESTONE_AREAS, getObservationLabel, getMilestonesForAgeGroup, getCurrentTerm, getCurrentAcademicYear } from '../data/milestones';
 import { EMOTIONS } from '../data/emotions';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -56,6 +56,7 @@ interface Assessment {
   term: string;
   academic_year: string;
   assessed_at: string;
+  scale_version?: number | null;
 }
 
 interface EmotionLog {
@@ -233,7 +234,7 @@ export default function TrackerScreen() {
   const handleDeletePupil = (pupil: Pupil) => {
     showConfirm({
       title: 'Remove Pupil',
-      message: `Remove ${pupil.display_code} and all their assessment data? This cannot be undone.`,
+      message: `Remove ${pupil.display_code} and all their observation data? This cannot be undone.`,
       confirmText: 'Remove',
       onConfirm: async () => {
         try {
@@ -253,44 +254,23 @@ export default function TrackerScreen() {
 
   const handleSaveAssessments = async (
     pupilId: string,
-    newAssessments: { milestone_id: string; area_id: string; rating: number }[],
+    newAssessments: { milestone_id: string; area_id: string; rating: number; scale_version: number }[],
     term: string,
     academicYear: string
   ) => {
-    if (!user) return;
-    try {
-      await supabase.from('tracker_assessments')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('pupil_id', pupilId)
-        .eq('term', term)
-        .eq('academic_year', academicYear);
-
-      if (newAssessments.length > 0) {
-        const rows = newAssessments.map(a => ({
-          user_id: user.id,
-          pupil_id: pupilId,
-          milestone_id: a.milestone_id,
-          area_id: a.area_id,
-          rating: a.rating,
-          term,
-          academic_year: academicYear,
-        }));
-        const { data, error } = await supabase.from('tracker_assessments').insert(rows).select('*');
-        if (error) throw error;
-
-        setAssessments(prev => {
-          const filtered = prev.filter(a => 
-            !(a.pupil_id === pupilId && a.term === term && a.academic_year === academicYear)
-          );
-          return [...filtered, ...(data || [])];
-        });
-      }
-
-      showToast('Assessment Saved', `${newAssessments.length} milestone ratings recorded.`);
-    } catch (err: any) {
-      showToast('Error', err.message || 'Failed to save assessment', 'error');
-    }
+    if (!user) throw new Error('Sign in to save observations.');
+    const { data, error } = await supabase.rpc('save_tracker_observations', {
+      p_pupil_id: pupilId,
+      p_term: term,
+      p_academic_year: academicYear,
+      p_observations: newAssessments,
+    });
+    if (error) throw error;
+    setAssessments(prev => [
+      ...prev.filter(a => !(a.pupil_id === pupilId && a.term === term && a.academic_year === academicYear)),
+      ...(data || []),
+    ]);
+    showToast('Observation Saved', 'Your observations have been saved.');
   };
 
   // Handle logging an emotion for a pupil
@@ -397,18 +377,9 @@ export default function TrackerScreen() {
     const latest = getLatestPupilAssessments(pupil.id);
     const areas = getMilestonesForAgeGroup(pupil.age_group);
     const totalMilestones = areas.reduce((s, a) => s + a.milestones.length, 0);
-    const rated = latest.length;
-    const avg = rated > 0 ? latest.reduce((s, a) => s + a.rating, 0) / rated : 0;
+    const rated = latest.filter(a => areas.some(area => area.milestones.some(m => m.id === a.milestone_id))).length;
     const emotionCount = getPupilEmotionLogs(pupil.id).length;
-    return { rated, totalMilestones, avg, emotionCount };
-  };
-
-  const getProgressLabel = (rating: number) => {
-    if (rating >= 4) return RATING_LABELS[3].label;
-    if (rating >= 3) return RATING_LABELS[2].label;
-    if (rating >= 2) return RATING_LABELS[1].label;
-    if (rating >= 1) return RATING_LABELS[0].label;
-    return 'Not yet assessed';
+    return { rated, totalMilestones, emotionCount };
   };
 
   const getParentShareApprovalForPupil = (pupil: Pupil) =>
@@ -427,48 +398,22 @@ export default function TrackerScreen() {
     const areas = getMilestonesForAgeGroup(pupil.age_group);
 
     const progressAreas = areas.map(area => {
-      const areaAssessments = latestAssessments.filter(a => a.area_id === area.id);
-      const rawAverage = areaAssessments.length > 0
-        ? areaAssessments.reduce((sum, item) => sum + item.rating, 0) / areaAssessments.length
-        : 0;
-      const roundedRating = rawAverage > 0 ? Math.max(1, Math.min(4, Math.round(rawAverage))) : 0;
-
+      const areaAssessments = latestAssessments.filter(a => a.area_id === area.id && area.milestones.some(m => m.id === a.milestone_id));
       return {
         areaId: area.id,
         area: area.title,
-        description: areaAssessments.length > 0
-          ? `${areaAssessments.length}/${area.milestones.length} milestones assessed`
-          : 'More observations needed to complete this area.',
-        rating: roundedRating,
-        ratingLabel: getProgressLabel(roundedRating),
+        description: areaAssessments.map(a => {
+          const indicator = area.milestones.find(m => m.id === a.milestone_id);
+          return indicator ? indicator.shortLabel + ': ' + (getObservationLabel(a)?.label ?? 'No observation') : '';
+        }).filter(Boolean).join('; ') || 'No observations recorded in this area.',
+        rating: 0, // Compatibility with existing report shape; no aggregate attainment score.
+        ratingLabel: areaAssessments.length + ' of ' + area.milestones.length + ' observations recorded',
       };
     });
 
-    const strongestAreas = progressAreas
-      .filter(area => area.rating > 0)
-      .sort((a, b) => b.rating - a.rating)
-      .slice(0, 2);
-
-    const strengths = strongestAreas.map(area =>
-      `${area.area}: ${area.ratingLabel} in the latest tracker snapshot.`
-    );
-
-    const developingAreas = progressAreas
-      .filter(area => area.rating === 0 || area.rating < 3)
-      .sort((a, b) => a.rating - b.rating)
-      .slice(0, 2);
-
-    const nextSteps = developingAreas.map(area =>
-      area.rating === 0
-        ? `Gather more observations in ${area.area.toLowerCase()} to build a clearer end-of-term picture.`
-        : `Keep practising ${area.area.toLowerCase()} through short, regular routines and adult modelling.`
-    );
-
-    const homeSuggestions = Array.from(new Set(
-      developingAreas
-        .map(area => HOME_SUGGESTIONS_BY_AREA[area.areaId])
-        .filter((item): item is string => Boolean(item))
-    )).slice(0, 3);
+    const strengths = ['Review the individual observations above when describing this child’s strengths.'];
+    const nextSteps = ['Use the recorded observations and your professional judgement to agree next steps.'];
+    const homeSuggestions = areas.map(area => HOME_SUGGESTIONS_BY_AREA[area.id]).filter((item): item is string => Boolean(item)).slice(0, 3);
 
     const emotionCounts = pupilEmotionLogs.reduce<Record<string, number>>((acc, log) => {
       acc[log.emotion_name] = (acc[log.emotion_name] || 0) + 1;
@@ -485,23 +430,7 @@ export default function TrackerScreen() {
       ? ` Most recent logged feeling: ${latestEmotion.emotion_name}${latestEmotion.context ? ` during ${formatContext(latestEmotion.context)}` : ''}.`
       : '';
 
-    const strategiesUsed = Array.from(new Set([
-      'Emotion check-in cards',
-      'Feelings thermometer',
-      'Calm corner / quiet space',
-      ...(emotionSummary.some(item => ['Worried', 'Angry', 'Scared', 'Overwhelmed'].includes(item.name))
-        ? ['Breathing exercises', 'Help / break cards']
-        : []),
-      ...(pupil.sen_status || progressAreas.some(area => area.areaId === 'sensory-awareness' && area.rating > 0 && area.rating < 3)
-        ? ['Sensory tools (fidgets, etc.)', 'Visual schedule / timetable']
-        : []),
-      ...(progressAreas.some(area => area.areaId === 'relationships' && area.rating > 0 && area.rating < 3)
-        ? ['Peer buddy system', 'Small group work']
-        : []),
-      ...(progressAreas.some(area => area.areaId === 'inclusion-kindness' && area.rating > 0 && area.rating < 3)
-        ? ['Social stories']
-        : []),
-    ].filter(strategy => REPORT_STRATEGY_POOL.includes(strategy))));
+    const strategiesUsed: string[] = [];
 
     const latestAssessmentDate = latestAssessments.length > 0
       ? latestAssessments
@@ -536,7 +465,7 @@ export default function TrackerScreen() {
         ? homeSuggestions
         : ['Continue naming emotions, sharing calm routines, and using simple daily check-ins at home.'],
       emotionSummary,
-      additionalNotes: `Generated from ${latestAssessments.length} latest milestone ratings and ${pupilEmotionLogs.length} emotion log${pupilEmotionLogs.length === 1 ? '' : 's'} recorded in the teacher tracker.${latestEmotionLine}`,
+      additionalNotes: `Generated from ${latestAssessments.length} latest observations and ${pupilEmotionLogs.length} emotion log${pupilEmotionLogs.length === 1 ? '' : 's'} recorded in the teacher tracker.${latestEmotionLine}`,
     };
   };
 
@@ -693,7 +622,7 @@ export default function TrackerScreen() {
   return (
     <RequireAuth
       title="Sign In Required"
-      message="The Pupil Tracker stores assessment data securely in your teacher account. Sign in to track progress, emotion logs, and class milestones."
+      message="The Observation Tracker stores observations in your teacher account. Sign in to record observations and emotion logs."
     >
       <SafeAreaView style={styles.safeArea}>
 
@@ -726,7 +655,7 @@ export default function TrackerScreen() {
         <View style={styles.gdprBanner}>
           <Ionicons name="shield-checkmark" size={16} color={COLORS.primary} />
           <Text style={styles.gdprBannerText}>
-            GDPR Safe: Anonymous codes only. No child names stored. 
+            Use pupil codes only. Do not enter pupil names, dates of birth, addresses or other identifying information in notes.
             <Text style={styles.gdprLink} onPress={handleDeleteAllData}> Delete all data</Text>
           </Text>
         </View>
@@ -738,14 +667,14 @@ export default function TrackerScreen() {
             <View style={styles.workflowHeaderCopy}>
               <Text style={styles.workflowTitle}>Track progress in three simple steps</Text>
               <Text style={styles.workflowText}>
-                Use anonymous pupil codes, record quick observations, then create a parent-ready progress summary when you are ready to share.
+                Use pupil codes, record quick observations, then create a parent-ready progress summary when you are ready to share.
               </Text>
             </View>
           </View>
           <View style={styles.workflowSteps}>
             {[
-              { icon: 'person-add-outline', title: '1. Add pupil', text: 'Use P1, P2 or your own anonymous code.' },
-              { icon: 'clipboard-outline', title: '2. Assess progress', text: 'Tick quick milestones when you notice them.' },
+              { icon: 'person-add-outline', title: '1. Add pupil', text: 'Use P1, P2 or your own pupil code.' },
+              { icon: 'clipboard-outline', title: '2. Record observations', text: 'Record what you notice using the observation indicators.' },
               { icon: 'document-text-outline', title: '3. Share summary', text: 'Generate a pre-filled letter/report for parents.' },
             ].map(step => (
               <View key={step.title} style={styles.workflowStep}>
@@ -791,7 +720,7 @@ export default function TrackerScreen() {
                   return s.rated > 0;
                 }).length}
               </Text>
-              <Text style={styles.overviewLabel}>Assessed</Text>
+              <Text style={styles.overviewLabel}>With observations</Text>
             </View>
             <View style={[styles.overviewCard, { backgroundColor: COLORS.bgPurple }]}>
               <Text style={[styles.overviewNum, { color: COLORS.purple }]}>
@@ -814,7 +743,7 @@ export default function TrackerScreen() {
             <Ionicons name="people-outline" size={56} color={COLORS.mediumGray} />
             <Text style={styles.emptyTitle}>No pupils added yet</Text>
             <Text style={styles.emptyText}>
-              Tap "Add Pupil" to start tracking progress. Use anonymous codes (P1, P2) to stay GDPR compliant.
+              Tap "Add Pupil" to start tracking progress. Use pupil codes (P1, P2) after your school has approved recording pupil information here.
             </Text>
             <TouchableOpacity
               style={styles.emptyBtn}
@@ -831,11 +760,6 @@ export default function TrackerScreen() {
               const summary = getPupilSummary(pupil);
               const recentEmotion = getRecentEmotion(pupil.id);
               const emotionData = recentEmotion ? EMOTIONS.find(e => e.id === recentEmotion.emotion_id) : null;
-              const ratingLabel = summary.avg >= 3.5 ? RATING_LABELS[3]
-                : summary.avg >= 2.5 ? RATING_LABELS[2]
-                : summary.avg >= 1.5 ? RATING_LABELS[1]
-                : summary.avg > 0 ? RATING_LABELS[0]
-                : null;
 
               return (
                 <View key={pupil.id} style={styles.pupilCard}>
@@ -860,21 +784,12 @@ export default function TrackerScreen() {
                       </View>
                       <Text style={styles.pupilStatus}>
                         {summary.rated > 0
-                          ? `${summary.rated}/${summary.totalMilestones} assessed`
-                          : 'Not yet assessed'}
+                          ? `${summary.rated} of ${summary.totalMilestones} observations recorded`
+                          : 'No observations recorded'}
                         {summary.emotionCount > 0 ? ` | ${summary.emotionCount} emotion logs` : ''}
                       </Text>
                     </View>
-                    {ratingLabel ? (
-                      <View style={[styles.ratingBadge, { backgroundColor: ratingLabel.bgColor }]}>
-                        <Text style={[styles.ratingBadgeText, { color: ratingLabel.color }]}>
-                          {summary.avg.toFixed(1)}
-                        </Text>
-                        <Text style={[styles.ratingBadgeLabel, { color: ratingLabel.color }]}>
-                          {ratingLabel.shortLabel}
-                        </Text>
-                      </View>
-                    ) : null}
+
                   </View>
 
                   {/* Recent Emotion Banner */}
@@ -905,23 +820,16 @@ export default function TrackerScreen() {
                     </View>
                   )}
 
-                  {/* Mini progress bars per area */}
+                  {/* Observation coverage per area */}
                   {summary.rated > 0 ? (
                     <View style={styles.miniAreas}>
                       {getMilestonesForAgeGroup(pupil.age_group).map(area => {
                         const areaAssess = getLatestPupilAssessments(pupil.id).filter(a => a.area_id === area.id);
-                        const areaAvg = areaAssess.length > 0
-                          ? areaAssess.reduce((s, a) => s + a.rating, 0) / areaAssess.length
-                          : 0;
-                        const pct = Math.round((areaAvg / 4) * 100);
+                        const recorded = new Set(areaAssess.filter(a => area.milestones.some(m => m.id === a.milestone_id)).map(a => a.milestone_id)).size;
                         return (
                           <View key={area.id} style={styles.miniAreaRow}>
                             <Text style={styles.miniAreaLabel} numberOfLines={1}>{area.shortTitle}</Text>
-                            <View style={styles.miniBarBg}>
-                              {areaAvg > 0 ? (
-                                <View style={[styles.miniBarFill, { width: `${pct}%`, backgroundColor: area.color }]} />
-                              ) : null}
-                            </View>
+                            <Text style={styles.pupilStatus}>{recorded} of {area.milestones.length} recorded</Text>
                           </View>
                         );
                       })}
@@ -944,7 +852,7 @@ export default function TrackerScreen() {
                       activeOpacity={0.7}
                     >
                       <Ionicons name="clipboard" size={16} color={COLORS.white} />
-                      <Text style={styles.assessBtnText}>Assess</Text>
+                      <Text style={styles.assessBtnText}>Observe</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.progressBtn}
@@ -971,7 +879,7 @@ export default function TrackerScreen() {
         <View style={styles.curriculumNote}>
           <Ionicons name="school-outline" size={17} color={COLORS.primary} />
           <Text style={styles.curriculumNoteText}>
-            Assessment milestones are built into each pupil's Assess button and aligned to EYFS / KS1 emotional literacy, sensory awareness, communication, self-regulation, and inclusion.
+            Many Petals observation indicators support teacher reflection on emotional literacy, sensory awareness, communication, self-regulation, and inclusion in EYFS and KS1.
           </Text>
         </View>
 
@@ -980,10 +888,10 @@ export default function TrackerScreen() {
           <Ionicons name="shield-checkmark" size={20} color={COLORS.secondary} />
           <Text style={styles.gdprFooterTitle}>Data Protection Notice</Text>
           <Text style={styles.gdprFooterText}>
-            This tracker is designed to be GDPR compliant. No child names, dates of birth, photographs, or other personally identifiable information is collected or stored. All pupils are identified by anonymous codes chosen by the teacher. Assessment and emotion log data is stored securely and linked only to your teacher account. You can delete all data at any time using the link above.
+            Coded pupil records may still be personal data. Keep the code-to-name mapping with your school and do not enter names, dates of birth or identifying details in notes. Use this tracker only with school approval. Delete My Data removes app records; account deletion and subscription cancellation are separate steps described in the privacy notice.
           </Text>
           <Text style={styles.gdprFooterText}>
-            Milestones are based on the EYFS Development Matters 2021 framework (PSED area) and KS1 PSHE National Curriculum, aligned with the Cobie the Cactus story themes of emotional literacy, sensory awareness, and inclusion.
+            These Many Petals observation indicators support teacher reflection and are informed by EYFS PSED, Development Matters (non-statutory guidance) and primary Relationships Education and Health Education in England. They are not statutory assessment criteria and do not replace professional judgement.
           </Text>
         </View>
 
@@ -1000,20 +908,23 @@ export default function TrackerScreen() {
         />
       ) : null}
 
-      {/* Quick Assess Modal */}
+      {/* Quick Observation Modal */}
       {assessPupil ? (
         <QuickAssess
           visible={!!assessPupil}
           onClose={() => setAssessPupil(null)}
           onSave={(newAssessments, term, year) => {
-            handleSaveAssessments(assessPupil.id, newAssessments, term, year);
+            return handleSaveAssessments(assessPupil.id, newAssessments, term, year);
           }}
           pupilCode={assessPupil.display_code}
           ageGroup={assessPupil.age_group}
-          existingAssessments={getPupilAssessments(assessPupil.id, currentTerm, currentYear).map(a => ({
+          existingAssessments={getPupilAssessments(assessPupil.id).map(a => ({
             milestone_id: a.milestone_id,
             area_id: a.area_id,
             rating: a.rating,
+            scale_version: a.scale_version,
+            term: a.term,
+            academic_year: a.academic_year,
           }))}
         />
       ) : null}

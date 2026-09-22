@@ -1,6 +1,6 @@
-// EYFS Development Matters 2021 - PSED milestones
-// KS1 PSHE National Curriculum milestones
-// Aligned with Cobie the Cactus story themes
+// Many Petals programme observation indicators, not statutory assessment criteria.
+// Informed by EYFS PSED, Development Matters (non-statutory guidance),
+// and primary Relationships Education and Health Education in England.
 
 export interface Milestone {
   id: string;
@@ -21,12 +21,31 @@ export interface MilestoneArea {
   milestones: Milestone[];
 }
 
+// Historical scale: keep these meanings for previously saved records.
+// Do not relabel historical values as new observation statuses.
 export const RATING_LABELS = [
   { value: 1, label: 'Emerging', shortLabel: 'E', color: '#FF8A65', bgColor: '#FBE9E7', description: 'Just beginning to show awareness' },
   { value: 2, label: 'Developing', shortLabel: 'D', color: '#FFB74D', bgColor: '#FFF3E0', description: 'Some evidence with support' },
   { value: 3, label: 'Secure', shortLabel: 'S', color: '#81C784', bgColor: '#E8F5E9', description: 'Consistent and independent' },
   { value: 4, label: 'Exceeding', shortLabel: 'Ex', color: '#4FC3F7', bgColor: '#E1F5FE', description: 'Beyond age-related expectations' },
 ];
+
+export const OBSERVATION_LABELS = [
+  { value: 1, label: 'Not yet observed', shortLabel: 'Not yet observed', color: '#9C4327', bgColor: '#FBE9E7', description: 'Not observed yet in this context' },
+  { value: 2, label: 'Observed with support', shortLabel: 'With support', color: '#805500', bgColor: '#FFF3E0', description: 'Seen when prompted or supported' },
+  { value: 3, label: 'Observed independently', shortLabel: 'Independently', color: '#2E6532', bgColor: '#E8F5E9', description: 'Seen independently without prompting' },
+  { value: 4, label: 'Observed consistently', shortLabel: 'Consistently', color: '#14627F', bgColor: '#E1F5FE', description: 'Seen consistently across more than one occasion or context' },
+];
+
+export function getObservationLabel(record: { rating: number; scale_version?: number | null }) {
+  // Missing markers are historical, including responses from older deployments.
+  const labels = record.scale_version === 2 ? OBSERVATION_LABELS : RATING_LABELS;
+  const label = labels.find(item => item.value === record.rating);
+  return label ? {
+    ...label,
+    label: record.scale_version === 2 ? label.label : `${label.label} (previous scale)`,
+  } : null;
+}
 
 export const TERMS = ['Autumn', 'Spring', 'Summer'] as const;
 
@@ -58,7 +77,7 @@ export const MILESTONE_AREAS: MilestoneArea[] = [
     color: '#1B6B93',
     bgColor: '#E1F5FE',
     ageGroup: 'Both',
-    source: 'EYFS PSED / KS1 PSHE',
+    source: 'Many Petals indicator — informed by EYFS PSED and primary Relationships and Health Education',
     milestones: [
       {
         id: 'sr-1',
@@ -100,7 +119,7 @@ export const MILESTONE_AREAS: MilestoneArea[] = [
     color: '#7BC67E',
     bgColor: '#E8F5E9',
     ageGroup: 'Both',
-    source: 'EYFS PSED / KS1 PSHE',
+    source: 'Many Petals indicator — informed by EYFS PSED and primary Relationships and Health Education',
     milestones: [
       {
         id: 'ms-1',
@@ -136,7 +155,7 @@ export const MILESTONE_AREAS: MilestoneArea[] = [
     color: '#F48FB1',
     bgColor: '#FCE4EC',
     ageGroup: 'Both',
-    source: 'EYFS PSED / KS1 PSHE',
+    source: 'Many Petals indicator — informed by EYFS PSED and primary Relationships and Health Education',
     milestones: [
       {
         id: 'br-1',
@@ -172,7 +191,7 @@ export const MILESTONE_AREAS: MilestoneArea[] = [
     color: '#CE93D8',
     bgColor: '#F3E5F5',
     ageGroup: 'Both',
-    source: 'KS1 PSHE / Cobie Curriculum',
+    source: 'Many Petals programme indicator — informed by primary Relationships and Health Education',
     milestones: [
       {
         id: 'el-1',
@@ -208,7 +227,7 @@ export const MILESTONE_AREAS: MilestoneArea[] = [
     color: '#FF8A65',
     bgColor: '#FBE9E7',
     ageGroup: 'Both',
-    source: 'SEND Code of Practice / Cobie Curriculum',
+    source: 'Many Petals programme indicator — informed by SEND guidance',
     milestones: [
       {
         id: 'sa-1',
@@ -224,9 +243,9 @@ export const MILESTONE_AREAS: MilestoneArea[] = [
       },
       {
         id: 'sa-3',
-        label: 'Tolerates a range of sensory experiences',
-        shortLabel: 'Sensory tolerance',
-        description: 'Can manage different textures, sounds, and environments with support',
+        label: 'Participates in sensory environments using appropriate support or strategies when needed',
+        shortLabel: 'Sensory participation',
+        description: 'Uses appropriate support or strategies to participate when sensory input is challenging',
       },
       {
         id: 'sa-4',
@@ -244,7 +263,7 @@ export const MILESTONE_AREAS: MilestoneArea[] = [
     color: '#FFD54F',
     bgColor: '#FFF8E1',
     ageGroup: 'Both',
-    source: 'KS1 PSHE / Cobie Curriculum',
+    source: 'Many Petals programme indicator — informed by primary Relationships and Health Education',
     milestones: [
       {
         id: 'ik-1',
@@ -282,28 +301,4 @@ export function getMilestonesForAgeGroup(ageGroup: 'EYFS' | 'KS1'): MilestoneAre
 // Helper to get total milestone count
 export function getTotalMilestoneCount(): number {
   return MILESTONE_AREAS.reduce((sum, area) => sum + area.milestones.length, 0);
-}
-
-// Helper to calculate progress percentage
-export function calculateProgress(ratings: { milestone_id: string; rating: number }[], ageGroup: 'EYFS' | 'KS1'): number {
-  const areas = getMilestonesForAgeGroup(ageGroup);
-  const totalMilestones = areas.reduce((sum, a) => sum + a.milestones.length, 0);
-  if (totalMilestones === 0) return 0;
-  
-  const totalScore = ratings.reduce((sum, r) => sum + r.rating, 0);
-  const maxScore = totalMilestones * 4;
-  return Math.round((totalScore / maxScore) * 100);
-}
-
-// Helper to get area average rating
-export function getAreaAverage(ratings: { milestone_id: string; rating: number }[], areaId: string): number {
-  const area = MILESTONE_AREAS.find(a => a.id === areaId);
-  if (!area) return 0;
-  
-  const areaRatings = ratings.filter(r => 
-    area.milestones.some(m => m.id === r.milestone_id)
-  );
-  
-  if (areaRatings.length === 0) return 0;
-  return areaRatings.reduce((sum, r) => sum + r.rating, 0) / areaRatings.length;
 }

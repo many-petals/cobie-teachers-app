@@ -48,7 +48,7 @@ export const PARENT_LETTERS: ParentLetter[] = [
     title: 'Progress Report Template',
     subtitle: 'Emotional Literacy Progress Update',
     description:
-      'A structured report template to share a child\'s emotional literacy progress with parents. Covers self-regulation, empathy, communication, and sensory awareness milestones.',
+      'A structured report template to share teacher observations with parents/carers. Covers self-regulation, empathy, communication, and sensory awareness.',
     icon: 'trending-up',
     color: '#B39DDB',
     pages: 2,

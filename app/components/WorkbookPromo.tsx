@@ -97,7 +97,7 @@ export default function WorkbookPromo({ compact = false }: WorkbookPromoProps) {
             </View>
             <View style={styles.featureItem}>
               <Ionicons name="checkmark-circle" size={14} color={COLORS.secondary} />
-              <Text style={styles.featureText}>Assessment checklists included</Text>
+              <Text style={styles.featureText}>Observation checklists included</Text>
             </View>
           </View>
 

@@ -11,10 +11,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import {
   MILESTONE_AREAS,
-  RATING_LABELS,
+  getObservationLabel,
   TERMS,
   getMilestonesForAgeGroup,
-  getAreaAverage,
 } from '../data/milestones';
 import EmotionHistory from './EmotionHistory';
 import type { EmotionLogEntry } from './EmotionHistory';
@@ -26,6 +25,7 @@ interface AssessmentData {
   term: string;
   academic_year: string;
   assessed_at: string;
+  scale_version?: number | null;
 }
 
 interface EmotionLogData {
@@ -99,22 +99,9 @@ export default function ProgressView({
     ? Object.values(latestByMilestone)
     : (termGroups[selectedTerm] || []);
 
-  // Calculate overall score
-  const totalRated = filteredAssessments.length;
-  const totalScore = filteredAssessments.reduce((s, a) => s + a.rating, 0);
-  const avgRating = totalRated > 0 ? totalScore / totalRated : 0;
+  const totalRated = new Set(filteredAssessments.filter(a => areas.some(area => area.milestones.some(m => m.id === a.milestone_id))).map(a => a.milestone_id)).size;
   const totalMilestones = areas.reduce((s, a) => s + a.milestones.length, 0);
 
-  // Get rating label for average
-  const getRatingLabel = (avg: number): { label: string; color: string } => {
-    if (avg >= 3.5) return { label: 'Exceeding', color: RATING_LABELS[3].color };
-    if (avg >= 2.5) return { label: 'Secure', color: RATING_LABELS[2].color };
-    if (avg >= 1.5) return { label: 'Developing', color: RATING_LABELS[1].color };
-    if (avg > 0) return { label: 'Emerging', color: RATING_LABELS[0].color };
-    return { label: 'Not assessed', color: COLORS.mediumGray };
-  };
-
-  const overallLabel = getRatingLabel(avgRating);
   const parentShareState =
     parentShareStatus === 'active'
       ? {
@@ -142,28 +129,6 @@ export default function ProgressView({
             helper: 'Keep sharing off until you want a parent-safe summary available for this child.',
           };
 
-  // Check for improvement between terms
-  const getTermComparison = (areaId: string): { improved: boolean; change: number } | null => {
-    if (termKeys.length < 2) return null;
-    const prevTerm = termGroups[termKeys[termKeys.length - 2]] || [];
-    const currTerm = termGroups[termKeys[termKeys.length - 1]] || [];
-    
-    const area = areas.find(a => a.id === areaId);
-    if (!area) return null;
-
-    const prevAvg = getAreaAverage(
-      prevTerm.map(a => ({ milestone_id: a.milestone_id, rating: a.rating })),
-      areaId
-    );
-    const currAvg = getAreaAverage(
-      currTerm.map(a => ({ milestone_id: a.milestone_id, rating: a.rating })),
-      areaId
-    );
-
-    if (prevAvg === 0 || currAvg === 0) return null;
-    return { improved: currAvg > prevAvg, change: currAvg - prevAvg };
-  };
-
   // Convert emotion logs to EmotionLogEntry format
   const emotionLogEntries: EmotionLogEntry[] = emotionLogs.map(l => ({
     id: l.id,
@@ -175,13 +140,13 @@ export default function ProgressView({
   }));
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal visible={visible} animationType="slide" transparent accessibilityViewIsModal>
       <View style={styles.overlay}>
         <View style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
             <View>
-              <Text style={styles.headerTitle}>Progress: {pupilCode}</Text>
+              <Text style={styles.headerTitle}>Observations: {pupilCode}</Text>
               <View style={styles.headerTags}>
                 <View style={[styles.tag, { backgroundColor: COLORS.bgLight }]}>
                   <Text style={[styles.tagText, { color: COLORS.primary }]}>{ageGroup}</Text>
@@ -200,7 +165,7 @@ export default function ProgressView({
                   <Text style={styles.reportBtnText}>Parent Letter</Text>
                 </TouchableOpacity>
               ) : null}
-              <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
+              <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Close observation summary">
                 <Ionicons name="close" size={22} color={COLORS.text} />
               </TouchableOpacity>
             </View>
@@ -244,18 +209,10 @@ export default function ProgressView({
                 {/* Overall Summary */}
                 <View style={styles.summaryCard}>
                   <View style={styles.summaryTop}>
-                    <View style={[styles.summaryCircle, { borderColor: overallLabel.color }]}>
-                      <Text style={[styles.summaryScore, { color: overallLabel.color }]}>
-                        {avgRating > 0 ? avgRating.toFixed(1) : '-'}
-                      </Text>
-                      <Text style={styles.summaryOutOf}>/4</Text>
-                    </View>
                     <View style={styles.summaryInfo}>
-                      <Text style={[styles.summaryLabel, { color: overallLabel.color }]}>
-                        {overallLabel.label}
-                      </Text>
+                      <Text style={styles.summaryLabel}>Observation coverage</Text>
                       <Text style={styles.summaryDetail}>
-                        {totalRated} of {totalMilestones} milestones assessed
+                        {totalRated} of {totalMilestones} observations recorded
                       </Text>
                       {termKeys.length > 0 ? (
                         <Text style={styles.summaryDetail}>
@@ -277,7 +234,7 @@ export default function ProgressView({
                       <Ionicons name={parentShareState.icon} size={18} color={parentShareState.color} />
                     </View>
                     <View style={styles.parentShareCopy}>
-                      <Text style={styles.parentShareTitle}>Parent progress summary</Text>
+                      <Text style={styles.parentShareTitle}>Parent observation summary</Text>
                       <Text style={[styles.parentShareStatus, { color: parentShareState.color }]}>
                         {parentShareState.label}
                       </Text>
@@ -366,11 +323,7 @@ export default function ProgressView({
                 {/* Area Breakdown */}
                 {areas.map(area => {
                   const areaAssessments = filteredAssessments.filter(a => a.area_id === area.id);
-                  const areaAvg = areaAssessments.length > 0
-                    ? areaAssessments.reduce((s, a) => s + a.rating, 0) / areaAssessments.length
-                    : 0;
-                  const areaLabel = getRatingLabel(areaAvg);
-                  const comparison = getTermComparison(area.id);
+
 
                   return (
                     <View key={area.id} style={styles.areaCard}>
@@ -382,48 +335,23 @@ export default function ProgressView({
                           <Text style={styles.areaTitle}>{area.title}</Text>
                           <Text style={styles.areaSrc}>{area.source}</Text>
                         </View>
-                        <View style={styles.areaScoreBox}>
-                          <Text style={[styles.areaScore, { color: areaLabel.color }]}>
-                            {areaAvg > 0 ? areaAvg.toFixed(1) : '-'}
-                          </Text>
-                          {comparison ? (
-                            <View style={styles.changeRow}>
-                              <Ionicons
-                                name={comparison.improved ? 'trending-up' : 'trending-down'}
-                                size={14}
-                                color={comparison.improved ? COLORS.success : COLORS.warning}
-                              />
-                            </View>
-                          ) : null}
-                        </View>
+                        <Text style={styles.areaSrc}>
+                          {new Set(areaAssessments.filter(a => area.milestones.some(m => m.id === a.milestone_id)).map(a => a.milestone_id)).size} of {area.milestones.length} recorded
+                        </Text>
                       </View>
 
-                      {/* Visual bar chart for each milestone */}
+                      {/* Individual observation statuses, without attainment bars */}
                       <View style={styles.milestonesList}>
                         {area.milestones.map(m => {
                           const assessment = areaAssessments.find(a => a.milestone_id === m.id);
-                          const rating = assessment?.rating || 0;
-                          const ratingInfo = rating > 0 ? RATING_LABELS[rating - 1] : null;
+                          const ratingInfo = assessment ? getObservationLabel(assessment) : null;
 
                           return (
                             <View key={m.id} style={styles.milestoneItem}>
-                              <Text style={styles.mLabel} numberOfLines={1}>{m.shortLabel}</Text>
+                              <Text style={styles.mLabel}>{m.shortLabel}</Text>
                               <View style={styles.barContainer}>
-                                <View style={styles.barBg}>
-                                  {rating > 0 ? (
-                                    <View
-                                      style={[
-                                        styles.barFill,
-                                        {
-                                          width: `${(rating / 4) * 100}%`,
-                                          backgroundColor: ratingInfo?.color || COLORS.mediumGray,
-                                        },
-                                      ]}
-                                    />
-                                  ) : null}
-                                </View>
                                 <Text style={[styles.mRating, { color: ratingInfo?.color || COLORS.textMuted }]}>
-                                  {ratingInfo ? ratingInfo.shortLabel : '--'}
+                                  {ratingInfo ? ratingInfo.label : 'No observation'}
                                 </Text>
                               </View>
                             </View>
@@ -434,46 +362,13 @@ export default function ProgressView({
                   );
                 })}
 
-                {/* Term-over-term comparison */}
-                {termKeys.length >= 2 ? (
-                  <View style={styles.comparisonCard}>
-                    <View style={styles.compHeader}>
-                      <Ionicons name="analytics" size={20} color={COLORS.primary} />
-                      <Text style={styles.compTitle}>Term-over-Term Progress</Text>
-                    </View>
-                    {areas.map(area => {
-                      const comparison = getTermComparison(area.id);
-                      if (!comparison) return null;
-                      return (
-                        <View key={area.id} style={styles.compRow}>
-                          <View style={[styles.compDot, { backgroundColor: area.color }]} />
-                          <Text style={styles.compAreaName}>{area.shortTitle}</Text>
-                          <View style={styles.compChange}>
-                            <Ionicons
-                              name={comparison.improved ? 'arrow-up-circle' : comparison.change === 0 ? 'remove-circle' : 'arrow-down-circle'}
-                              size={18}
-                              color={comparison.improved ? COLORS.success : comparison.change === 0 ? COLORS.mediumGray : COLORS.warning}
-                            />
-                            <Text style={[
-                              styles.compChangeText,
-                              { color: comparison.improved ? COLORS.success : comparison.change === 0 ? COLORS.mediumGray : COLORS.warning },
-                            ]}>
-                              {comparison.change > 0 ? '+' : ''}{comparison.change.toFixed(1)}
-                            </Text>
-                          </View>
-                        </View>
-                      );
-                    })}
-                  </View>
-                ) : null}
-
                 {/* Empty state */}
                 {assessments.length === 0 ? (
                   <View style={styles.emptyState}>
                     <Ionicons name="bar-chart-outline" size={48} color={COLORS.mediumGray} />
-                    <Text style={styles.emptyTitle}>No assessments yet</Text>
+                    <Text style={styles.emptyTitle}>No observations yet</Text>
                     <Text style={styles.emptyText}>
-                      Tap "Quick Assess" to record this pupil's first milestone ratings.
+                      Tap "Observe" on the pupil card to record this pupil's first observation statuses.
                     </Text>
                   </View>
                 ) : null}
@@ -866,10 +761,10 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   mRating: {
-    width: 22,
+    flex: 1,
     fontSize: FONT_SIZES.xs,
     fontWeight: '700',
-    textAlign: 'center',
+    textAlign: 'left',
   },
   comparisonCard: {
     backgroundColor: COLORS.white,

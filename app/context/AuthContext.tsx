@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { supabase } from '@/app/lib/supabase';
 import * as LocalStorage from '@/app/lib/storage';
+import { getBillingStatus, BillingStatus } from '@/lib/billing';
 
 export interface TeacherProfile {
   id: string;
@@ -39,7 +40,10 @@ interface AuthContextType {
   savedCalmConfigs: SavedCalmConfig[];
   loading: boolean;
   hasFullAccess: boolean;
-  setHasFullAccess: (value: boolean) => void;
+  billingLoading: boolean;
+  billingError: string | null;
+  billingStatus: BillingStatus | null;
+  refreshBilling: () => Promise<BillingStatus | null>;
   showAuthModal: boolean;
   setShowAuthModal: (show: boolean) => void;
   showProfileModal: boolean;
@@ -60,7 +64,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
-const TESTER_EMAILS = ['caroline_marklew@hotmail.com', 'mand1984@yahoo.co.uk'];
 const SESSION_TIMEOUT_MS = 8000;
 const USER_DATA_TIMEOUT_MS = 10000;
 
@@ -83,7 +86,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [completedLessons, setCompletedLessons] = useState<CompletedLesson[]>([]);
   const [savedCalmConfigs, setSavedCalmConfigs] = useState<SavedCalmConfig[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hasFullAccess, setHasFullAccess] = useState(false);
+  const [billing, setBilling] = useState<{ userId: string; value: BillingStatus } | null>(null);
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [billingError, setBillingError] = useState<string | null>(null);
+  const billingRequestId = useRef(0);
+  const billingStatus = billing?.userId === user?.id ? billing?.value ?? null : null;
+  const hasFullAccess = billingStatus?.hasFullAccess === true;
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
@@ -93,7 +101,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setFavourites([]);
     setCompletedLessons([]);
     setSavedCalmConfigs([]);
-    setHasFullAccess(false);
+    billingRequestId.current += 1;
+    setBilling(null);
+    setBillingError(null);
+    setBillingLoading(false);
     setShowProfileModal(false);
   }, []);
 
@@ -101,9 +112,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return user?.id ?? undefined;
   }, [user]);
 
+  const refreshBilling = useCallback(async () => {
+    const requestId = ++billingRequestId.current;
+    if (!user?.id) return null;
+    setBillingLoading(true);
+    setBillingError(null);
+    try {
+      const value = await getBillingStatus();
+      if (requestId !== billingRequestId.current) return null;
+      setBilling({ userId: user.id, value });
+      return value;
+    } catch (error) {
+      if (requestId === billingRequestId.current) {
+        setBilling(null);
+        setBillingError(error instanceof Error ? error.message : 'We could not check your access. Please try again.');
+      }
+      return null;
+    } finally {
+      if (requestId === billingRequestId.current) setBillingLoading(false);
+    }
+  }, [user?.id]);
+
   useEffect(() => {
-    setHasFullAccess(Boolean(user?.email && TESTER_EMAILS.includes(user.email)));
-  }, [user]);
+    void refreshBilling();
+    if (!user?.id) return;
+    const refreshWhenVisible = () => {
+      if (typeof document === 'undefined' || document.visibilityState === 'visible') void refreshBilling();
+    };
+    const timer = setInterval(refreshWhenVisible, 5 * 60 * 1000);
+    if (typeof window !== 'undefined') window.addEventListener('focus', refreshWhenVisible);
+    return () => {
+      billingRequestId.current += 1;
+      clearInterval(timer);
+      if (typeof window !== 'undefined') window.removeEventListener('focus', refreshWhenVisible);
+    };
+  }, [user?.id, refreshBilling]);
 
   const loadAndMergeUserData = useCallback(async (userId: string) => {
     try {
@@ -602,7 +645,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         savedCalmConfigs,
         loading,
         hasFullAccess,
-        setHasFullAccess,
+        billingLoading,
+        billingError,
+        billingStatus,
+        refreshBilling,
         showAuthModal,
         setShowAuthModal,
         showProfileModal,

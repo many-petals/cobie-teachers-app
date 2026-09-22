@@ -93,7 +93,7 @@ export const LESSONS: Lesson[] = [
       'Offer ear defenders during sound station',
       'Allow children to skip stations',
       'Provide visual choice cards',
-      'Use hand-over-hand guidance if appropriate',
+      'Model the action visually or alongside the child. Offer physical guidance only when appropriate, agreed to by the child and consistent with the setting’s practice.',
       'Keep instructions minimal',
     ],
     assessmentOpportunities: [

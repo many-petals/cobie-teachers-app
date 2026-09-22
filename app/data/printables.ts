@@ -147,7 +147,7 @@ export const PRINTABLES: Printable[] = [
   },
   {
     id: 'p-8',
-    title: 'Assessment Checklist',
+    title: 'Observation Checklist',
     category: 'checklist',
     skillType: 'general',
     ageRange: 'Both',

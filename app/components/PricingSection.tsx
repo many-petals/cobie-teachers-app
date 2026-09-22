@@ -9,6 +9,8 @@ import {
   Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { LESSONS } from '../data/lessons';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -22,15 +24,15 @@ const PLANS = [
     description: 'Try the core features',
     color: COLORS.mediumGray,
     features: [
-      { label: 'View all 4 lesson outlines', included: true },
+      { label: `View all ${LESSONS.length} lesson outlines`, included: true },
       { label: 'Lesson 1 full player access', included: true },
       { label: '3 sample printables', included: true },
       { label: 'Emotion cards tool', included: true },
-      { label: 'Full lesson player (all 4)', included: false },
+      { label: `Full lesson player (all ${LESSONS.length})`, included: false },
       { label: 'All 18 printable resources', included: false },
       { label: 'Pupil progress tracker', included: false },
       { label: 'Calm Corner builder', included: false },
-      { label: 'Assessment checklists', included: false },
+      { label: 'Observation checklists', included: false },
     ],
     cta: 'Current Plan',
     popular: false,
@@ -43,7 +45,7 @@ const PLANS = [
     description: 'Full access for one teacher',
     color: COLORS.primary,
     features: [
-      { label: 'All 4 lesson players', included: true },
+      { label: `All ${LESSONS.length} lesson players`, included: true },
       { label: 'All 18 printable resources', included: true },
       { label: 'All 8 optional activities', included: true },
       { label: 'Pupil progress tracker', included: true },
@@ -81,6 +83,7 @@ interface PricingSectionProps {
 }
 
 export default function PricingSection({ visible, onClose }: PricingSectionProps) {
+  const router = useRouter();
   const { user, setShowAuthModal } = useAuth();
   const { showToast } = useToast();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
@@ -96,11 +99,12 @@ export default function PricingSection({ visible, onClose }: PricingSectionProps
       return;
     }
     if (planId === 'teacher') {
-      window.location.href = 'https://buy.stripe.com/aFa14o8Hj2SM6OFeSSdAk02';
+      onClose();
+      router.push('/upgrade');
       return;
     }
     if (planId === 'school') {
-      window.location.href = 'mailto:info@manypetals.co.uk?subject=School%20Plan%20Enquiry';
+      void Linking.openURL('mailto:info@manypetals.co.uk?subject=School%20Plan%20Enquiry');
       return;
     }
     setSelectedPlan(planId);

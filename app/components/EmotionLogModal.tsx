@@ -171,6 +171,7 @@ export default function EmotionLogModal({ visible, onClose, onLog, pupilCode }: 
                 </View>
 
                 <Text style={styles.notesLabel}>Notes (optional)</Text>
+                <Text style={styles.notesHint}>Do not enter pupil names, dates of birth, addresses or other identifying information.</Text>
                 <TextInput
                   style={styles.notesInput}
                   value={notes}
@@ -368,6 +369,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.text,
     marginBottom: SPACING.sm,
+  },
+  notesHint: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.xs,
   },
   notesInput: {
     backgroundColor: COLORS.white,

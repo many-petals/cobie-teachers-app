@@ -56,7 +56,7 @@ const TEACHER_FLOW = [
   {
     icon: 'analytics-outline',
     title: 'Track progress',
-    text: 'Tap simple progress ratings for each pupil. The app turns observations into useful classroom evidence.',
+    text: 'Record observation statuses for each pupil to support classroom reflection.',
   },
   {
     icon: 'people-outline',

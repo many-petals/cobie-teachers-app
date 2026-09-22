@@ -84,7 +84,7 @@ export default function AddPupilModal({ visible, onClose, onAdd, existingCodes }
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal visible={visible} animationType="slide" transparent accessibilityViewIsModal>
       <View style={styles.overlay}>
         <View style={styles.container}>
           <View style={styles.header}>
@@ -99,14 +99,14 @@ export default function AddPupilModal({ visible, onClose, onAdd, existingCodes }
             <View style={styles.gdprNotice}>
               <Ionicons name="shield-checkmark" size={18} color={COLORS.primary} />
               <Text style={styles.gdprText}>
-                GDPR Safe: Use anonymous codes only (e.g. P1, Child A). Do not enter real names or identifiable information.
+                Pupil Code — do not enter a real name. Do not enter pupil names, dates of birth, addresses or other identifying information in this form or its notes. A code may still be personal data, so use this only with your school's approval and data protection arrangements.
               </Text>
             </View>
 
-            {/* Anonymous Code */}
+            {/* Pupil Code */}
             <View style={styles.field}>
-              <Text style={styles.label}>Anonymous Code</Text>
-              <Text style={styles.hint}>A short code to identify this pupil (no real names)</Text>
+              <Text style={styles.label}>Pupil Code</Text>
+              <Text style={styles.hint}>Use a code such as P1 or Child A. Do not enter a real name.</Text>
               <TextInput
                 style={styles.input}
                 value={code}
@@ -168,7 +168,7 @@ export default function AddPupilModal({ visible, onClose, onAdd, existingCodes }
             {/* Notes */}
             <View style={styles.field}>
               <Text style={styles.label}>Notes (optional)</Text>
-              <Text style={styles.hint}>General notes only - no identifiable information</Text>
+              <Text style={styles.hint}>General notes only. Do not enter pupil names, dates of birth, addresses or other identifying information.</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
                 value={notes}

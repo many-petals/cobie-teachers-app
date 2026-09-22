@@ -14,7 +14,7 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from './data/theme';
 import { BRAND, LOCAL_LOGO } from './data/brand';
 
-const LAST_UPDATED = '7 March 2026';
+const LAST_UPDATED = '15 September 2026';
 
 interface PolicySectionProps {
   number: string;
@@ -229,9 +229,9 @@ export default function PrivacyPolicyScreen() {
               <Ionicons name="checkmark-circle" size={24} color={COLORS.secondary} />
             </View>
             <View style={styles.gdprTextWrap}>
-              <Text style={styles.gdprTitle}>GDPR Compliant</Text>
+              <Text style={styles.gdprTitle}>Pupil data needs school approval</Text>
               <Text style={styles.gdprText}>
-                This app is designed with privacy by default and privacy by design, in full compliance with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.
+                Use the lessons and resources without entering pupil records until your school has reviewed and approved the data arrangements. Using pupil codes reduces identification risk but does not, by itself, establish UK GDPR compliance.
               </Text>
             </View>
           </View>
@@ -242,9 +242,9 @@ export default function PrivacyPolicyScreen() {
           <Text style={styles.principlesTitle}>Our Privacy Principles</Text>
           <View style={styles.principlesGrid}>
             {[
-              { icon: 'eye-off-outline', label: 'No child names\ncollected', color: COLORS.primary },
-              { icon: 'lock-closed-outline', label: 'Data encrypted\nat rest', color: COLORS.secondary },
-              { icon: 'people-outline', label: 'Teacher data\nisolated via RLS', color: COLORS.purple },
+              { icon: 'eye-off-outline', label: 'Use pupil codes\nnot names', color: COLORS.primary },
+              { icon: 'lock-closed-outline', label: 'School approval\nbefore pupil data', color: COLORS.secondary },
+              { icon: 'people-outline', label: 'Keep code keys\nwith your school', color: COLORS.purple },
               { icon: 'trash-outline', label: 'Full deletion\nrights', color: COLORS.error },
             ].map((item) => (
               <View key={item.label} style={styles.principleItem}>
@@ -268,7 +268,7 @@ export default function PrivacyPolicyScreen() {
           <View style={styles.importantBox}>
             <Ionicons name="information-circle" size={20} color={COLORS.primary} />
             <Text style={styles.importantText}>
-              We never collect, store, or process the real names, photographs, or any directly identifying information of children. Pupils are tracked using anonymous codes only (e.g. "Pupil A", "Cactus 3").
+              Use pupil codes such as "P1" instead of names. If your school can link a code to a child, the record is pseudonymised personal data. Do not enter identifying details in codes, notes or recordings; free-text fields cannot guarantee that such details are excluded.
             </Text>
           </View>
         </View>
@@ -284,14 +284,14 @@ export default function PrivacyPolicyScreen() {
             We collect the minimum amount of data necessary to provide the App's functionality. The data we collect falls into two categories:
           </Paragraph>
 
-          <Text style={styles.subHeading}>1.1 Account Data (Stored in Supabase Database)</Text>
+          <Text style={styles.subHeading}>1.1 Account Data</Text>
           <Paragraph>
-            When you create an account, we collect and store the following in our secure Supabase database:
+            When you create an account, the app sends the following details to its authentication and database service:
           </Paragraph>
           <InfoCard
             icon="mail-outline"
             title="Email Address"
-            description="Used for authentication and account recovery. This is the only personally identifiable information we store."
+            description="Used for authentication and account recovery. Your name, school, role and account-linked records may also be personal data."
             color={COLORS.primary}
           />
           <InfoCard
@@ -312,17 +312,17 @@ export default function PrivacyPolicyScreen() {
             To support teaching and learning, the following data is stored in our database:
           </Paragraph>
           <BulletPoint
-            text="Anonymous pupil codes (e.g. 'Pupil A', 'Cactus 3') - never real names"
+            text="Pupil codes (e.g. 'Pupil A', 'Cactus 3') - never real names"
             icon="checkmark"
             color={COLORS.secondary}
           />
           <BulletPoint
-            text="Emotion check-in records linked to anonymous pupil codes"
+            text="Emotion check-in records linked to pupil codes"
             icon="checkmark"
             color={COLORS.secondary}
           />
           <BulletPoint
-            text="Milestone tracking progress linked to anonymous pupil codes"
+            text="Milestone tracking progress linked to pupil codes"
             icon="checkmark"
             color={COLORS.secondary}
           />
@@ -365,7 +365,7 @@ export default function PrivacyPolicyScreen() {
             color={COLORS.purple}
           />
 
-          <Text style={[styles.subHeading, { marginTop: SPACING.lg }]}>1.4 Data We Do NOT Collect</Text>
+          <Text style={[styles.subHeading, { marginTop: SPACING.lg }]}>1.4 Information to Keep Out of Pupil Records</Text>
           <View style={styles.noCollectBox}>
             {[
               'Real names of children or pupils',
@@ -397,32 +397,32 @@ export default function PrivacyPolicyScreen() {
             We use a combination of cloud database storage and local device storage to keep your data secure and accessible.
           </Paragraph>
 
-          <Text style={styles.subHeading}>2.1 Cloud Database (Supabase)</Text>
+          <Text style={styles.subHeading}>2.1 Cloud Database and Hosting</Text>
           <Paragraph>
-            Account data and educational tracking data are stored in a PostgreSQL database hosted by Supabase, a trusted open-source backend platform.
+            The app connects to a DatabasePad service through a Supabase-compatible client for authentication and cloud records. Schools should obtain confirmed supplier, hosting-location and data-processing information before using pupil records.
           </Paragraph>
           <BulletPoint
-            text="All data is encrypted at rest using AES-256 encryption"
+            text="Hosting location, encryption at rest and supplier assurance documents must be confirmed for the deployed service"
             icon="checkmark"
             color={COLORS.secondary}
           />
           <BulletPoint
-            text="All data in transit is protected by TLS 1.2+ encryption"
+            text="The app uses HTTPS connections to its cloud service"
             icon="checkmark"
             color={COLORS.secondary}
           />
           <BulletPoint
-            text="Database hosted in secure, SOC 2 Type II compliant data centres"
+            text="Ask for the applicable data-processing agreement and subprocessor information"
             icon="checkmark"
             color={COLORS.secondary}
           />
           <BulletPoint
-            text="Automatic daily backups with point-in-time recovery"
+            text="Backup frequency, retention and restore arrangements require confirmation"
             icon="checkmark"
             color={COLORS.secondary}
           />
           <BulletPoint
-            text="Row Level Security (RLS) policies enforce strict data isolation between teachers (see Section 3)"
+            text="Database access controls must be verified with separate teacher accounts before pupil records are used"
             icon="checkmark"
             color={COLORS.secondary}
           />
@@ -449,7 +449,7 @@ export default function PrivacyPolicyScreen() {
 
           <Text style={[styles.subHeading, { marginTop: SPACING.lg }]}>2.3 Data Retention</Text>
           <Paragraph>
-            We retain your account data and associated educational tracking data for as long as your account is active. You may request deletion at any time (see Section 5). Upon account deletion, all associated data is permanently removed from our database within 30 days.
+            You can remove app records using Delete My Data and request account deletion through the privacy contact below. Schools should agree retention periods, account-deletion procedures and backup retention before using pupil records.
           </Paragraph>
         </PolicySection>
 
@@ -461,35 +461,35 @@ export default function PrivacyPolicyScreen() {
           iconColor={COLORS.purple}
         >
           <Paragraph>
-            We implement strict access controls to ensure your data is only accessible to authorised parties.
+            The app associates cloud records with a teacher account. School approval should include verification that the deployed database prevents access between different teachers.
           </Paragraph>
 
-          <Text style={styles.subHeading}>3.1 Row Level Security (RLS)</Text>
+          <Text style={styles.subHeading}>3.1 Teacher Account Boundaries</Text>
           <View style={styles.rlsBox}>
             <View style={styles.rlsHeader}>
               <Ionicons name="shield-checkmark" size={20} color={COLORS.primary} />
               <Text style={styles.rlsTitle}>Teacher Data Isolation</Text>
             </View>
             <Paragraph>
-              Our database uses Supabase Row Level Security (RLS) policies to enforce strict data isolation. This means:
+              Filtering records in the app is not a substitute for database-enforced access controls. The deployment review must verify that:
             </Paragraph>
             <BulletPoint
-              text="Each teacher can ONLY view, edit, and delete their own data"
+              text="Each teacher can view, edit and delete only the records their account is authorised to access"
               icon="checkmark"
               color={COLORS.primary}
             />
             <BulletPoint
-              text="Teacher A cannot see Teacher B's pupils, check-ins, or progress data"
+              text="A second teacher cannot read or change the first teacher's pupil records, check-ins or progress data"
               icon="checkmark"
               color={COLORS.primary}
             />
             <BulletPoint
-              text="RLS policies are enforced at the database level - they cannot be bypassed by the application"
+              text="Database policies enforce account boundaries even when requests are made directly to the service"
               icon="checkmark"
               color={COLORS.primary}
             />
             <BulletPoint
-              text="All database queries are automatically filtered by the authenticated teacher's user ID"
+              text="Signed-out requests cannot access teacher or pupil records"
               icon="checkmark"
               color={COLORS.primary}
             />
@@ -505,13 +505,13 @@ export default function PrivacyPolicyScreen() {
           <InfoCard
             icon="construct-outline"
             title="Many Petals Learning (Admin)"
-            description="Limited access for technical support and maintenance purposes only. We do not routinely access individual teacher data."
+            description="Contact us for the documented administrator-access and support arrangements applicable to your school."
             color={COLORS.accentOrange}
           />
           <InfoCard
             icon="server-outline"
-            title="Supabase (Infrastructure)"
-            description="Our database hosting provider. Supabase processes data on our behalf under a Data Processing Agreement (DPA) and does not access your data for their own purposes."
+            title="Database and Authentication Provider"
+            description="The current service endpoint is provided through DatabasePad. Confirm the responsible provider, subprocessors and data-processing agreement before using pupil records."
             color={COLORS.secondary}
           />
 
@@ -519,7 +519,7 @@ export default function PrivacyPolicyScreen() {
           <View style={styles.importantBox}>
             <Ionicons name="hand-left" size={20} color={COLORS.error} />
             <Text style={styles.importantText}>
-              We do NOT sell, rent, trade, or share your personal data with any third parties for marketing, advertising, or any other commercial purpose. We do not use any third-party analytics or advertising SDKs.
+              The app uses external services for hosting, authentication and database records. When you use billing, Stripe receives your teacher account reference, email and billing details. Do not include pupil information in billing. School review should cover all applicable suppliers and their terms.
             </Text>
           </View>
         </PolicySection>
@@ -595,10 +595,10 @@ export default function PrivacyPolicyScreen() {
           iconColor={COLORS.error}
         >
           <Paragraph>
-            You have the right to request complete deletion of your account and all associated data at any time. Here's how:
+            Use Delete My Data in your profile to remove app records and sign out. This does not delete your authentication account or cancel a Stripe subscription. Use Manage billing to cancel, and the contact below to request account deletion.
           </Paragraph>
 
-          <Text style={styles.subHeading}>5.1 Delete Cloud Data (Database)</Text>
+          <Text style={styles.subHeading}>5.1 Delete App Records or Request Account Deletion</Text>
           <View style={styles.stepsContainer}>
             {[
               { step: '1', text: 'Send an email to privacy@manypetalslearning.co.uk with the subject line "Data Deletion Request"' },
@@ -619,15 +619,15 @@ export default function PrivacyPolicyScreen() {
             Upon deletion, the following data will be permanently removed from our database:
           </Paragraph>
           <BulletPoint text="Your account profile (email, name, role, school)" color={COLORS.error} />
-          <BulletPoint text="All anonymous pupil codes you created" color={COLORS.error} />
+          <BulletPoint text="All pupil codes you created" color={COLORS.error} />
           <BulletPoint text="All emotion check-in records" color={COLORS.error} />
           <BulletPoint text="All milestone tracking data" color={COLORS.error} />
           <BulletPoint text="All lesson completion records" color={COLORS.error} />
           <BulletPoint text="All saved favourites and calm corner configurations" color={COLORS.error} />
 
-          <Text style={[styles.subHeading, { marginTop: SPACING.lg }]}>5.2 Delete Local Data (Device)</Text>
+          <Text style={[styles.subHeading, { marginTop: SPACING.lg }]}>5.2 Delete Local Data (Browser or Device)</Text>
           <Paragraph>
-            To remove data stored locally on your device:
+            In the web app, use Delete My Data to clear the app records for your signed-in account. To clear all local records for this site on a shared device, use your browser settings to clear its site data. Export anything you need first. For installed mobile apps:
           </Paragraph>
           <BulletPoint
             text="iOS: Go to Settings > General > iPhone Storage > Cobie Teacher Pack > Delete App"
@@ -660,7 +660,7 @@ export default function PrivacyPolicyScreen() {
               resizeMode="contain"
             />
             <Text style={styles.contactName}>{BRAND.name}</Text>
-            <Text style={styles.contactRole}>Data Controller</Text>
+            <Text style={styles.contactRole}>Privacy Contact</Text>
 
             <View style={styles.contactDivider} />
 
@@ -737,22 +737,22 @@ export default function PrivacyPolicyScreen() {
             color={COLORS.pink}
           />
           <BulletPoint
-            text="Pupils are identified only by anonymous codes chosen by the teacher (e.g. 'Pupil A', 'Cactus 3')"
+            text="Pupils are identified only by pupil codes chosen by the teacher (e.g. 'Pupil A', 'Cactus 3')"
             icon="checkmark"
             color={COLORS.pink}
           />
           <BulletPoint
-            text="No real names, photographs, or identifying information about children is collected or stored"
+            text="Do not include child names, photographs or identifying details in pupil records, free-text notes or recordings"
             icon="checkmark"
             color={COLORS.pink}
           />
           <BulletPoint
-            text="Emotion check-in data is linked to anonymous codes, not to identifiable children"
+            text="Emotion check-ins linked to a pupil code may still be personal data where your school can identify the child"
             icon="checkmark"
             color={COLORS.pink}
           />
           <BulletPoint
-            text="The teacher is the data controller for any mapping between anonymous codes and real pupil identities, which should be managed according to their school's data protection policy"
+            text="Your school should determine the controller and processor responsibilities and keep any code-to-name mapping separately under its data protection policy"
             icon="checkmark"
             color={COLORS.pink}
           />
@@ -777,7 +777,7 @@ export default function PrivacyPolicyScreen() {
             color={COLORS.darkGray}
           />
           <BulletPoint
-            text="Continued use of the App after changes constitutes acceptance of the updated policy"
+            text="Review policy changes with your school before continuing to enter pupil information"
             color={COLORS.darkGray}
           />
           <Paragraph>
@@ -789,24 +789,24 @@ export default function PrivacyPolicyScreen() {
         <View style={styles.legalBasisCard}>
           <Text style={styles.legalBasisTitle}>Legal Basis for Processing</Text>
           <Paragraph>
-            Under the UK GDPR, we process your data on the following legal bases:
+            The lawful basis depends on the purpose of processing. Schools must determine the basis for pupil records and agree the provider responsibilities before using the tracker.
           </Paragraph>
           <InfoCard
             icon="checkmark-circle-outline"
-            title="Consent (Article 6(1)(a))"
-            description="You provide consent when creating an account and agreeing to this Privacy Policy."
+            title="Reading a Privacy Notice"
+            description="Creating an account or reading this notice does not automatically provide consent for processing pupil information."
             color={COLORS.secondary}
           />
           <InfoCard
             icon="document-outline"
-            title="Contract (Article 6(1)(b))"
-            description="Processing is necessary to provide the App's services as described in our Terms of Use."
+            title="Account and Billing Services"
+            description="Teacher account and billing information is used to provide the service. The applicable service terms and processing arrangements should be confirmed before purchase."
             color={COLORS.primary}
           />
           <InfoCard
             icon="scale-outline"
-            title="Legitimate Interest (Article 6(1)(f))"
-            description="We have a legitimate interest in maintaining the security and integrity of our service."
+            title="School Pupil Records"
+            description="Ask your school data protection officer to review the purpose, lawful basis, retention and any additional conditions needed for the pupil information you intend to record."
             color={COLORS.accentOrange}
           />
         </View>

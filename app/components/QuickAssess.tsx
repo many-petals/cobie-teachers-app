@@ -11,7 +11,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import {
   MILESTONE_AREAS,
-  RATING_LABELS,
+  OBSERVATION_LABELS,
+  getObservationLabel,
   TERMS,
   getCurrentAcademicYear,
   getCurrentTerm,
@@ -23,34 +24,36 @@ interface Assessment {
   milestone_id: string;
   area_id: string;
   rating: number;
+  scale_version: number;
 }
 
 interface ExistingAssessment {
   milestone_id: string;
   area_id: string;
   rating: number;
+  scale_version?: number | null;
+  term: string;
+  academic_year: string;
 }
 
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onSave: (assessments: Assessment[], term: string, academicYear: string) => void;
+  onSave: (assessments: Assessment[], term: string, academicYear: string) => Promise<void>;
   pupilCode: string;
   ageGroup: 'EYFS' | 'KS1';
   existingAssessments: ExistingAssessment[];
 }
 
-const ASSESSMENT_CHOICES = [
-  { value: 1, label: 'Needs support', shortLabel: 'Support' },
-  { value: 2, label: 'Building', shortLabel: 'Building' },
-  { value: 3, label: 'On track', shortLabel: 'On track' },
-];
-
-const QUICK_RATING_LABELS = RATING_LABELS.filter(r => r.value <= 3);
+const ASSESSMENT_CHOICES = OBSERVATION_LABELS;
+const QUICK_RATING_LABELS = OBSERVATION_LABELS;
 
 export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGroup, existingAssessments }: Props) {
   const { senMode } = useSEN();
   const [ratings, setRatings] = useState<Record<string, number>>({});
+  const [versions, setVersions] = useState<Record<string, number>>({});
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [term, setTerm] = useState(getCurrentTerm());
   const [academicYear] = useState(getCurrentAcademicYear());
   const [expandedArea, setExpandedArea] = useState<string | null>(null);
@@ -61,21 +64,26 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
   useEffect(() => {
     if (visible) {
       const existing: Record<string, number> = {};
-      existingAssessments.forEach(a => {
+      const existingVersions: Record<string, number> = {};
+      existingAssessments.filter(a => a.term === term && a.academic_year === academicYear).forEach(a => {
         existing[a.milestone_id] = a.rating;
+        existingVersions[a.milestone_id] = a.scale_version ?? 1;
       });
       setRatings(existing);
+      setVersions(existingVersions);
+      setSaveError('');
       // Auto-expand first area
       if (areas.length > 0 && !expandedArea) {
         setExpandedArea(areas[0].id);
       }
     }
-  }, [visible, existingAssessments]);
+  }, [visible, existingAssessments, term, academicYear]);
 
   const setRating = (milestoneId: string, rating: number) => {
+    setVersions(prev => ({ ...prev, [milestoneId]: 2 }));
     setRatings(prev => {
       // Toggle off if same rating tapped
-      if (prev[milestoneId] === rating) {
+      if (prev[milestoneId] === rating && versions[milestoneId] === 2) {
         const next = { ...prev };
         delete next[milestoneId];
         return next;
@@ -87,6 +95,7 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
   const setAreaRating = (areaId: string, rating: number) => {
     const targetArea = areas.find(area => area.id === areaId);
     if (!targetArea) return;
+    setVersions(prev => ({ ...prev, ...Object.fromEntries(targetArea.milestones.map(m => [m.id, 2])) }));
 
     setRatings(prev => {
       const next = { ...prev };
@@ -99,6 +108,7 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
   };
 
   const setAllRatings = (rating: number) => {
+    setVersions(Object.fromEntries(areas.flatMap(a => a.milestones.map(m => [m.id, 2]))));
     setRatings(() => {
       const next: Record<string, number> = {};
       areas.forEach(area => {
@@ -111,10 +121,13 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
   };
 
   const clearRatings = () => {
-    setRatings({});
+    // A bulk clear must not silently erase historical observations.
+    setRatings(prev => Object.fromEntries(Object.entries(prev).filter(([id]) => versions[id] !== 2)));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError('');
     const assessments: Assessment[] = [];
     areas.forEach(area => {
       area.milestones.forEach(m => {
@@ -123,28 +136,35 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
             milestone_id: m.id,
             area_id: area.id,
             rating: ratings[m.id],
+            scale_version: versions[m.id] ?? 1,
           });
         }
       });
     });
-    onSave(assessments, term, academicYear);
-    onClose();
+    try {
+      await onSave(assessments, term, academicYear);
+      onClose();
+    } catch {
+      setSaveError('Observations were not saved. Your selections are still here. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const ratedCount = Object.keys(ratings).length;
   const totalMilestones = areas.reduce((sum, a) => sum + a.milestones.length, 0);
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal visible={visible} animationType="slide" transparent accessibilityViewIsModal>
       <View style={styles.overlay}>
         <View style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
             <View>
-              <Text style={styles.headerTitle}>Quick Assess</Text>
+              <Text style={styles.headerTitle}>Quick Observation</Text>
               <Text style={styles.headerSub}>{pupilCode} - {ageGroup} - {term} {academicYear}</Text>
             </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Close quick observation">
               <Ionicons name="close" size={22} color={COLORS.text} />
             </TouchableOpacity>
           </View>
@@ -168,7 +188,7 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
             {QUICK_RATING_LABELS.map(r => (
               <View key={r.value} style={[styles.keyItem, { backgroundColor: r.bgColor }]}>
                 <View style={[styles.keyDot, { backgroundColor: r.color }]}>
-                  <Text style={styles.keyDotText}>{r.shortLabel}</Text>
+                  <Text style={styles.keyDotText}>{r.value}</Text>
                 </View>
                 <Text style={[styles.keyLabel, { color: r.color }]}>
                   {ASSESSMENT_CHOICES.find(choice => choice.value === r.value)?.label ?? r.label}
@@ -181,7 +201,7 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: `${totalMilestones > 0 ? (ratedCount / totalMilestones) * 100 : 0}%` }]} />
           </View>
-          <Text style={styles.progressText}>{ratedCount} of {totalMilestones} milestones rated</Text>
+          <Text style={styles.progressText}>{ratedCount} of {totalMilestones} observations recorded</Text>
 
           {/* Milestone Areas */}
           <ScrollView style={styles.scrollArea} showsVerticalScrollIndicator={true}>
@@ -191,7 +211,7 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
                 <Text style={styles.quickStartTitle}>Fast route</Text>
               </View>
               <Text style={styles.quickStartCopy}>
-                Choose one level for each area, then open an area only if you need to tweak individual milestones.
+                Choose an observation status for each area, then review individual indicators as needed.
               </Text>
               <View style={styles.quickFillRow}>
                 {QUICK_RATING_LABELS.map(r => {
@@ -231,13 +251,13 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
                     </View>
                     <View style={styles.areaInfo}>
                       <Text style={styles.areaTitle}>{senMode ? area.shortTitle : area.title}</Text>
-                      <Text style={styles.areaSub}>{areaRated}/{area.milestones.length} rated - tap a level below to fill this area</Text>
+                      <Text style={styles.areaSub}>{areaRated}/{area.milestones.length} recorded - tap a status below to fill this area</Text>
                     </View>
                     {/* Mini progress dots */}
                     <View style={styles.miniDots}>
                       {area.milestones.map(m => {
                         const r = ratings[m.id];
-                        const ratingInfo = r ? RATING_LABELS.find(rl => rl.value === r) : null;
+                        const ratingInfo = r ? OBSERVATION_LABELS.find(rl => rl.value === r) : null;
                         return (
                           <View
                             key={m.id}
@@ -286,6 +306,11 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
                             {senMode ? (
                               <Text style={styles.milestoneDesc}>{milestone.description}</Text>
                             ) : null}
+                            {currentRating && versions[milestone.id] !== 2 ? (
+                              <Text style={styles.milestoneDesc}>
+                                Previously recorded: {getObservationLabel({ rating: currentRating, scale_version: versions[milestone.id] })?.label}. Choose a new status only after reviewing this observation.
+                              </Text>
+                            ) : null}
                             <View style={styles.ratingRow}>
                               {QUICK_RATING_LABELS.map(r => (
                                 <TouchableOpacity
@@ -293,16 +318,19 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
                                   style={[
                                     styles.ratingBtn,
                                     { borderColor: r.color },
-                                    currentRating === r.value && { backgroundColor: r.color },
+                                    currentRating === r.value && versions[milestone.id] === 2 && { backgroundColor: r.color },
                                   ]}
                                   onPress={() => setRating(milestone.id, r.value)}
+                                  accessibilityRole="button"
+                                  accessibilityLabel={`${milestone.label}: ${r.label}. ${r.description}`}
+                                  accessibilityState={{ selected: currentRating === r.value && versions[milestone.id] === 2 }}
                                   activeOpacity={0.6}
                                 >
                                   <Text
                                     style={[
                                       styles.ratingBtnText,
                                       { color: r.color },
-                                      currentRating === r.value && { color: COLORS.white },
+                                      currentRating === r.value && versions[milestone.id] === 2 && { color: COLORS.white },
                                     ]}
                                   >
                                     {ASSESSMENT_CHOICES.find(choice => choice.value === r.value)?.shortLabel ?? r.shortLabel}
@@ -324,9 +352,10 @@ export default function QuickAssess({ visible, onClose, onSave, pupilCode, ageGr
 
           {/* Save Button */}
           <View style={styles.footer}>
-            <TouchableOpacity style={styles.saveBtn} onPress={handleSave} activeOpacity={0.7}>
+            {saveError ? <Text accessibilityRole="alert" style={styles.milestoneDesc}>{saveError}</Text> : null}
+            <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={saving} activeOpacity={0.7}>
               <Ionicons name="save" size={20} color={COLORS.white} />
-              <Text style={styles.saveText}>Save Assessment ({ratedCount} ratings)</Text>
+              <Text style={styles.saveText}>{saving ? 'Saving…' : `Save observations (${ratedCount})`}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -406,12 +435,14 @@ const styles = StyleSheet.create({
   },
   ratingKey: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: SPACING.xs,
     paddingHorizontal: SPACING.xl,
     paddingTop: SPACING.md,
   },
   keyItem: {
-    flex: 1,
+    flexBasis: '47%',
+    flexGrow: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -549,12 +580,14 @@ const styles = StyleSheet.create({
   },
   areaQuickRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: SPACING.xs,
     paddingHorizontal: SPACING.md,
     paddingBottom: SPACING.md,
   },
   areaQuickBtn: {
-    flex: 1,
+    flexBasis: '45%',
+    flexGrow: 1,
     paddingVertical: 8,
     borderRadius: RADIUS.md,
     borderWidth: 1.5,
@@ -601,11 +634,13 @@ const styles = StyleSheet.create({
   },
   ratingRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: SPACING.sm,
     marginTop: SPACING.xs,
   },
   ratingBtn: {
-    flex: 1,
+    flexBasis: '45%',
+    flexGrow: 1,
     paddingVertical: 8,
     borderRadius: RADIUS.sm,
     borderWidth: 2,

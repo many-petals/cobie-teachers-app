@@ -4,7 +4,7 @@
 
 > *"This tool reduces your admin so you can spend more time with pupils."*
 
-A complete EYFS & KS1 Teacher Resource Pack built around the story *"Cobie the Cactus: Happy As He Is"*. Classroom-ready resources for emotional literacy, sensory awareness, and inclusion — evidence-based, SEN-first, and designed so teachers can track, support, and follow up without drowning in admin.
+A complete EYFS & KS1 Teacher Resource Pack built around the story *"Cobie the Cactus: Happy As He Is"*. Classroom-ready resources for emotional literacy, sensory awareness, and inclusion — evidence-informed, SEN-first, and designed so teachers can track, support, and follow up without drowning in admin.
 
 ---
 
@@ -47,20 +47,20 @@ Before publishing, save the logo image as the app icon and splash screen:
 
 | Feature | Description |
 |---------|-------------|
-| **4 Core Lessons** | Step-by-step lesson plans with learning objectives, materials lists, timed steps, and SEN differentiation. Interactive lesson player with built-in timer. |
+| **8 Lessons** | Eight lesson plans across EYFS and KS1, with learning objectives, materials, timed steps, differentiation and an interactive lesson player. |
 | **8 Optional Activities** | Sensory, emotional, communication, creative, movement, and reflection activities. Filterable by type, age group, and duration. |
-| **18 Printable Resources** | Worksheets, visual aids, display materials, and assessment tools. Categorised by type with lesson cross-references. |
+| **18 Printable Resources** | Worksheets, visual aids, display materials, and observation tools. Categorised by type with lesson cross-references. |
 | **4 Parent Letters** | Ready-to-send home communications covering each lesson theme. Customisable with school name and teacher details. |
 
-### Pupil Tracker (GDPR Compliant)
+### Pupil Tracker (school approval required)
 
 | Feature | Description |
 |---------|-------------|
-| **Anonymous Pupil Codes** | No child names stored — only teacher-chosen codes (P1, P2, etc.) |
-| **Milestone Assessment** | Track pupils against EYFS Development Matters 2021 and KS1 PSHE milestones across 5 development areas |
+| **Pupil Codes** | Teacher-chosen codes such as P1 or P2; coded records may still be personal data |
+| **Observation Tracker** | Record teacher observations using Many Petals programme indicators across 6 areas; these are not statutory assessment criteria |
 | **Emotion Logging** | Quick-tap emotion recording with context (morning, circle time, playtime, etc.) and notes |
-| **Progress Visualisation** | Per-pupil progress bars, rating summaries, and emotion history timelines |
-| **Secure Cloud Storage** | All tracker data stored in Supabase with per-teacher isolation |
+| **Observation Overview** | Per-pupil observation counts, individual statuses, and emotion history timelines |
+| **Cloud Storage** | Tracker records are stored through the configured cloud database; schools should verify live provider and access arrangements |
 | **Full Data Deletion** | Teachers can delete all pupil data at any time |
 
 ### Emotion & Wellbeing Tools
@@ -82,7 +82,7 @@ Before publishing, save the logo image as the app icon and splash screen:
 | **User Authentication** | Secure sign-up/sign-in with email and password |
 | **Favourites & Progress** | Bookmark lessons, activities, and printables. Track completed lessons. |
 | **Today's Activity** | Daily rotating activity suggestion on the home screen |
-| **Evidence-Based Banner** | Links to curriculum frameworks and research underpinning the resources |
+| **Evidence-Informed Banner** | Links to curriculum frameworks and research relevant to the resources |
 | **Pricing/Support Section** | Tiered support options for the resource pack |
 | **Voice Notes** | Audio recording tool for quick observations |
 | **Weekly Planner** | Planning tool for scheduling lessons and activities |
@@ -177,7 +177,7 @@ app/
 │   ├── FilterChips.tsx       # Reusable filter chip component
 │   ├── PricingSection.tsx    # Pricing modal
 │   ├── ProgressView.tsx      # Pupil progress visualisation
-│   ├── QuickAssess.tsx       # Quick milestone assessment modal
+│   ├── QuickAssess.tsx       # Quick observation modal
 │   ├── QuickTile.tsx         # Home screen quick access tile
 │   ├── ResourceCard.tsx      # Generic resource card
 │   ├── SENBanner.tsx         # SEN mode toggle banner
@@ -196,7 +196,7 @@ app/
 │   ├── brand.ts              # Brand configuration (logo, name, tagline)
 │   ├── emotions.ts           # Emotion definitions & calming resources
 │   ├── lessons.ts            # 4 lesson plan definitions
-│   ├── milestones.ts         # EYFS/KS1 milestone framework
+│   ├── milestones.ts         # EYFS/KS1 observation indicators
 │   ├── parentLetters.ts      # 4 parent letter templates
 │   ├── printables.ts         # 18 printable resource definitions
 │   └── theme.ts              # Colours, spacing, typography, shadows
@@ -245,7 +245,7 @@ Configure your Supabase project in `app/lib/supabase.ts` with your project URL a
 The following tables are required for the Pupil Tracker:
 
 ```sql
--- Tracker Pupils (anonymous codes only)
+-- Tracker Pupils (teacher-chosen pupil codes)
 CREATE TABLE tracker_pupils (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -264,6 +264,7 @@ CREATE TABLE tracker_assessments (
   milestone_id TEXT NOT NULL,
   area_id TEXT NOT NULL,
   rating INTEGER CHECK (rating BETWEEN 1 AND 4) NOT NULL,
+  scale_version SMALLINT NOT NULL DEFAULT 1 CHECK (scale_version IN (1, 2)),
   term TEXT NOT NULL,
   academic_year TEXT NOT NULL,
   assessed_at TIMESTAMPTZ DEFAULT NOW()
@@ -401,9 +402,9 @@ Use the following for your app store listings:
 **Description:**
 > Cobie Classroom Companion is a complete teaching resource pack built around the story "Cobie the Cactus: Happy As He Is". Designed for EYFS and KS1 teachers, it provides classroom-ready resources for emotional literacy, sensory awareness, and inclusion.
 >
-> Features include 4 core lesson plans with interactive lesson players, 8 optional activities across sensory, emotional, creative, and movement categories, 18 printable resources, 4 parent letter templates, a GDPR-compliant pupil tracker with milestone assessments and emotion logging, emotion tools with daily check-ins, and a calm corner builder for personalised calming plans.
+> Features include 8 lesson plans across EYFS and KS1 with interactive lesson players, 8 activities across sensory, emotional, creative, and movement categories, 18 printable resources, 4 parent letter templates, a school-review-required pupil tracker with teacher observations and emotion logging, emotion tools with daily check-ins, and a calm corner builder for personalised calming plans.
 >
-> Every resource includes SEN differentiation and is aligned with the EYFS Development Matters 2021 framework and KS1 PSHE National Curriculum.
+> The programme includes SEND support and is informed by EYFS PSED, Development Matters (non-statutory guidance), and primary Relationships Education and Health Education in England. This is not a claim of formal curriculum mapping or endorsement.
 >
 > This tool reduces your admin so you can spend more time with pupils.
 
@@ -419,11 +420,11 @@ Use the following for your app store listings:
 
 ## GDPR & Data Protection
 
-This app is designed with GDPR compliance as a core principle:
+The app supports data minimisation, but schools must verify the live service arrangements and their own responsibilities before entering pupil records:
 
-- **No child names** are collected or stored anywhere in the system
-- All pupils are identified by **anonymous codes** chosen by the teacher
-- All data is **per-teacher isolated** using Supabase Row Level Security
+- Pupil codes are recommended, but coded records may still be personal data
+- Free-text notes must not contain names or identifying information
+- Per-teacher access controls are implemented in the app; schools should verify the deployed database policies
 - Teachers can **delete all data** at any time with a single action
 - Local emotion check-in data uses **AsyncStorage** (device-only, no cloud sync)
 - The Pupil Tracker requires authentication to ensure data is securely associated with a teacher account
@@ -434,8 +435,9 @@ This app is designed with GDPR compliance as a core principle:
 
 | Framework | Coverage |
 |-----------|----------|
-| **EYFS Development Matters 2021** | Personal, Social & Emotional Development (PSED) |
-| **KS1 PSHE National Curriculum** | Health & Wellbeing, Relationships |
+| **[EYFS statutory framework](https://www.gov.uk/government/publications/early-years-foundation-stage-framework--2)** | England; includes Personal, Social and Emotional Development (PSED) |
+| **[Development Matters](https://www.gov.uk/government/publications/development-matters--2)** | Non-statutory curriculum guidance for the EYFS in England |
+| **[Relationships Education and Health Education](https://www.gov.uk/government/publications/relationships-education-relationships-and-sex-education-rse-and-health-education)** | Primary provision in England; revised statutory guidance effective 1 September 2026 |
 | **Communication & Language** | Speaking, listening, vocabulary development |
 | **Understanding the World** | People, culture, communities |
 | **SEND Code of Practice** | Sensory needs, inclusion, differentiation |

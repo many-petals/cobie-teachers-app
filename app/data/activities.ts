@@ -100,7 +100,7 @@ export const ACTIVITIES: Activity[] = [
       'Repeat 3-5 times. Ask: "How does your body feel now?"',
     ],
     senAdaptations: [
-      'Use hand-over-hand guidance if appropriate',
+      'Model the action visually or alongside the child. Offer physical guidance only when appropriate, agreed to by the child and consistent with the setting’s practice.',
       'Keep instructions minimal',
       'Allow children to watch first',
     ],

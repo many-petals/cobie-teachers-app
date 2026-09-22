@@ -18,23 +18,23 @@ const EVIDENCE_ITEMS = [
     color: '#1B6B93',
   },
   {
-    source: 'EYFS Statutory Framework 2025',
+    source: 'EYFS statutory framework (England)',
     finding: 'PSED is crucial for healthy, happy lives and is fundamental to cognitive development. Children should be supported to manage emotions and develop a positive sense of self.',
     url: 'https://www.gov.uk/government/publications/early-years-foundation-stage-framework--2',
     icon: 'document-text' as const,
     color: '#7BC67E',
   },
   {
-    source: 'Education 3-13 (Taylor & Francis, 2025)',
-    finding: 'Post-COVID, the current EYFS conception of emotional development may not be sufficient. New approaches are needed to address emerging PSED challenges.',
-    url: 'https://www.tandfonline.com/doi/full/10.1080/03004279.2025.2510700',
-    icon: 'flask' as const,
+    source: 'Development Matters (DfE, non-statutory guidance)',
+    finding: 'Development Matters guides early years practice and says it should support professional judgement rather than operate as a tick list.',
+    url: 'https://www.gov.uk/government/publications/development-matters--2/development-matters',
+    icon: 'book' as const,
     color: '#B39DDB',
   },
   {
-    source: 'Bristol Early Years / Dan Hughes',
-    finding: 'The PACE model (Playfulness, Acceptance, Curiosity, Empathy) and Emotion Coaching provide effective frameworks for supporting children emotionally during conflict.',
-    url: 'https://bristolearlyyears.org.uk/personal-social-and-emotional-development/',
+    source: 'Relationships Education and Health Education (DfE)',
+    finding: 'This is statutory guidance for schools in England, revised to take effect on 1 September 2026.',
+    url: 'https://www.gov.uk/government/publications/relationships-education-relationships-and-sex-education-rse-and-health-education',
     icon: 'heart' as const,
     color: '#F48FB1',
   },
@@ -130,9 +130,9 @@ export default function EvidenceBanner() {
             <Ionicons name="flask" size={20} color={COLORS.primary} />
           </View>
           <View>
-            <Text style={styles.headerTitle}>Evidence-Based Approach</Text>
+            <Text style={styles.headerTitle}>Evidence-Informed Approach</Text>
             <Text style={styles.headerSubtitle}>
-              Aligned with EEF, Development Matters 2025 & UK research
+              Informed by early years guidance and research
             </Text>
           </View>
         </View>
@@ -168,8 +168,8 @@ export default function EvidenceBanner() {
             </TouchableOpacity>
           ))}
 
-          {/* Competitor Comparison */}
-          <TouchableOpacity
+          {/* Product comparisons are intentionally excluded from the live evidence panel. */}
+          {false && <TouchableOpacity
             style={styles.toggleSection}
             onPress={() => setShowComparisons(!showComparisons)}
             activeOpacity={0.7}
@@ -181,9 +181,9 @@ export default function EvidenceBanner() {
               size={16}
               color={COLORS.mediumGray}
             />
-          </TouchableOpacity>
+          </TouchableOpacity>}
 
-          {showComparisons ? (
+          {false && showComparisons ? (
             <View style={styles.comparisonSection}>
               {COMPARISONS.map((comp, i) => (
                 <View key={i} style={styles.compCard}>
@@ -206,9 +206,8 @@ export default function EvidenceBanner() {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.advantageTitle}>Many Petals Advantage</Text>
                   <Text style={styles.advantageText}>
-                    Story-led, SEN-first, structured programme with integrated assessment 
-                    tracking. The only UK resource combining emotional literacy teaching 
-                    with built-in pupil progress monitoring against EYFS/KS1 milestones.
+                    Story-led, SEN-first, structured programme with integrated teacher observations
+                    tracking informed by the cited guidance above.
                   </Text>
                 </View>
               </View>
@@ -216,21 +215,21 @@ export default function EvidenceBanner() {
           ) : null}
 
           {/* Improvement Recommendations */}
-          <TouchableOpacity
+          {false && <TouchableOpacity
             style={styles.toggleSection}
             onPress={() => setShowImprovements(!showImprovements)}
             activeOpacity={0.7}
           >
             <Ionicons name="rocket" size={18} color={COLORS.accentOrange} />
-            <Text style={styles.toggleTitle}>Evidence-Based Improvement Ideas</Text>
+            <Text style={styles.toggleTitle}>Evidence-Informed Notes</Text>
             <Ionicons
               name={showImprovements ? 'chevron-up' : 'chevron-down'}
               size={16}
               color={COLORS.mediumGray}
             />
-          </TouchableOpacity>
+          </TouchableOpacity>}
 
-          {showImprovements ? (
+          {false && showImprovements ? (
             <View style={styles.improvementSection}>
               {IMPROVEMENTS.map((item, i) => (
                 <View key={i} style={styles.improvementCard}>
