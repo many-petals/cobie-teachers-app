@@ -206,6 +206,29 @@ export default function PricingSection({ visible, onClose }: PricingSectionProps
               </View>
             ))}
 
+            <View style={styles.pilotCard}>
+              <View style={styles.pilotCopy}>
+                <Text style={styles.pilotEyebrow}>MANC50 PILOT</Text>
+                <Text style={styles.pilotTitle}>Three-month school starter access</Text>
+                <Text style={styles.pilotText}>
+                  Join the capped pilot for one eligible school and activate classroom access after checkout.
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.pilotButton}
+                onPress={() => { onClose(); router.push('/manc50-buy' as any); }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.pilotButtonText}>Join the pilot</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => { onClose(); router.push('/manc50-activate' as any); }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.pilotLink}>Already paid? Activate access</Text>
+              </TouchableOpacity>
+            </View>
+
             {/* FAQ */}
             <View style={styles.faqSection}>
               <Text style={styles.faqTitle}>Common Questions</Text>
@@ -394,6 +417,54 @@ const styles = StyleSheet.create({
   },
   planButtonTextFree: {
     color: COLORS.textMuted,
+  },
+  pilotCard: {
+    backgroundColor: '#EAF4FF',
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: '#BCD2E0',
+  },
+  pilotCopy: {
+    marginBottom: SPACING.md,
+  },
+  pilotEyebrow: {
+    color: COLORS.primary,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
+    letterSpacing: 1.1,
+    marginBottom: 4,
+  },
+  pilotTitle: {
+    color: COLORS.text,
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  pilotText: {
+    color: COLORS.textMuted,
+    fontSize: FONT_SIZES.sm,
+    lineHeight: 20,
+  },
+  pilotButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: RADIUS.md,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.sm,
+  },
+  pilotButtonText: {
+    color: COLORS.white,
+    fontSize: FONT_SIZES.md,
+    fontWeight: '800',
+  },
+  pilotLink: {
+    color: COLORS.primary,
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '700',
+    textAlign: 'center',
   },
   faqSection: {
     marginTop: SPACING.lg,

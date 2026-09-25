@@ -1,5 +1,7 @@
 {
   "rewrites": [
+    { "source": "/manc50-buy", "destination": "/manc50-buy.html" },
+    { "source": "/manc50-activate", "destination": "/manc50-activate.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

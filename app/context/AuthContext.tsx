@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { supabase } from '@/app/lib/supabase';
 import * as LocalStorage from '@/app/lib/storage';
 import { getBillingStatus, BillingStatus } from '@/lib/billing';
+import { recordManc50Use } from '@/app/lib/manc50';
 
 export interface TeacherProfile {
   id: string;
@@ -577,6 +578,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const updated = [...completedLessons, newEntry];
     setCompletedLessons(updated);
     await LocalStorage.saveCompletedLessons(updated, getStorageUserId());
+    await recordManc50Use(updated.length === 1 ? 'first_value' : 'qualifying_use', lessonId);
   };
 
   const isLessonCompleted = (lessonId: string) => {
