@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Linking } from 'react-native';
+import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Linking, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from './lib/supabase';
 import { savePendingManc50Token } from './lib/manc50';
@@ -39,7 +39,11 @@ export default function Manc50BuyScreen() {
     }
     if (data.activation_token) await savePendingManc50Token(data.activation_token);
     setMessage('Your secure checkout is ready. After payment, return to Cobie and your activation token will be ready to use.');
-    await Linking.openURL(data.checkout_url);
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.location.assign(data.checkout_url);
+    } else {
+      await Linking.openURL(data.checkout_url);
+    }
   };
 
   return (
