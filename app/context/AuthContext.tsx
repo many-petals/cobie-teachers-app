@@ -80,6 +80,17 @@ function withTimeout<T>(promise: PromiseLike<T>, milliseconds: number, label: st
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
 }
 
+function getTeacherProfileFromMetadata(user: any): Pick<TeacherProfile, 'name' | 'school' | 'role'> {
+  const metadata = user?.user_metadata ?? {};
+  const emailName = typeof user?.email === 'string' ? user.email.split('@')[0] : 'Teacher';
+
+  return {
+    name: typeof metadata.name === 'string' && metadata.name.trim() ? metadata.name.trim() : emailName,
+    school: typeof metadata.school === 'string' ? metadata.school.trim() : '',
+    role: typeof metadata.role === 'string' && metadata.role.trim() ? metadata.role.trim() : 'Teacher',
+  };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<any | null>(null);
   const [profile, setProfile] = useState<TeacherProfile | null>(null);
@@ -149,13 +160,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [user?.id, refreshBilling]);
 
-  const loadAndMergeUserData = useCallback(async (userId: string) => {
+  const loadAndMergeUserData = useCallback(async (currentUser: any) => {
+    const userId = currentUser.id;
+
     try {
-      const { data: profileData } = await supabase
+      let { data: profileData } = await supabase
         .from('teachers')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
+
+      if (!profileData) {
+        const profile = getTeacherProfileFromMetadata(currentUser);
+        const { data: createdProfile } = await supabase
+          .from('teachers')
+          .insert({
+            user_id: userId,
+            ...profile,
+          })
+          .select('*')
+          .maybeSingle();
+
+        profileData = createdProfile ?? null;
+      }
 
       setProfile(profileData ?? null);
 
@@ -290,7 +317,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user) {
           setUser(session.user);
           await withTimeout(
-            loadAndMergeUserData(session.user.id),
+            loadAndMergeUserData(session.user),
             USER_DATA_TIMEOUT_MS,
             'User data load',
           );
@@ -322,7 +349,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session.user);
         try {
           await withTimeout(
-            loadAndMergeUserData(session.user.id),
+            loadAndMergeUserData(session.user),
             USER_DATA_TIMEOUT_MS,
             'User data load',
           );
@@ -353,22 +380,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await LocalStorage.clearAllLocalData(getStorageUserId());
       resetAuthState();
 
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            school,
+            role,
+          },
+        },
+      });
       if (error) {
         return { error: error.message };
       }
 
-      if (data.user) {
-        const { error: profileError } = await supabase.from('teachers').insert({
-          user_id: data.user.id,
-          name,
-          school,
-          role,
-        });
-
-        if (profileError) {
-          return { error: profileError.message };
-        }
+      if (data.session?.user) {
+        await loadAndMergeUserData(data.session.user);
       }
 
       return { error: null };
