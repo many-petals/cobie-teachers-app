@@ -18,9 +18,17 @@ export default function Manc50ActivateScreen() {
   const activate = async () => {
     setStatus('loading');
     setMessage('');
-    const { data, error } = await supabase.functions.invoke('manc50-activate', {
-      body: { activation_token: token.trim() },
-    });
+    let data: { activated?: boolean; entitlement_id?: string; expires_at?: string; error?: string } | null = null;
+    let error: unknown = null;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const result = await supabase.functions.invoke('manc50-activate', {
+        body: { activation_token: token.trim() },
+      });
+      data = result.data;
+      error = result.error;
+      if (!error && data?.activated) break;
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 2500));
+    }
     if (error || !data?.activated) {
       setStatus('error');
       setMessage(data?.error ?? 'We could not activate this school access. Please try again.');
