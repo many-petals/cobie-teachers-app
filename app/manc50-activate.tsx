@@ -52,7 +52,7 @@ export default function Manc50ActivateScreen() {
           {status === 'loading' ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.buttonText}>Activate access</Text>}
         </TouchableOpacity>
         {message ? <Text style={[styles.message, status === 'error' ? styles.error : styles.success]}>{message}</Text> : null}
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}><Text style={styles.backText}>Back to Cobie</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => router.replace('/')} style={styles.backButton}><Text style={styles.backText}>Back to Cobie</Text></TouchableOpacity>
       </View>
     </SafeAreaView>
   );
