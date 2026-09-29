@@ -4,6 +4,8 @@ export interface BillingStatus {
   hasFullAccess: boolean;
   status: string;
   canManageBilling: boolean;
+  pilotEntitlementId?: string;
+  pilotExpiresAt?: string;
 }
 
 async function billingRequest(action: 'status' | 'checkout' | 'portal') {
@@ -34,6 +36,9 @@ export async function getBillingStatus(): Promise<BillingStatus> {
   const result = await billingRequest('status');
   if (typeof result.hasFullAccess !== 'boolean' || typeof result.canManageBilling !== 'boolean') {
     throw new Error('We could not verify your subscription. Please try again.');
+  }
+  if (result.status === 'pilot' && (typeof result.pilotEntitlementId !== 'string' || typeof result.pilotExpiresAt !== 'string')) {
+    throw new Error('We could not verify your pilot access. Please try again.');
   }
   return result;
 }

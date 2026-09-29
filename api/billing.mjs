@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto';
 
 const APP = 'cobie-teachers';
-const PILOT_EMAILS = ['caroline_marklew@hotmail.com', 'mand1984@yahoo.co.uk'];
 class BillingError extends Error {
   constructor(status, message) { super(message); this.status = status; }
 }
@@ -58,6 +57,20 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
       && subscription.metadata?.application === APP
       && subscription.items?.data.some(item => item.price?.id === priceId);
   }
+  async function activePilotEntitlement(authUrl, serviceKey, userId) {
+    const query = new URLSearchParams({
+      select: 'id,expires_at',
+      activated_by_user_id: `eq.${userId}`,
+      status: 'eq.activated',
+      expires_at: `gt.${new Date().toISOString()}`,
+      order: 'expires_at.desc',
+      limit: '1',
+    });
+    const entitlements = await request(`${authUrl}/rest/v1/manc50_entitlements?${query}`, {
+      headers: { Authorization: `Bearer ${serviceKey}`, apikey: serviceKey },
+    });
+    return Array.isArray(entitlements) ? entitlements[0] ?? null : null;
+  }
 
   return async function handler(req, res) {
     res.setHeader('Cache-Control', 'private, no-store');
@@ -77,8 +90,12 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
         headers: { Authorization: token, apikey: required('SUPABASE_ANON_KEY') },
       });
       if (!user.id || !user.email || !user.email_confirmed_at) throw new BillingError(403, 'Please confirm your email address before upgrading.');
-      const pilot = PILOT_EMAILS.includes(user.email.toLowerCase());
-      if (action === 'status' && pilot) return res.status(200).json({ hasFullAccess: true, status: 'pilot', canManageBilling: false });
+      const serviceKey = required('SUPABASE_SERVICE_ROLE_KEY');
+      const pilot = await activePilotEntitlement(authUrl, serviceKey, user.id);
+      if (action === 'status' && pilot) return res.status(200).json({
+        hasFullAccess: true, status: 'pilot', canManageBilling: false,
+        pilotEntitlementId: pilot.id, pilotExpiresAt: pilot.expires_at,
+      });
       if (action === 'checkout' && pilot) throw new BillingError(409, 'You already have pilot access.');
       const priceId = required('STRIPE_PRICE_ID');
       const mode = required('STRIPE_SECRET_KEY').includes('_test_') ? 'test' : 'live';
@@ -104,7 +121,6 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
         throw new BillingError(409, 'You already have a subscription. Use Manage billing to update it.');
       }
       // Never create a checkout until the trusted customer mapping can be saved.
-      const serviceKey = required('SUPABASE_SERVICE_ROLE_KEY');
       if (!customerId) {
         const customer = await stripe('customers', {
           email: user.email, 'metadata[application]': APP, 'metadata[user_id]': user.id,

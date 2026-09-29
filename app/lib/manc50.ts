@@ -35,16 +35,21 @@ async function loadManc50Access(): Promise<Manc50Access | null> {
   }
 }
 
-export async function recordManc50Use(eventName: 'first_value' | 'qualifying_use', lessonId: string): Promise<void> {
-  const access = await loadManc50Access();
-  if (!access || new Date(access.expiresAt).getTime() <= Date.now()) return;
+export async function recordManc50Use(
+  eventName: 'first_value' | 'qualifying_use',
+  lessonId: string,
+  verifiedEntitlementId?: string,
+): Promise<void> {
+  const localAccess = verifiedEntitlementId ? null : await loadManc50Access();
+  if (!verifiedEntitlementId && (!localAccess || new Date(localAccess.expiresAt).getTime() <= Date.now())) return;
+  const entitlementId = verifiedEntitlementId ?? localAccess?.entitlementId;
+  if (!entitlementId) return;
   const today = new Date().toISOString().slice(0, 10);
   const { error } = await supabase.functions.invoke('manc50-event', {
     body: {
-      entitlement_id: access.entitlementId,
+      entitlement_id: entitlementId,
       event_name: eventName,
-      event_date: today,
-      idempotency_key: `lesson:${eventName}:${access.entitlementId}:${today}:${lessonId}`,
+      idempotency_key: `lesson:${eventName}:${entitlementId}:${today}:${lessonId}`,
     },
   });
   if (error) console.warn('MANC50 measurement event was not recorded:', error.message);

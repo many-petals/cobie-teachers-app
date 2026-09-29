@@ -18,6 +18,10 @@ async function call({ action = 'status', method, headers = {}, authenticatedUser
     calls.push({ url, options });
     let value;
     if (parsed.pathname === '/auth/v1/user') value = authenticatedUser;
+    else if (parsed.pathname === '/rest/v1/manc50_entitlements') {
+      const route = routes[`${options.method || 'GET'} ${parsed.pathname}`];
+      value = route ? (typeof route === 'function' ? await route(options, parsed) : route) : [];
+    }
     else {
       const route = routes[`${options.method || 'GET'} ${parsed.pathname}`];
       assert.ok(route, `Unexpected request: ${options.method || 'GET'} ${parsed.pathname}`);
@@ -52,15 +56,39 @@ test('requires confirmed email, including for pilot accounts', async () => {
   assert.equal(result.code, 403);
   assert.equal(result.calls.length, 1);
 });
-test('pilot access is verified by the auth service without a Stripe dependency', async () => {
-  const result = await call({ authenticatedUser: { ...user, email: 'mand1984@yahoo.co.uk' }, environment: { ...env, STRIPE_SECRET_KEY: '' } });
+test('pilot access is bound to the authenticated user without a Stripe dependency', async () => {
+  const result = await call({ environment: { ...env, STRIPE_SECRET_KEY: '' }, routes: {
+    'GET /rest/v1/manc50_entitlements': (options, parsed) => {
+      assert.equal(options.headers.apikey, env.SUPABASE_SERVICE_ROLE_KEY);
+      assert.equal(parsed.searchParams.get('activated_by_user_id'), `eq.${user.id}`);
+      assert.equal(parsed.searchParams.get('status'), 'eq.activated');
+      assert.match(parsed.searchParams.get('expires_at'), /^gt\./);
+      return [{ id: 'entitlement-1', expires_at: '2026-12-15T00:00:00Z' }];
+    },
+  } });
   assert.equal(result.data.hasFullAccess, true);
   assert.equal(result.data.status, 'pilot');
+  assert.equal(result.data.pilotEntitlementId, 'entitlement-1');
+  assert.equal(result.data.pilotExpiresAt, '2026-12-15T00:00:00Z');
+  assert.equal(result.calls.some(call => call.url.includes('api.stripe.com')), false);
+});
+test('an account without a bound active entitlement remains free', async () => {
+  const result = await call();
+  assert.equal(result.code, 200);
+  assert.equal(result.data.hasFullAccess, false);
+  assert.equal(result.data.status, 'free');
+});
+test('active pilot access cannot create a second checkout', async () => {
+  const result = await call({ action: 'checkout', routes: {
+    'GET /rest/v1/manc50_entitlements': [{ id: 'entitlement-1', expires_at: '2026-12-15T00:00:00Z' }],
+  } });
+  assert.equal(result.code, 409);
+  assert.equal(result.calls.some(call => call.url.includes('api.stripe.com')), false);
 });
 test('free account cannot grant itself access through editable user metadata', async () => {
   const result = await call({ authenticatedUser: { ...user, user_metadata: { hasFullAccess: true, cobie_stripe_customer_test: customer.id } } });
   assert.equal(result.data.hasFullAccess, false);
-  assert.equal(result.calls.length, 1);
+  assert.equal(result.calls.length, 2);
   assert.equal(result.headers['Cache-Control'], 'private, no-store');
 });
 for (const status of ['active', 'trialing', 'past_due', 'unpaid', 'canceled', 'incomplete', 'incomplete_expired', 'paused']) {
@@ -84,7 +112,7 @@ test('wrong product and paused collection do not grant access', async () => {
 test('a mapping to another teacher is rejected', async () => {
   const result = await call({ authenticatedUser: mappedUser, routes: { 'GET /v1/customers/cus_teacher': { ...customer, metadata: { ...customer.metadata, user_id: 'teacher-2' } } } });
   assert.equal(result.code, 403);
-  assert.equal(result.calls.length, 2);
+  assert.equal(result.calls.length, 3);
 });
 test('checkout rejects cross-origin POSTs and GET mutation attempts', async () => {
   const crossOrigin = await call({ action: 'checkout', headers: { origin: 'https://evil.example' } });

@@ -624,7 +624,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const updated = [...completedLessons, newEntry];
     setCompletedLessons(updated);
     await LocalStorage.saveCompletedLessons(updated, getStorageUserId());
-    await recordManc50Use(updated.length === 1 ? 'first_value' : 'qualifying_use', lessonId);
+    await recordManc50Use(
+      updated.length === 1 ? 'first_value' : 'qualifying_use',
+      lessonId,
+      billingStatus?.pilotEntitlementId,
+    );
   };
 
   const isLessonCompleted = (lessonId: string) => {

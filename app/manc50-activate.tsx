@@ -3,19 +3,34 @@ import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, Acti
 import { useRouter } from 'expo-router';
 import { supabase } from './lib/supabase';
 import { clearPendingManc50Token, loadPendingManc50Token, saveManc50Access } from './lib/manc50';
+import { useAuth } from './context/AuthContext';
 import { COLORS, SPACING, RADIUS, FONT_SIZES } from './data/theme';
 
 export default function Manc50ActivateScreen() {
   const router = useRouter();
+  const { user, loading: authLoading, setShowAuthModal, refreshBilling } = useAuth();
   const [token, setToken] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'auth' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     void loadPendingManc50Token().then(setToken);
   }, []);
 
+  useEffect(() => {
+    if (user && status === 'auth') {
+      setStatus('idle');
+      setMessage('You are signed in. Select Activate access to finish.');
+    }
+  }, [status, user]);
+
   const activate = async () => {
+    if (!user) {
+      setStatus('auth');
+      setMessage('Sign in or create the lead teacher account before activating this school access.');
+      setShowAuthModal(true);
+      return;
+    }
     setStatus('loading');
     setMessage('');
     let data: { activated?: boolean; entitlement_id?: string; expires_at?: string; error?: string } | null = null;
@@ -36,6 +51,12 @@ export default function Manc50ActivateScreen() {
     }
     await saveManc50Access({ entitlementId: data.entitlement_id, expiresAt: data.expires_at });
     await clearPendingManc50Token();
+    const verified = await refreshBilling();
+    if (!verified?.hasFullAccess || verified.pilotEntitlementId !== data.entitlement_id) {
+      setStatus('error');
+      setMessage('Your token was activated, but access could not be verified yet. Refresh the page or sign in again; do not reuse the token.');
+      return;
+    }
     setStatus('success');
     setMessage(`Access is active until ${new Date(data.expires_at).toLocaleDateString('en-GB')}.`);
   };
@@ -45,7 +66,7 @@ export default function Manc50ActivateScreen() {
       <View style={styles.card}>
         <Text style={styles.kicker}>MANC50 SCHOOL ACCESS</Text>
         <Text style={styles.title}>Activate your classroom access</Text>
-        <Text style={styles.body}>Paste the activation token from your MANC50 checkout confirmation. Your three-month access period starts when you activate it.</Text>
+        <Text style={styles.body}>Sign in as the lead teacher, then paste the activation token from your MANC50 checkout confirmation. Your three-month access period starts when you activate it.</Text>
         <TextInput
           value={token}
           onChangeText={setToken}
@@ -56,10 +77,10 @@ export default function Manc50ActivateScreen() {
           style={styles.input}
           editable={status !== 'loading' && status !== 'success'}
         />
-        <TouchableOpacity style={styles.button} onPress={() => void activate()} disabled={status === 'loading' || !token.trim()}>
-          {status === 'loading' ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.buttonText}>Activate access</Text>}
+        <TouchableOpacity style={styles.button} onPress={() => void activate()} disabled={status === 'loading' || authLoading || !token.trim()}>
+          {status === 'loading' || authLoading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.buttonText}>{user ? 'Activate access' : 'Sign in to activate'}</Text>}
         </TouchableOpacity>
-        {message ? <Text style={[styles.message, status === 'error' ? styles.error : styles.success]}>{message}</Text> : null}
+        {message ? <Text style={[styles.message, status === 'error' ? styles.error : status === 'success' ? styles.success : styles.info]}>{message}</Text> : null}
         <TouchableOpacity onPress={() => router.replace('/')} style={styles.backButton}><Text style={styles.backText}>Back to Cobie</Text></TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -78,6 +99,7 @@ const styles = StyleSheet.create({
   message: { marginTop: SPACING.md, fontSize: FONT_SIZES.sm, lineHeight: 20 },
   error: { color: '#B42318' },
   success: { color: '#067647' },
+  info: { color: COLORS.primary },
   backButton: { alignItems: 'center', marginTop: SPACING.lg },
   backText: { color: COLORS.primary, fontWeight: '700' },
 });
