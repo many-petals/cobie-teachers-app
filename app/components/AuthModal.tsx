@@ -156,13 +156,13 @@ export default function AuthModal() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.overlay}
       >
-        <View style={styles.modalContainer}>
+        <View style={styles.modalContainer} accessibilityViewIsModal>
           <View style={styles.modalHeader}>
             <View style={styles.headerLeft}>
               <Ionicons name="flower" size={24} color={COLORS.secondary} />
               <Text style={styles.modalTitle}>{title}</Text>
             </View>
-            <TouchableOpacity onPress={handleClose} style={styles.closeBtn} activeOpacity={0.7}>
+            <TouchableOpacity onPress={handleClose} style={styles.closeBtn} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Close account window">
               <Ionicons name="close" size={24} color={COLORS.text} />
             </TouchableOpacity>
           </View>
@@ -196,6 +196,7 @@ export default function AuthModal() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                accessibilityLabel="Email address"
               />
             </View>
 
@@ -212,8 +213,9 @@ export default function AuthModal() {
                     placeholderTextColor={COLORS.mediumGray}
                     secureTextEntry={!showPassword}
                     autoCapitalize="none"
+                    accessibilityLabel="Password"
                   />
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)} accessibilityRole="button" accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}>
                     <Ionicons
                       name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                       size={20}
@@ -235,6 +237,7 @@ export default function AuthModal() {
                     onChangeText={setName}
                     placeholder="Your full name"
                     placeholderTextColor={COLORS.mediumGray}
+                    accessibilityLabel="Full name"
                   />
                 </View>
 
@@ -247,6 +250,7 @@ export default function AuthModal() {
                     onChangeText={setSchool}
                     placeholder="Your school name"
                     placeholderTextColor={COLORS.mediumGray}
+                    accessibilityLabel="School name, optional"
                   />
                 </View>
 
@@ -261,6 +265,8 @@ export default function AuthModal() {
                       ]}
                       onPress={() => setRole(roleOption.value)}
                       activeOpacity={0.7}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected: role === roleOption.value }}
                     >
                       <Text
                         style={[
@@ -281,6 +287,7 @@ export default function AuthModal() {
               onPress={handleSubmit}
               disabled={loading}
               activeOpacity={0.7}
+              accessibilityRole="button"
             >
               {loading ? (
                 <ActivityIndicator color={COLORS.white} />

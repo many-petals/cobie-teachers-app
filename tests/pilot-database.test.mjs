@@ -86,7 +86,7 @@ test('pilot docs require baseline, verification, email setup and disposable acco
 
 test('privacy policy date is set for the current production deployment', () => {
   const privacy = fs.readFileSync(new URL('../app/privacy.tsx', import.meta.url), 'utf8');
-  assert.match(privacy, /const LAST_UPDATED = '29 September 2026';/);
+  assert.match(privacy, /const LAST_UPDATED = '30 September 2026';/);
   assert.doesNotMatch(readiness, /privacy-policy date remains a deployment placeholder/i);
-  assert.match(readiness, /privacy-policy date is set to 29 September 2026/i);
+  assert.match(readiness, /privacy-policy date is set to 30 September 2026/i);
 });

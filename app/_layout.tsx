@@ -158,6 +158,13 @@ export default function RootLayout() {
                 presentation: 'modal',
               }}
             />
+            <Stack.Screen
+              name="manc50-feedback"
+              options={{
+                headerShown: false,
+                presentation: 'modal',
+              }}
+            />
           </Stack>
 
 

@@ -83,7 +83,7 @@ function formatDate(dateStr: string): string {
 function ProfileModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const {
     user, profile, favourites, completedLessons, savedCalmConfigs,
-    signOut, clearUserData, updateProfile, deleteCalmConfig,
+    signOut, clearUserData, updateProfile, deleteCalmConfig, billingStatus,
   } = useAuth();
   const { showToast, showConfirm } = useToast();
   const router = useRouter();
@@ -287,6 +287,19 @@ Short 1-2 minute check-ins help children recognise and name their feelings. Over
               </View>
             ) : null}
 
+            {billingStatus?.status === 'pilot' ? (
+              <TouchableOpacity
+                style={pStyles.feedbackBtn}
+                onPress={() => { onClose(); router.push('/manc50-feedback' as any); }}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="Give MANC50 pilot feedback"
+              >
+                <Ionicons name="chatbubbles-outline" size={20} color={COLORS.white} />
+                <Text style={pStyles.feedbackText}>Give Pilot Feedback</Text>
+              </TouchableOpacity>
+            ) : null}
+
             {/* Sign Out */}
             <TouchableOpacity style={pStyles.signOutBtn} onPress={() => { signOut(); onClose(); }} activeOpacity={0.7}>
               <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
@@ -332,6 +345,8 @@ const pStyles = StyleSheet.create({
   emptyState: { alignItems: 'center', paddingVertical: SPACING.huge },
   emptyTitle: { fontSize: FONT_SIZES.lg, fontWeight: '600', color: COLORS.textLight, marginTop: SPACING.md },
   emptyText: { fontSize: FONT_SIZES.sm, color: COLORS.textMuted, textAlign: 'center', marginTop: SPACING.sm, paddingHorizontal: SPACING.xl },
+  feedbackBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: SPACING.sm, paddingVertical: SPACING.lg, borderRadius: RADIUS.lg, backgroundColor: COLORS.primary, marginTop: SPACING.xl },
+  feedbackText: { fontSize: FONT_SIZES.md, fontWeight: '700', color: COLORS.white },
   signOutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: SPACING.sm, paddingVertical: SPACING.lg, borderRadius: RADIUS.lg, backgroundColor: '#FFEBEE', marginTop: SPACING.xl },
   signOutText: { fontSize: FONT_SIZES.md, fontWeight: '600', color: COLORS.error },
   deleteDataBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: SPACING.sm, paddingVertical: SPACING.lg, borderRadius: RADIUS.lg, backgroundColor: COLORS.error, marginTop: SPACING.md },

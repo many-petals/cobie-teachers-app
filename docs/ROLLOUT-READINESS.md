@@ -4,7 +4,7 @@
 
 The approved correction pass is implemented in this working copy and has passed TypeScript, observation-scale tests, diff checks and the Expo web export. The source preserves the existing lesson/resource data, internal tracker table names and working flows.
 
-The privacy-policy date is set to 29 September 2026 for the current production deployment.
+The privacy-policy date is set to 30 September 2026 for the current production deployment.
 
 The pilot database baseline is prepared at `migrations/20260929_pilot_database_baseline.sql`. It includes the account/profile tables, tracker tables, row-level policies and observation RPC needed for the current app. It has not been applied to the live DatabasePad service in this environment. Do not invite pilot schools until the baseline has been applied and verified with disposable teacher accounts.
 
@@ -18,7 +18,7 @@ The pilot database baseline is prepared at `migrations/20260929_pilot_database_b
 - Stripe is queried directly for the current subscription; only this app's configured price in `active` or `trialing` state grants access. No webhook-maintained entitlement table is used. Access refreshes at sign-in, on return from billing, window focus and every five minutes while visible. Provider errors close paid access and offer retry.
 - Checkout reuses an open session and uses Stripe idempotency keys. Existing live/delinquent subscriptions are sent to billing management. Previous subscribers do not receive a second trial.
 - The two existing pilot emails are recognised only after server authentication and email confirmation.
-- Privacy wording now distinguishes pupil codes from anonymity, removes unverified infrastructure/compliance assurances, describes Stripe billing data, and distinguishes app-record deletion from auth-account deletion and cancellation.
+- Privacy wording now distinguishes pupil codes from anonymity, removes unverified infrastructure/compliance assurances, describes Stripe billing data, distinguishes app-record deletion from auth-account deletion and cancellation, and uses the published Many Petals contact `info@manypetals.co.uk`.
 
 ## Activation required before deployment
 

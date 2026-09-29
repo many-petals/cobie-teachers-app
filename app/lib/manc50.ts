@@ -45,11 +45,14 @@ export async function recordManc50Use(
   const entitlementId = verifiedEntitlementId ?? localAccess?.entitlementId;
   if (!entitlementId) return;
   const today = new Date().toISOString().slice(0, 10);
+  const idempotencyKey = eventName === 'first_value'
+    ? `pilot:first_value:${entitlementId}`
+    : `lesson:${eventName}:${entitlementId}:${today}:${lessonId}`;
   const { error } = await supabase.functions.invoke('manc50-event', {
     body: {
       entitlement_id: entitlementId,
       event_name: eventName,
-      idempotency_key: `lesson:${eventName}:${entitlementId}:${today}:${lessonId}`,
+      idempotency_key: idempotencyKey,
     },
   });
   if (error) console.warn('MANC50 measurement event was not recorded:', error.message);
