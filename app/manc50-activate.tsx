@@ -29,7 +29,7 @@ export default function Manc50ActivateScreen() {
       if (!error && data?.activated) break;
       if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 2500));
     }
-    if (error || !data?.activated) {
+    if (error || !data?.activated || !data.entitlement_id || !data.expires_at) {
       setStatus('error');
       setMessage(data?.error ?? 'We could not activate this school access. Please try again.');
       return;

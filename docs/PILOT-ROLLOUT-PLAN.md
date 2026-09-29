@@ -9,7 +9,7 @@ Use Cobie Classroom Companion as the master implementation for a controlled Manc
 1. **Technical staging**
    - Install and apply `migrations/20260916_observation_scale.sql` in a disposable DatabasePad test project.
    - Verify the observation RPC, row-level isolation, old-record display and new scale version.
-   - Configure Vercel server variables and Stripe test mode; run signup, checkout, access refresh, sign-out/in and cancellation with test accounts.
+   - Configure Vercel server variables, Stripe test mode and a dedicated auth email sender; run signup, confirmation email, password reset, checkout, access refresh, sign-out/in and cancellation with test accounts.
    - Set the privacy notice date to the actual deployment date.
 
 2. **School-readiness review**
@@ -37,5 +37,5 @@ Use Cobie Classroom Companion as the master implementation for a controlled Manc
 ## Current blockers
 
 - The live DatabasePad migration has not been applied or verified.
-- Vercel server environment variables and Stripe test-mode settings have not been configured.
-- No real checkout, cancellation, auth-account mutation or pupil-record mutation has been performed in this review.
+- Dedicated auth email sending is not yet pilot-ready. Supabase's default sender hit the account email rate limit during signup testing; configure custom SMTP or an approved equivalent before inviting schools.
+- The full disposable-account journey still needs verified testing: signup, confirmation email, password reset, checkout, access refresh, sign-out/in, cancellation, cross-account database isolation and pupil-record deletion.

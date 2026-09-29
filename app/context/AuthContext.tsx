@@ -91,6 +91,16 @@ function getTeacherProfileFromMetadata(user: any): Pick<TeacherProfile, 'name' |
   };
 }
 
+function getFriendlyAuthError(message: string): string {
+  const normalised = message.toLowerCase();
+
+  if (normalised.includes('email rate limit') || (normalised.includes('email') && normalised.includes('rate limit'))) {
+    return 'The account email service has reached its sending limit. Please wait before trying again. For the school pilot, Many Petals must enable a dedicated email sender before inviting teachers.';
+  }
+
+  return message;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<any | null>(null);
   const [profile, setProfile] = useState<TeacherProfile | null>(null);
@@ -392,7 +402,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       });
       if (error) {
-        return { error: error.message };
+        return { error: getFriendlyAuthError(error.message) };
       }
 
       if (data.session?.user) {
@@ -411,7 +421,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        return { error: error.message };
+        return { error: getFriendlyAuthError(error.message) };
       }
 
       setShowAuthModal(false);
@@ -436,7 +446,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        return { error: error.message };
+        return { error: getFriendlyAuthError(error.message) };
       }
 
       return { error: null };
