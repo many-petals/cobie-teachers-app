@@ -44,15 +44,23 @@ Deno.serve(async (request) => {
     if (session.payment_status !== 'paid' || session.metadata?.cohort !== 'MANC50') return new Response(JSON.stringify({ received: true }));
 
     const supabase = createClient(required('SUPABASE_URL'), required('SUPABASE_SERVICE_ROLE_KEY'));
-    const { error } = await supabase.rpc('create_manc50_entitlement', {
-      p_school_key: session.metadata.school_key,
-      p_school_name: session.metadata.school_name,
-      p_contact_email: session.metadata.contact_email,
-      p_stripe_checkout_session_id: session.id,
-      p_stripe_payment_intent_id: session.payment_intent,
-      p_activation_token_hash: session.metadata.activation_token_hash,
-      p_idempotency_key: `stripe:${event.id}`,
-    });
+    const reservationId = session.metadata?.reservation_id;
+    const { error } = reservationId
+      ? await supabase.rpc('finalize_manc50_checkout', {
+          p_reservation_id: reservationId,
+          p_stripe_checkout_session_id: session.id,
+          p_stripe_payment_intent_id: session.payment_intent,
+          p_idempotency_key: `stripe:${event.id}`,
+        })
+      : await supabase.rpc('create_manc50_entitlement', {
+          p_school_key: session.metadata.school_key,
+          p_school_name: session.metadata.school_name,
+          p_contact_email: session.metadata.contact_email,
+          p_stripe_checkout_session_id: session.id,
+          p_stripe_payment_intent_id: session.payment_intent,
+          p_activation_token_hash: session.metadata.activation_token_hash,
+          p_idempotency_key: `stripe:${event.id}`,
+        });
     if (error) throw error;
 
     return new Response(JSON.stringify({ received: true }), { headers: { 'Content-Type': 'application/json' } });
