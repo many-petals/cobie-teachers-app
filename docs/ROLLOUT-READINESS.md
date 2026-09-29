@@ -4,7 +4,7 @@
 
 The approved correction pass is implemented in this working copy and has passed TypeScript, observation-scale tests, diff checks and the Expo web export. The source preserves the existing lesson/resource data, internal tracker table names and working flows.
 
-The privacy-policy date remains a deployment placeholder. Set it to the actual production deployment date immediately before publishing.
+The privacy-policy date is set to 29 September 2026 for the current production deployment.
 
 The pilot database baseline is prepared at `migrations/20260929_pilot_database_baseline.sql`. It includes the account/profile tables, tracker tables, row-level policies and observation RPC needed for the current app. It has not been applied to the live DatabasePad service in this environment. Do not invite pilot schools until the baseline has been applied and verified with disposable teacher accounts.
 

@@ -14,7 +14,7 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from './data/theme';
 import { BRAND, LOCAL_LOGO } from './data/brand';
 
-const LAST_UPDATED = '15 September 2026';
+const LAST_UPDATED = '29 September 2026';
 
 interface PolicySectionProps {
   number: string;
