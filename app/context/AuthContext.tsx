@@ -624,11 +624,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const updated = [...completedLessons, newEntry];
     setCompletedLessons(updated);
     await LocalStorage.saveCompletedLessons(updated, getStorageUserId());
-    await recordManc50Use(
-      updated.length === 1 ? 'first_value' : 'qualifying_use',
-      lessonId,
-      billingStatus?.pilotEntitlementId,
-    );
+    if (billingStatus?.pilotEntitlementId) {
+      await Promise.all([
+        recordManc50Use('first_value', lessonId, billingStatus.pilotEntitlementId),
+        recordManc50Use('qualifying_use', lessonId, billingStatus.pilotEntitlementId),
+      ]);
+    }
   };
 
   const isLessonCompleted = (lessonId: string) => {

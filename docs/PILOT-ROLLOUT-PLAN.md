@@ -10,7 +10,7 @@ Use Cobie Classroom Companion as the master implementation for a controlled Manc
    - Apply `migrations/20260929_pilot_database_baseline.sql` in a disposable DatabasePad test project first, then production after review.
    - Run `migrations/20260929_pilot_database_verify.sql` and verify the account tables, tracker tables, observation RPC, row-level isolation, old-record display and new scale version.
    - Vercel production server variable names were verified on 29 September 2026. Configure Stripe test mode and a dedicated auth email sender; run signup, confirmation email, password reset, checkout, access refresh, sign-out/in and cancellation with test accounts.
-   - Privacy notice date set to 29 September 2026 for the current production deployment; update it again if the policy materially changes before pilot launch.
+   - Privacy notice date set to 30 September 2026 for the current production deployment; update it again if the policy materially changes before pilot launch.
 
 2. **School-readiness review**
    - Confirm hosting location, subprocessors, retention, backup and deletion procedures with the school or responsible organisation.

@@ -67,6 +67,7 @@ export default function Manc50ActivateScreen() {
         <Text style={styles.kicker}>MANC50 SCHOOL ACCESS</Text>
         <Text style={styles.title}>Activate your classroom access</Text>
         <Text style={styles.body}>Sign in as the lead teacher who completed checkout, then activate your three-month access. Older purchases can still paste their activation token below.</Text>
+        <Text style={styles.label}>Older activation token (optional)</Text>
         <TextInput
           value={token}
           onChangeText={setToken}
@@ -75,13 +76,19 @@ export default function Manc50ActivateScreen() {
           placeholder="Older purchase token (optional)"
           placeholderTextColor={COLORS.textMuted}
           style={styles.input}
+          accessibilityLabel="Older activation token, optional"
           editable={status !== 'loading' && status !== 'success'}
         />
-        <TouchableOpacity style={styles.button} onPress={() => void activate()} disabled={status === 'loading' || authLoading || status === 'success'}>
+        <TouchableOpacity style={styles.button} onPress={() => void activate()} disabled={status === 'loading' || authLoading || status === 'success'} accessibilityRole="button" accessibilityState={{ disabled: status === 'loading' || authLoading || status === 'success' }}>
           {status === 'loading' || authLoading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.buttonText}>{user ? 'Activate paid access' : 'Sign in to activate'}</Text>}
         </TouchableOpacity>
-        {message ? <Text style={[styles.message, status === 'error' ? styles.error : status === 'success' ? styles.success : styles.info]}>{message}</Text> : null}
-        <TouchableOpacity onPress={() => router.replace('/')} style={styles.backButton}><Text style={styles.backText}>Back to Cobie</Text></TouchableOpacity>
+        {message ? <Text accessibilityRole={status === 'error' ? 'alert' : 'text'} style={[styles.message, status === 'error' ? styles.error : status === 'success' ? styles.success : styles.info]}>{message}</Text> : null}
+        {status === 'success' ? (
+          <TouchableOpacity onPress={() => router.push('/manc50-feedback' as any)} style={styles.feedbackButton} accessibilityRole="button">
+            <Text style={styles.feedbackText}>Give first-use feedback</Text>
+          </TouchableOpacity>
+        ) : null}
+        <TouchableOpacity onPress={() => router.replace('/')} style={styles.backButton} accessibilityRole="button"><Text style={styles.backText}>Back to Cobie</Text></TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -93,6 +100,7 @@ const styles = StyleSheet.create({
   kicker: { color: COLORS.primary, fontSize: FONT_SIZES.xs, fontWeight: '800', letterSpacing: 1.2, marginBottom: SPACING.sm },
   title: { color: COLORS.text, fontSize: FONT_SIZES.xxl, fontWeight: '800', marginBottom: SPACING.md },
   body: { color: COLORS.textMuted, fontSize: FONT_SIZES.md, lineHeight: 24, marginBottom: SPACING.xl },
+  label: { color: COLORS.text, fontSize: FONT_SIZES.sm, fontWeight: '700', marginBottom: SPACING.xs },
   input: { borderWidth: 1, borderColor: '#BCD2E0', borderRadius: RADIUS.md, padding: SPACING.md, color: COLORS.text, minHeight: 48, marginBottom: SPACING.md },
   button: { backgroundColor: COLORS.primary, borderRadius: RADIUS.md, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
   buttonText: { color: COLORS.white, fontSize: FONT_SIZES.md, fontWeight: '800' },
@@ -100,6 +108,8 @@ const styles = StyleSheet.create({
   error: { color: '#B42318' },
   success: { color: '#067647' },
   info: { color: COLORS.primary },
+  feedbackButton: { alignItems: 'center', marginTop: SPACING.md, paddingVertical: SPACING.sm },
+  feedbackText: { color: COLORS.primary, fontWeight: '800' },
   backButton: { alignItems: 'center', marginTop: SPACING.lg },
   backText: { color: COLORS.primary, fontWeight: '700' },
 });

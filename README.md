@@ -323,7 +323,7 @@ Use the following for your app store listings:
 
 **Age Rating:** 4+
 
-**Privacy Policy URL:** *(Add your privacy policy URL)*
+**Privacy Policy URL:** https://cobie-teachers-app.vercel.app/privacy
 
 ---
 

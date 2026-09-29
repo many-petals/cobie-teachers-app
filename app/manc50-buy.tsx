@@ -55,13 +55,14 @@ export default function Manc50BuyScreen() {
         <Text style={styles.kicker}>MANC50 PILOT</Text>
         <Text style={styles.title}>Bring Cobie into your school</Text>
         <Text style={styles.body}>A three-month starter access period for one eligible school. Sign in first so payment, activation and recovery stay safely linked to the lead teacher account.</Text>
-        <TextInput value={schoolName} onChangeText={setSchoolName} placeholder="School name" placeholderTextColor={COLORS.textMuted} style={styles.input} />
+        <Text style={styles.label}>School or setting name</Text>
+        <TextInput value={schoolName} onChangeText={setSchoolName} placeholder="School name" placeholderTextColor={COLORS.textMuted} style={styles.input} accessibilityLabel="School or setting name" />
         {user?.email ? <Text style={styles.account}>Purchase will be linked to {user.email}</Text> : null}
-        <TouchableOpacity style={styles.button} onPress={() => void beginCheckout()} disabled={loading || authLoading || Boolean(user && !schoolName.trim())}>
+        <TouchableOpacity style={styles.button} onPress={() => void beginCheckout()} disabled={loading || authLoading || Boolean(user && !schoolName.trim())} accessibilityRole="button" accessibilityState={{ disabled: loading || authLoading || Boolean(user && !schoolName.trim()) }}>
           {loading || authLoading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.buttonText}>{user ? 'Continue to secure checkout' : 'Sign in to continue'}</Text>}
         </TouchableOpacity>
         {message ? <Text style={styles.message}>{message}</Text> : null}
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}><Text style={styles.backText}>Back to Cobie</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton} accessibilityRole="button"><Text style={styles.backText}>Back to Cobie</Text></TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -73,6 +74,7 @@ const styles = StyleSheet.create({
   kicker: { color: COLORS.primary, fontSize: FONT_SIZES.xs, fontWeight: '800', letterSpacing: 1.2, marginBottom: SPACING.sm },
   title: { color: COLORS.text, fontSize: FONT_SIZES.xxl, fontWeight: '800', marginBottom: SPACING.md },
   body: { color: COLORS.textMuted, fontSize: FONT_SIZES.md, lineHeight: 24, marginBottom: SPACING.xl },
+  label: { color: COLORS.text, fontSize: FONT_SIZES.sm, fontWeight: '700', marginBottom: SPACING.xs },
   input: { borderWidth: 1, borderColor: '#BCD2E0', borderRadius: RADIUS.md, padding: SPACING.md, color: COLORS.text, minHeight: 48, marginBottom: SPACING.md },
   account: { color: COLORS.textMuted, fontSize: FONT_SIZES.sm, lineHeight: 20, marginBottom: SPACING.md },
   button: { backgroundColor: COLORS.primary, borderRadius: RADIUS.md, minHeight: 48, alignItems: 'center', justifyContent: 'center' },

@@ -75,3 +75,38 @@ test('database migration removes legacy RPC signatures and restricts execution',
   assert.match(source, /revoke all on function public\.activate_manc50_entitlement/i);
   assert.match(source, /grant execute on function public\.record_manc50_event/i);
 });
+
+test('first-value and qualifying-use analytics have stable, meaningful identities', async () => {
+  const measurement = await read('../app/lib/manc50.ts');
+  const auth = await read('../app/context/AuthContext.tsx');
+  assert.match(measurement, /pilot:first_value:\$\{entitlementId\}/);
+  assert.match(measurement, /lesson:\$\{eventName\}:\$\{entitlementId\}:\$\{today\}:\$\{lessonId\}/);
+  assert.match(auth, /recordManc50Use\('first_value'/);
+  assert.match(auth, /recordManc50Use\('qualifying_use'/);
+});
+
+test('pilot feedback is account-bound, structured, private and reachable in the app', async () => {
+  const migration = await read('../migrations/20260930_manc50_feedback.sql');
+  const edge = await read('../supabase/functions/manc50-feedback/index.ts');
+  const screen = await read('../app/manc50-feedback.tsx');
+  const layout = await read('../app/_layout.tsx');
+  assert.match(migration, /create table if not exists public\.manc50_feedback/i);
+  assert.match(migration, /activated_by_user_id = p_user_id/i);
+  assert.match(migration, /revoke all on table public\.manc50_feedback from public, anon, authenticated/i);
+  assert.match(migration, /unique \(entitlement_id, user_id, stage\)/i);
+  assert.match(edge, /auth\.getUser\(token\)/);
+  assert.match(edge, /submit_manc50_feedback/);
+  assert.match(screen, /Do not include pupil names or identifying information/);
+  assert.match(screen, /SEND suitability/);
+  assert.match(layout, /name="manc50-feedback"/);
+});
+
+test('pilot entry screens expose labels and the published support contact', async () => {
+  const buy = await read('../app/manc50-buy.tsx');
+  const activate = await read('../app/manc50-activate.tsx');
+  const privacy = await read('../app/privacy.tsx');
+  assert.match(buy, /accessibilityLabel="School or setting name"/);
+  assert.match(activate, /accessibilityLabel="Older activation token, optional"/);
+  assert.match(privacy, /info@manypetals\.co\.uk/);
+  assert.doesNotMatch(privacy, /manypetalslearning\.co\.uk/);
+});

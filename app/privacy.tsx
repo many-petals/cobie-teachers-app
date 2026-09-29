@@ -14,7 +14,7 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from './data/theme';
 import { BRAND, LOCAL_LOGO } from './data/brand';
 
-const LAST_UPDATED = '29 September 2026';
+const LAST_UPDATED = '30 September 2026';
 
 interface PolicySectionProps {
   number: string;
@@ -601,7 +601,7 @@ export default function PrivacyPolicyScreen() {
           <Text style={styles.subHeading}>5.1 Delete App Records or Request Account Deletion</Text>
           <View style={styles.stepsContainer}>
             {[
-              { step: '1', text: 'Send an email to privacy@manypetalslearning.co.uk with the subject line "Data Deletion Request"' },
+              { step: '1', text: 'Send an email to info@manypetals.co.uk with the subject line "Data Deletion Request"' },
               { step: '2', text: 'Include the email address associated with your account' },
               { step: '3', text: 'We will verify your identity and process the deletion within 30 days' },
               { step: '4', text: 'You will receive confirmation once all data has been permanently deleted' },
@@ -666,7 +666,7 @@ export default function PrivacyPolicyScreen() {
 
             <TouchableOpacity
               style={styles.contactRow}
-              onPress={() => Linking.openURL('mailto:privacy@manypetalslearning.co.uk')}
+              onPress={() => Linking.openURL('mailto:info@manypetals.co.uk?subject=Privacy%20Enquiry')}
               activeOpacity={0.7}
             >
               <View style={[styles.contactIcon, { backgroundColor: COLORS.primary + '15' }]}>
@@ -674,14 +674,14 @@ export default function PrivacyPolicyScreen() {
               </View>
               <View style={styles.contactInfo}>
                 <Text style={styles.contactLabel}>Privacy Enquiries</Text>
-                <Text style={styles.contactValue}>privacy@manypetalslearning.co.uk</Text>
+                <Text style={styles.contactValue}>info@manypetals.co.uk</Text>
               </View>
               <Ionicons name="open-outline" size={16} color={COLORS.mediumGray} />
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.contactRow}
-              onPress={() => Linking.openURL('mailto:hello@manypetalslearning.co.uk')}
+              onPress={() => Linking.openURL('mailto:info@manypetals.co.uk?subject=General%20Enquiry')}
               activeOpacity={0.7}
             >
               <View style={[styles.contactIcon, { backgroundColor: COLORS.secondary + '15' }]}>
@@ -689,7 +689,7 @@ export default function PrivacyPolicyScreen() {
               </View>
               <View style={styles.contactInfo}>
                 <Text style={styles.contactLabel}>General Enquiries</Text>
-                <Text style={styles.contactValue}>hello@manypetalslearning.co.uk</Text>
+                <Text style={styles.contactValue}>info@manypetals.co.uk</Text>
               </View>
               <Ionicons name="open-outline" size={16} color={COLORS.mediumGray} />
             </TouchableOpacity>
