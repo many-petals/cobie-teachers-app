@@ -48,20 +48,23 @@ Deno.serve(async (request) => {
     if (userError || !user?.id) return json({ error: 'Please sign in again.' }, 401);
     if (!user.email_confirmed_at) return json({ error: 'Confirm your email address before activating school access.' }, 403);
 
-    const { activation_token: activationToken } = await request.json();
-    if (typeof activationToken !== 'string' || activationToken.trim().length < 20) {
-      return json({ error: 'Enter a valid activation token.' }, 400);
-    }
+    const body = await request.json().catch(() => ({}));
+    const activationToken = typeof body.activation_token === 'string' ? body.activation_token.trim() : '';
+    if (activationToken && activationToken.length < 20) return json({ error: 'Enter a valid activation token.' }, 400);
 
-    const { data, error } = await serviceClient.rpc('activate_manc50_entitlement', {
-      p_activation_token_hash: await sha256(activationToken.trim()),
-      p_user_id: user.id,
-    });
+    const { data, error } = activationToken
+      ? await serviceClient.rpc('activate_manc50_entitlement', {
+          p_activation_token_hash: await sha256(activationToken),
+          p_user_id: user.id,
+        })
+      : await serviceClient.rpc('activate_manc50_entitlement_for_user', {
+          p_user_id: user.id,
+        });
     if (error) throw error;
 
     return json({ activated: true, entitlement_id: data.id, expires_at: data.expires_at });
   } catch (error) {
     console.error('MANC50 activation failed', error);
-    return json({ error: 'That activation token is invalid, already used, or this account already has pilot access.' }, 400);
+    return json({ error: 'No paid MANC50 place is ready for this account. If you purchased through the older checkout, paste its activation token.' }, 400);
   }
 });

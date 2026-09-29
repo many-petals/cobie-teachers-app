@@ -31,18 +31,13 @@ export default function Manc50ActivateScreen() {
       setShowAuthModal(true);
       return;
     }
-    if (!token.trim()) {
-      setStatus('error');
-      setMessage('Paste the activation token from your MANC50 checkout confirmation.');
-      return;
-    }
     setStatus('loading');
     setMessage('');
     let data: { activated?: boolean; entitlement_id?: string; expires_at?: string; error?: string } | null = null;
     let error: unknown = null;
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const result = await supabase.functions.invoke('manc50-activate', {
-        body: { activation_token: token.trim() },
+        body: token.trim() ? { activation_token: token.trim() } : {},
       });
       data = result.data;
       error = result.error;
@@ -71,19 +66,19 @@ export default function Manc50ActivateScreen() {
       <View style={styles.card}>
         <Text style={styles.kicker}>MANC50 SCHOOL ACCESS</Text>
         <Text style={styles.title}>Activate your classroom access</Text>
-        <Text style={styles.body}>Sign in as the lead teacher, then paste the activation token from your MANC50 checkout confirmation. Your three-month access period starts when you activate it.</Text>
+        <Text style={styles.body}>Sign in as the lead teacher who completed checkout, then activate your three-month access. Older purchases can still paste their activation token below.</Text>
         <TextInput
           value={token}
           onChangeText={setToken}
           autoCapitalize="none"
           autoCorrect={false}
-          placeholder="Paste activation token"
+          placeholder="Older purchase token (optional)"
           placeholderTextColor={COLORS.textMuted}
           style={styles.input}
           editable={status !== 'loading' && status !== 'success'}
         />
         <TouchableOpacity style={styles.button} onPress={() => void activate()} disabled={status === 'loading' || authLoading || status === 'success'}>
-          {status === 'loading' || authLoading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.buttonText}>{user ? 'Activate access' : 'Sign in to activate'}</Text>}
+          {status === 'loading' || authLoading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.buttonText}>{user ? 'Activate paid access' : 'Sign in to activate'}</Text>}
         </TouchableOpacity>
         {message ? <Text style={[styles.message, status === 'error' ? styles.error : status === 'success' ? styles.success : styles.info]}>{message}</Text> : null}
         <TouchableOpacity onPress={() => router.replace('/')} style={styles.backButton}><Text style={styles.backText}>Back to Cobie</Text></TouchableOpacity>

@@ -22,8 +22,42 @@ test('activation verifies the signed-in account and binds its user id', async ()
 test('activation lets a teacher sign in before requiring the token', async () => {
   const source = await read('../app/manc50-activate.tsx');
   assert.match(source, /if \(!user\)[\s\S]*setShowAuthModal\(true\)/);
-  assert.match(source, /if \(!token\.trim\(\)\)/);
+  assert.match(source, /body:\s*token\.trim\(\)\s*\?\s*\{\s*activation_token/);
+  assert.match(source, /Older purchase token \(optional\)/);
   assert.doesNotMatch(source, /disabled=\{[^}]*!token\.trim\(\)/);
+});
+
+test('new checkout is authenticated, account-bound and capacity-reserved before Stripe', async () => {
+  const checkout = await read('../supabase/functions/manc50-checkout/index.ts');
+  const buyScreen = await read('../app/manc50-buy.tsx');
+  assert.match(checkout, /auth\.getUser\(token\)/);
+  assert.match(checkout, /reserve_manc50_checkout/);
+  assert.match(checkout, /attach_manc50_checkout_session/);
+  assert.match(checkout, /manc50-checkout-\$\{reservation\.id\}/);
+  assert.match(checkout, /expires_at:\s*String\(Math\.floor\(Date\.now\(\) \/ 1000\) \+ 35 \* 60\)/);
+  assert.match(checkout, /typeof error\.message === 'string'/);
+  assert.match(buyScreen, /Sign in to continue/);
+  assert.doesNotMatch(buyScreen, /contact_email:/);
+});
+
+test('release controls prevent overselling and make paid access recoverable by account', async () => {
+  const migration = await read('../migrations/20260930_manc50_release_controls.sql');
+  assert.match(migration, /create table if not exists public\.manc50_checkout_reservations/i);
+  assert.match(migration, /pg_advisory_xact_lock\(hashtext\('manc50-entitlement-cap'\)\)/i);
+  assert.match(migration, /manc50_entitlements[\s\S]*manc50_checkout_reservations[\s\S]*>= 50/i);
+  assert.match(migration, /create or replace function public\.finalize_manc50_checkout/i);
+  assert.match(migration, /Stripe can legitimately deliver the same completed session/i);
+  assert.match(migration, /create or replace function public\.activate_manc50_entitlement_for_user/i);
+  assert.match(migration, /create or replace function public\.get_manc50_pilot_metrics/i);
+  assert.match(migration, /revoke all on function public\.reserve_manc50_checkout/i);
+  assert.match(migration, /grant execute on function public\.get_manc50_pilot_metrics\(\) to service_role/i);
+});
+
+test('webhook finalizes reserved checkout and retains legacy paid-session support', async () => {
+  const source = await read('../supabase/functions/manc50-webhook/index.ts');
+  assert.match(source, /metadata\?\.reservation_id/);
+  assert.match(source, /finalize_manc50_checkout/);
+  assert.match(source, /create_manc50_entitlement/);
 });
 
 test('measurement verifies the signed-in account and cannot use another entitlement', async () => {

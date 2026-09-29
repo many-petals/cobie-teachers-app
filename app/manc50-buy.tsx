@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Linking, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from './lib/supabase';
-import { savePendingManc50Token } from './lib/manc50';
+import { useAuth } from './context/AuthContext';
 import { COLORS, SPACING, RADIUS, FONT_SIZES } from './data/theme';
 
 function schoolKeyFromName(name: string): string {
@@ -16,12 +16,17 @@ function checkoutAttemptId(): string {
 
 export default function Manc50BuyScreen() {
   const router = useRouter();
+  const { user, loading: authLoading, setShowAuthModal } = useAuth();
   const [schoolName, setSchoolName] = useState('');
-  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
   const beginCheckout = async () => {
+    if (!user) {
+      setMessage('Sign in or create the lead teacher account before checkout. Your purchase will be safely linked to this account.');
+      setShowAuthModal(true);
+      return;
+    }
     setLoading(true);
     setMessage('');
     const { data, error } = await supabase.functions.invoke('manc50-checkout', {
@@ -29,7 +34,6 @@ export default function Manc50BuyScreen() {
         school_key: schoolKeyFromName(schoolName),
         checkout_attempt_id: checkoutAttemptId(),
         school_name: schoolName.trim(),
-        contact_email: email.trim().toLowerCase(),
       },
     });
     setLoading(false);
@@ -37,8 +41,7 @@ export default function Manc50BuyScreen() {
       setMessage(data?.error ?? 'Checkout is not available yet. Please try again later.');
       return;
     }
-    if (data.activation_token) await savePendingManc50Token(data.activation_token);
-    setMessage('Your secure checkout is ready. After payment, return to Cobie and your activation token will be ready to use.');
+    setMessage('Your secure checkout is ready. After payment, return to Cobie while signed in to activate access.');
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
       window.location.assign(data.checkout_url);
     } else {
@@ -51,11 +54,11 @@ export default function Manc50BuyScreen() {
       <View style={styles.card}>
         <Text style={styles.kicker}>MANC50 PILOT</Text>
         <Text style={styles.title}>Bring Cobie into your school</Text>
-        <Text style={styles.body}>A three-month starter access period for one eligible school. Access begins when your school activates its token.</Text>
+        <Text style={styles.body}>A three-month starter access period for one eligible school. Sign in first so payment, activation and recovery stay safely linked to the lead teacher account.</Text>
         <TextInput value={schoolName} onChangeText={setSchoolName} placeholder="School name" placeholderTextColor={COLORS.textMuted} style={styles.input} />
-        <TextInput value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" placeholder="School contact email" placeholderTextColor={COLORS.textMuted} style={styles.input} />
-        <TouchableOpacity style={styles.button} onPress={() => void beginCheckout()} disabled={loading || !schoolName.trim() || !email.trim()}>
-          {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.buttonText}>Continue to secure checkout</Text>}
+        {user?.email ? <Text style={styles.account}>Purchase will be linked to {user.email}</Text> : null}
+        <TouchableOpacity style={styles.button} onPress={() => void beginCheckout()} disabled={loading || authLoading || Boolean(user && !schoolName.trim())}>
+          {loading || authLoading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.buttonText}>{user ? 'Continue to secure checkout' : 'Sign in to continue'}</Text>}
         </TouchableOpacity>
         {message ? <Text style={styles.message}>{message}</Text> : null}
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}><Text style={styles.backText}>Back to Cobie</Text></TouchableOpacity>
@@ -71,6 +74,7 @@ const styles = StyleSheet.create({
   title: { color: COLORS.text, fontSize: FONT_SIZES.xxl, fontWeight: '800', marginBottom: SPACING.md },
   body: { color: COLORS.textMuted, fontSize: FONT_SIZES.md, lineHeight: 24, marginBottom: SPACING.xl },
   input: { borderWidth: 1, borderColor: '#BCD2E0', borderRadius: RADIUS.md, padding: SPACING.md, color: COLORS.text, minHeight: 48, marginBottom: SPACING.md },
+  account: { color: COLORS.textMuted, fontSize: FONT_SIZES.sm, lineHeight: 20, marginBottom: SPACING.md },
   button: { backgroundColor: COLORS.primary, borderRadius: RADIUS.md, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
   buttonText: { color: COLORS.white, fontSize: FONT_SIZES.md, fontWeight: '800' },
   message: { marginTop: SPACING.md, color: COLORS.textMuted, fontSize: FONT_SIZES.sm, lineHeight: 20 },
