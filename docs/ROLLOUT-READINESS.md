@@ -41,6 +41,18 @@ Configure the Stripe customer portal to allow billing updates and cancellation. 
 
 No real checkout, payment, cancellation, auth-account mutation or pupil-record mutation was performed in this review.
 
+
+## Live public checks on 29 September 2026
+
+Checked on `https://teachers.manypetals.co.uk/` after production deployment `f75e0b0`:
+
+- Printables now shows `5 resource types` and five printable-type filters: Worksheets, Posters, Cards, Checklists and Scripts.
+- Lessons shows `8 core lessons` and lists eight lesson cards.
+- The Cobie card is marked live and shows `Buy Cobie book`.
+- The Parents navigation item is visible and opens the parent communication area with four teacher templates.
+
+Account-only checks are still blocked until the live database baseline is applied and verified and a dedicated auth email sender is configured.
+
 ## Verification
 
 - `node --test tests/billing.test.mjs`: offline request-level billing tests covering auth, account ownership, paid/trial/unpaid/cancelled states, duplicate subscriptions, trial eligibility, provider failures and portal ownership.
