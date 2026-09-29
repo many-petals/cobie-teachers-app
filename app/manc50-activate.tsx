@@ -31,6 +31,11 @@ export default function Manc50ActivateScreen() {
       setShowAuthModal(true);
       return;
     }
+    if (!token.trim()) {
+      setStatus('error');
+      setMessage('Paste the activation token from your MANC50 checkout confirmation.');
+      return;
+    }
     setStatus('loading');
     setMessage('');
     let data: { activated?: boolean; entitlement_id?: string; expires_at?: string; error?: string } | null = null;
@@ -77,7 +82,7 @@ export default function Manc50ActivateScreen() {
           style={styles.input}
           editable={status !== 'loading' && status !== 'success'}
         />
-        <TouchableOpacity style={styles.button} onPress={() => void activate()} disabled={status === 'loading' || authLoading || !token.trim()}>
+        <TouchableOpacity style={styles.button} onPress={() => void activate()} disabled={status === 'loading' || authLoading || status === 'success'}>
           {status === 'loading' || authLoading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.buttonText}>{user ? 'Activate access' : 'Sign in to activate'}</Text>}
         </TouchableOpacity>
         {message ? <Text style={[styles.message, status === 'error' ? styles.error : status === 'success' ? styles.success : styles.info]}>{message}</Text> : null}

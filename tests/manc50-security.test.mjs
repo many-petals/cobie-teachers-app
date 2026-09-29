@@ -19,6 +19,13 @@ test('activation verifies the signed-in account and binds its user id', async ()
   assert.match(source, /email_confirmed_at/);
 });
 
+test('activation lets a teacher sign in before requiring the token', async () => {
+  const source = await read('../app/manc50-activate.tsx');
+  assert.match(source, /if \(!user\)[\s\S]*setShowAuthModal\(true\)/);
+  assert.match(source, /if \(!token\.trim\(\)\)/);
+  assert.doesNotMatch(source, /disabled=\{[^}]*!token\.trim\(\)/);
+});
+
 test('measurement verifies the signed-in account and cannot use another entitlement', async () => {
   const source = await read('../supabase/functions/manc50-event/index.ts');
   assert.match(source, /auth\.getUser\(token\)/);
