@@ -22,9 +22,9 @@ The pilot database baseline is prepared at `migrations/20260929_pilot_database_b
 
 ## Activation required before deployment
 
-On 15 September 2026, the Vercel project showed **No Environment Variables Added**. No credentials were revealed or added during this work.
+On 29 September 2026, the Vercel project showed the required production environment variable names for server billing/API access. No credential values were revealed, copied, or added during this check.
 
-Configure these **server-only** variables in Vercel. Never prefix a secret with `EXPO_PUBLIC_`, commit it, or paste it into chat:
+Keep these **server-only** variables configured in Vercel. Never prefix a secret with `EXPO_PUBLIC_`, commit it, or paste it into chat:
 
 | Variable | Value/source |
 | --- | --- |
