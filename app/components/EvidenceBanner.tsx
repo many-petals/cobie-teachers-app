@@ -91,7 +91,7 @@ const IMPROVEMENTS = [
   },
   {
     title: 'Structured 6-Week Programme',
-    description: 'Expand from 4 lessons to a structured 6-week programme (like Partnership for Children model) with weekly themes and progression.',
+    description: 'Build from the 8 core Cobie lessons into a structured programme with weekly themes and progression.',
     priority: 'Medium',
     icon: 'calendar',
     color: '#FFB74D',
