@@ -105,6 +105,19 @@ const getFriendlyTrackerError = (err: any, fallback: string) => {
     return 'The tracker was busy saving in another tab or request. Please try again now.';
   }
 
+  const message = String(err?.message || err || '').toLowerCase();
+  if (message.includes('permission denied') || message.includes('row-level security') || message.includes('rls')) {
+    return 'The tracker database permissions are not ready yet. Many Petals needs to apply the pilot database permissions fix before teachers use pupil records.';
+  }
+
+  if (message.includes('function') && message.includes('save_tracker_observations')) {
+    return 'The tracker save function is missing from the database. Many Petals needs to apply the pilot database baseline before teachers use observations.';
+  }
+
+  if (message.includes('relation') && message.includes('does not exist')) {
+    return 'The tracker database is missing a required table. Many Petals needs to apply the pilot database baseline before teachers use pupil records.';
+  }
+
   return err?.message || fallback;
 };
 
@@ -151,7 +164,7 @@ export default function TrackerScreen() {
       setParentShareApprovals([]);
       setParentProgressSummaries([]);
     }
-  }, [user]);
+  }, [user, showToast]);
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -164,6 +177,10 @@ export default function TrackerScreen() {
         loadParentShareApprovals(user.id),
         loadParentProgressSummaries(user.id),
       ]);
+      if (pupilRes.error) throw pupilRes.error;
+      if (assessRes.error) throw assessRes.error;
+      if (emotionRes.error) throw emotionRes.error;
+
       if (pupilRes.data) setPupils(pupilRes.data);
       if (assessRes.data) setAssessments(assessRes.data);
       if (emotionRes.data) setEmotionLogs(emotionRes.data);
@@ -171,9 +188,10 @@ export default function TrackerScreen() {
       setParentProgressSummaries(summaries);
     } catch (err) {
       console.error('Error loading tracker data:', err);
+      showToast('Tracker Not Ready', getFriendlyTrackerError(err, 'Could not load tracker data.'), 'error');
     }
     setLoading(false);
-  }, [user]);
+  }, [user, showToast]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

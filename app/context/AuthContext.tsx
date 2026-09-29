@@ -98,6 +98,14 @@ function getFriendlyAuthError(message: string): string {
     return 'The account email service has reached its sending limit. Please wait before trying again. For the school pilot, Many Petals must enable a dedicated email sender before inviting teachers.';
   }
 
+  if (normalised.includes('permission denied') || normalised.includes('row-level security') || normalised.includes('rls')) {
+    return 'The teacher account database is not ready yet. Many Petals needs to apply the pilot database permissions fix before inviting teachers.';
+  }
+
+  if (normalised.includes('relation') && normalised.includes('does not exist')) {
+    return 'The teacher account database is missing a required table. Many Petals needs to apply the pilot database baseline before inviting teachers.';
+  }
+
   return message;
 }
 

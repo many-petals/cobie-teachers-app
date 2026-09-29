@@ -242,110 +242,19 @@ Configure your Supabase project in `app/lib/supabase.ts` with your project URL a
 
 ## Database Schema (Supabase)
 
-The following tables are required for the Pupil Tracker:
+The live app uses these Supabase tables:
 
-```sql
--- Tracker Pupils (teacher-chosen pupil codes)
-CREATE TABLE tracker_pupils (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  display_code TEXT NOT NULL,
-  age_group TEXT CHECK (age_group IN ('EYFS', 'KS1')) NOT NULL,
-  sen_status BOOLEAN DEFAULT FALSE,
-  notes TEXT DEFAULT '',
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+- `teachers`
+- `favourites`
+- `completed_lessons`
+- `saved_calm_configs`
+- `tracker_pupils`
+- `tracker_assessments`
+- `tracker_emotion_logs`
 
--- Tracker Assessments (milestone ratings)
-CREATE TABLE tracker_assessments (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  pupil_id UUID REFERENCES tracker_pupils(id) ON DELETE CASCADE,
-  milestone_id TEXT NOT NULL,
-  area_id TEXT NOT NULL,
-  rating INTEGER CHECK (rating BETWEEN 1 AND 4) NOT NULL,
-  scale_version SMALLINT NOT NULL DEFAULT 1 CHECK (scale_version IN (1, 2)),
-  term TEXT NOT NULL,
-  academic_year TEXT NOT NULL,
-  assessed_at TIMESTAMPTZ DEFAULT NOW()
-);
+Apply [`migrations/20260929_pilot_database_baseline.sql`](migrations/20260929_pilot_database_baseline.sql) from the database owner's SQL console before inviting pilot schools. The baseline creates the required tables where missing, enables row-level security, grants authenticated access, adds per-teacher policies, and installs `save_tracker_observations` for tracker saves.
 
--- Tracker Emotion Logs
-CREATE TABLE tracker_emotion_logs (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  pupil_id UUID REFERENCES tracker_pupils(id) ON DELETE CASCADE,
-  emotion_id TEXT NOT NULL,
-  emotion_name TEXT NOT NULL,
-  context TEXT DEFAULT '',
-  notes TEXT DEFAULT '',
-  logged_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- User Profiles
-CREATE TABLE user_profiles (
-  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-  name TEXT,
-  role TEXT DEFAULT 'EYFS Teacher',
-  school TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Favourites
-CREATE TABLE user_favourites (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  resource_type TEXT NOT NULL,
-  resource_id TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(user_id, resource_type, resource_id)
-);
-
--- Completed Lessons
-CREATE TABLE user_completed_lessons (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  lesson_id TEXT NOT NULL,
-  completed_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(user_id, lesson_id)
-);
-
--- Saved Calm Configurations
-CREATE TABLE user_calm_configs (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  emotion TEXT NOT NULL,
-  noise TEXT NOT NULL,
-  time_available INTEGER NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Enable Row Level Security on all tables
-ALTER TABLE tracker_pupils ENABLE ROW LEVEL SECURITY;
-ALTER TABLE tracker_assessments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE tracker_emotion_logs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_favourites ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_completed_lessons ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_calm_configs ENABLE ROW LEVEL SECURITY;
-
--- RLS Policies (users can only access their own data)
-CREATE POLICY "Users can manage own data" ON tracker_pupils
-  FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own data" ON tracker_assessments
-  FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own data" ON tracker_emotion_logs
-  FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own profile" ON user_profiles
-  FOR ALL USING (auth.uid() = id);
-CREATE POLICY "Users can manage own data" ON user_favourites
-  FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own data" ON user_completed_lessons
-  FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own data" ON user_calm_configs
-  FOR ALL USING (auth.uid() = user_id);
-```
+After applying the migration, verify the account journey with two disposable teacher accounts before entering real pupil records: signup, confirmation email, password reset, tracker save, observation save, emotion log save, parent report generation, cross-account isolation, deletion, Stripe checkout, access refresh, sign-out/sign-in, billing portal and cancellation.
 
 ---
 

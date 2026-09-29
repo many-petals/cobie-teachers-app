@@ -6,7 +6,7 @@ The approved correction pass is implemented in this working copy and has passed 
 
 The privacy-policy date remains a deployment placeholder. Set it to the actual production deployment date immediately before publishing.
 
-The observation-scale migration is prepared at `migrations/20260916_observation_scale.sql`. It has not been applied to the live DatabasePad service in this environment. Do not publish the new editor until the migration and its RPC have been applied and verified in a disposable test account.
+The pilot database baseline is prepared at `migrations/20260929_pilot_database_baseline.sql`. It includes the account/profile tables, tracker tables, row-level policies and observation RPC needed for the current app. It has not been applied to the live DatabasePad service in this environment. Do not invite pilot schools until the baseline has been applied and verified with disposable teacher accounts.
 
 ## Implemented
 
@@ -48,7 +48,7 @@ No real checkout, payment, cancellation, auth-account mutation or pupil-record m
 - `npm run build`: Expo production web export.
 - Browser: free Lesson 1 player, locked Lesson 5 direct URL, expandable Lesson 5 outline, eight-lesson upgrade copy, and sign-in gate before checkout.
 
-Still required: dedicated auth email sending for the pilot, then a real test-mode signup → confirmation email → password recovery → checkout → access → sign-out/in → cancellation journey, cross-account database isolation tests using disposable records, printing on school devices, and verified deletion/retention/backup procedures. An automated build does not establish any of these.
+Still required: apply `migrations/20260929_pilot_database_baseline.sql`, configure dedicated auth email sending for the pilot, then run a real test-mode signup → confirmation email → password recovery → checkout → access → sign-out/in → cancellation journey, cross-account database isolation tests using disposable records, printing on school devices, and verified deletion/retention/backup procedures. An automated build does not establish any of these.
 
 The locked dependency installation reported 41 npm audit findings (1 low, 19 moderate, 19 high, 2 critical). These are untriaged dependency findings, not confirmed production exploits. Review dependency paths and deployment exposure separately; no blanket breaking upgrade was applied.
 
