@@ -25,7 +25,6 @@ const CATEGORY_FILTERS = [
   { label: 'Cards', value: 'card', icon: 'albums' },
   { label: 'Checklists', value: 'checklist', icon: 'checkbox' },
   { label: 'Scripts', value: 'script', icon: 'reader' },
-  { label: 'Displays', value: 'display', icon: 'easel' },
 ];
 
 const AGE_FILTERS = [

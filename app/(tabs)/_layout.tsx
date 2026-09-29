@@ -112,7 +112,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="parents"
         options={{
-          href: null,
+          title: '',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

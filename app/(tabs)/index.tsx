@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   Modal,
   useWindowDimensions,
+  Linking,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -24,22 +25,21 @@ import { ACTIVITIES } from '../data/activities';
 import { PRINTABLES } from '../data/printables';
 import { BRAND } from '../data/brand';
 import { LITTLE_PETALS_BOOK_MODULES } from '../data/bookModules';
-import { openParentApp, ParentAppSection } from '../lib/parentAppLinks';
+
 
 const HERO_CHARACTER_IMAGE = require('../assets/images/cobie-hero.png');
-
+const COBIE_BOOK_URL = 'https://manypetals.com/shop/';
 type HeaderLinkConfig = {
   label: string;
   route?: string;
-  externalSection?: ParentAppSection;
 };
 
 const HEADER_LINKS: HeaderLinkConfig[] = [
   { label: 'Lessons', route: '/lessons' },
   { label: 'Activities', route: '/activities' },
   { label: 'Printables', route: '/printables' },
-  { label: 'Tracker', externalSection: 'tracker' },
-  { label: 'Parents', externalSection: 'home' },
+  { label: 'Tracker', route: '/tracker' },
+  { label: 'Parents', route: '/parents' },
 ];
 
 const TEACHER_FLOW = [
@@ -363,11 +363,6 @@ export default function HomeScreen() {
   }, []);
 
   const handleHeaderLinkPress = async (link: HeaderLinkConfig) => {
-    if (link.externalSection) {
-      await openParentApp(link.externalSection);
-      return;
-    }
-
     if (link.route) {
       router.push(link.route as any);
     }
@@ -608,10 +603,10 @@ export default function HomeScreen() {
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.bookSecondaryButton}
-                      onPress={() => {}}
-                      disabled
+                      onPress={() => { void Linking.openURL(COBIE_BOOK_URL); }}
+                      activeOpacity={0.75}
                     >
-                      <Text style={styles.bookSecondaryButtonText}>Book link coming soon</Text>
+                      <Text style={styles.bookSecondaryButtonText}>Buy Cobie book</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -663,11 +658,11 @@ export default function HomeScreen() {
               <Text style={styles.footerLink}>Printables</Text>
             </TouchableOpacity>
             <Text style={styles.footerDot}>|</Text>
-            <TouchableOpacity onPress={() => { openParentApp('home').catch(() => {}); }}>
+            <TouchableOpacity onPress={() => router.push('/parents' as any)}>
               <Text style={styles.footerLink}>Parents</Text>
             </TouchableOpacity>
             <Text style={styles.footerDot}>|</Text>
-            <TouchableOpacity onPress={() => { openParentApp('tracker').catch(() => {}); }}>
+            <TouchableOpacity onPress={() => router.push('/tracker' as any)}>
               <Text style={styles.footerLink}>Tracker</Text>
             </TouchableOpacity>
           </View>
