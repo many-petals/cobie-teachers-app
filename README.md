@@ -254,7 +254,7 @@ The live app uses these Supabase tables:
 
 Apply [`migrations/20260929_pilot_database_baseline.sql`](migrations/20260929_pilot_database_baseline.sql) from the database owner's SQL console before inviting pilot schools. The baseline creates the required tables where missing, enables row-level security, grants authenticated access, adds per-teacher policies, and installs `save_tracker_observations` for tracker saves.
 
-After applying the migration, verify the account journey with two disposable teacher accounts before entering real pupil records: signup, confirmation email, password reset, tracker save, observation save, emotion log save, parent report generation, cross-account isolation, deletion, Stripe checkout, access refresh, sign-out/sign-in, billing portal and cancellation.
+After applying the migration, run [`migrations/20260929_pilot_database_verify.sql`](migrations/20260929_pilot_database_verify.sql). Every row should return `ok`. Then verify the account journey with two disposable teacher accounts before entering real pupil records: signup, confirmation email, password reset, tracker save, observation save, emotion log save, parent report generation, cross-account isolation, deletion, Stripe checkout, access refresh, sign-out/sign-in, billing portal and cancellation.
 
 ---
 

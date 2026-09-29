@@ -48,7 +48,7 @@ No real checkout, payment, cancellation, auth-account mutation or pupil-record m
 - `npm run build`: Expo production web export.
 - Browser: free Lesson 1 player, locked Lesson 5 direct URL, expandable Lesson 5 outline, eight-lesson upgrade copy, and sign-in gate before checkout.
 
-Still required: apply `migrations/20260929_pilot_database_baseline.sql`, configure dedicated auth email sending for the pilot, then run a real test-mode signup → confirmation email → password recovery → checkout → access → sign-out/in → cancellation journey, cross-account database isolation tests using disposable records, printing on school devices, and verified deletion/retention/backup procedures. An automated build does not establish any of these.
+Still required: apply `migrations/20260929_pilot_database_baseline.sql`, run `migrations/20260929_pilot_database_verify.sql` until every row returns `ok`, configure dedicated auth email sending for the pilot, then run a real test-mode signup → confirmation email → password recovery → checkout → access → sign-out/in → cancellation journey, cross-account database isolation tests using disposable records, printing on school devices, and verified deletion/retention/backup procedures. An automated build does not establish any of these.
 
 The locked dependency installation reported 41 npm audit findings (1 low, 19 moderate, 19 high, 2 critical). These are untriaged dependency findings, not confirmed production exploits. Review dependency paths and deployment exposure separately; no blanket breaking upgrade was applied.
 
