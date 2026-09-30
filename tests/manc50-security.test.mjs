@@ -36,7 +36,18 @@ test('new checkout is authenticated, account-bound and capacity-reserved before 
   assert.match(checkout, /manc50-checkout-\$\{reservation\.id\}/);
   assert.match(checkout, /expires_at:\s*String\(Math\.floor\(Date\.now\(\) \/ 1000\) \+ 35 \* 60\)/);
   assert.match(checkout, /typeof error\.message === 'string'/);
+  assert.match(checkout, /allowedSettingTypes/);
+  assert.match(checkout, /servesAgesThreeToSeven/);
+  assert.match(checkout, /p_postcode:\s*postcode/);
+  assert.match(checkout, /p_setting_type:\s*settingType/);
+  assert.match(checkout, /p_serves_ages_3_7:\s*servesAgesThreeToSeven/);
+  assert.match(checkout, /Enter a valid UK school or setting postcode/);
+  assert.match(checkout, /canonicalSchoolKey\(schoolName, postcode\)/);
   assert.match(buyScreen, /Sign in to continue/);
+  assert.match(buyScreen, /School or setting postcode/);
+  assert.match(buyScreen, /I confirm this setting serves children aged 3–7/);
+  assert.match(buyScreen, /ScrollView/);
+  assert.doesNotMatch(buyScreen, /school_key:/);
   assert.doesNotMatch(buyScreen, /contact_email:/);
 });
 
@@ -51,6 +62,20 @@ test('release controls prevent overselling and make paid access recoverable by a
   assert.match(migration, /create or replace function public\.get_manc50_pilot_metrics/i);
   assert.match(migration, /revoke all on function public\.reserve_manc50_checkout/i);
   assert.match(migration, /grant execute on function public\.get_manc50_pilot_metrics\(\) to service_role/i);
+});
+
+test('eligibility is enforced by the server and retained for SEND-first reporting', async () => {
+  const migration = await read('../migrations/20260930_manc50_eligibility.sql');
+  const verify = await read('../migrations/20260930_manc50_eligibility_verify.sql');
+  assert.match(migration, /p_serves_ages_3_7 is distinct from true/i);
+  assert.match(migration, /p_setting_type not in/i);
+  assert.match(migration, /A valid UK school or setting postcode is required/i);
+  assert.match(migration, /send_priority/i);
+  assert.match(migration, /sync_manc50_school_eligibility_after_conversion/i);
+  assert.match(migration, /drop function if exists public\.reserve_manc50_checkout\(uuid, text, text, text, text\)/i);
+  assert.match(migration, /grant execute on function public\.reserve_manc50_checkout\(uuid, text, text, text, text, text, text, boolean\)\s+to service_role/i);
+  assert.match(verify, /eligibility_rpc_private/i);
+  assert.match(verify, /legacy_rpc_removed/i);
 });
 
 test('webhook finalizes reserved checkout and retains legacy paid-session support', async () => {
