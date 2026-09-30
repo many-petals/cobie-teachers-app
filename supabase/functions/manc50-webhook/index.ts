@@ -42,6 +42,9 @@ Deno.serve(async (request) => {
 
     const session = event.data.object;
     if (session.payment_status !== 'paid' || session.metadata?.cohort !== 'MANC50') return new Response(JSON.stringify({ received: true }));
+    if (session.amount_total !== 500 || String(session.currency ?? '').toLowerCase() !== 'gbp') {
+      return new Response('Invalid MANC50 amount or currency', { status: 400 });
+    }
 
     const supabase = createClient(required('SUPABASE_URL'), required('SUPABASE_SERVICE_ROLE_KEY'));
     const reservationId = session.metadata?.reservation_id;
@@ -50,6 +53,8 @@ Deno.serve(async (request) => {
           p_reservation_id: reservationId,
           p_stripe_checkout_session_id: session.id,
           p_stripe_payment_intent_id: session.payment_intent,
+          p_amount_total: session.amount_total,
+          p_currency: session.currency,
           p_idempotency_key: `stripe:${event.id}`,
         })
       : await supabase.rpc('create_manc50_entitlement', {

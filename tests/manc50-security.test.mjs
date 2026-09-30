@@ -36,19 +36,20 @@ test('new checkout is authenticated, account-bound and capacity-reserved before 
   assert.match(checkout, /manc50-checkout-\$\{reservation\.id\}/);
   assert.match(checkout, /expires_at:\s*String\(Math\.floor\(Date\.now\(\) \/ 1000\) \+ 35 \* 60\)/);
   assert.match(checkout, /typeof error\.message === 'string'/);
-  assert.match(checkout, /allowedSettingTypes/);
-  assert.match(checkout, /servesAgesThreeToSeven/);
-  assert.match(checkout, /p_postcode:\s*postcode/);
-  assert.match(checkout, /p_setting_type:\s*settingType/);
-  assert.match(checkout, /p_serves_ages_3_7:\s*servesAgesThreeToSeven/);
-  assert.match(checkout, /Enter a valid UK school or setting postcode/);
-  assert.match(checkout, /canonicalSchoolKey\(schoolName, postcode\)/);
+  assert.match(checkout, /p_dfe_urn:\s*schoolUrn/);
+  assert.match(checkout, /client_reference_id:\s*reservation\.school_key/);
+  assert.match(checkout, /metadata\[dfe_urn\]/);
+  assert.match(checkout, /customer_email:\s*contactEmail/);
   assert.match(buyScreen, /Sign in to continue/);
-  assert.match(buyScreen, /School or setting postcode/);
-  assert.match(buyScreen, /I confirm this setting serves children aged 3–7/);
+  assert.match(buyScreen, /School postcode/);
+  assert.match(buyScreen, /manc50-schools/);
+  assert.match(buyScreen, /school_urn:\s*selectedSchool\.dfe_urn/);
+  assert.match(buyScreen, /DfE URN/);
   assert.match(buyScreen, /ScrollView/);
   assert.doesNotMatch(buyScreen, /school_key:/);
   assert.doesNotMatch(buyScreen, /contact_email:/);
+  assert.doesNotMatch(buyScreen, /School or setting name/);
+  assert.doesNotMatch(buyScreen, /serves_ages_3_7/);
 });
 
 test('release controls prevent overselling and make paid access recoverable by account', async () => {
@@ -64,18 +65,43 @@ test('release controls prevent overselling and make paid access recoverable by a
   assert.match(migration, /grant execute on function public\.get_manc50_pilot_metrics\(\) to service_role/i);
 });
 
-test('eligibility is enforced by the server and retained for SEND-first reporting', async () => {
-  const migration = await read('../migrations/20260930_manc50_eligibility.sql');
-  const verify = await read('../migrations/20260930_manc50_eligibility_verify.sql');
-  assert.match(migration, /p_serves_ages_3_7 is distinct from true/i);
-  assert.match(migration, /p_setting_type not in/i);
-  assert.match(migration, /A valid UK school or setting postcode is required/i);
-  assert.match(migration, /send_priority/i);
-  assert.match(migration, /sync_manc50_school_eligibility_after_conversion/i);
-  assert.match(migration, /drop function if exists public\.reserve_manc50_checkout\(uuid, text, text, text, text\)/i);
-  assert.match(migration, /grant execute on function public\.reserve_manc50_checkout\(uuid, text, text, text, text, text, text, boolean\)\s+to service_role/i);
-  assert.match(verify, /eligibility_rpc_private/i);
-  assert.match(verify, /legacy_rpc_removed/i);
+test('eligibility is resolved from the approved Edubase master by DfE URN', async () => {
+  const migration = await read('../migrations/20261001_manc50_authoritative_identity_and_fulfilment.sql');
+  const verify = await read('../migrations/20261001_manc50_authoritative_identity_and_fulfilment_verify.sql');
+  const lookup = await read('../supabase/functions/manc50-schools/index.ts');
+  const seededUrns = [...migration.matchAll(/\((\d{6}), 'dfe-urn-\1'/g)].map((match) => match[1]);
+  assert.equal(seededUrns.length, 140);
+  assert.equal(new Set(seededUrns).size, 140);
+  assert.match(migration, /create table if not exists public\.manc50_eligible_schools/i);
+  assert.match(migration, /where dfe_urn = p_dfe_urn\s+and eligible_for_manc50 is true/i);
+  assert.match(migration, /v_source\.school_key/);
+  assert.match(migration, /drop function if exists public\.reserve_manc50_checkout\(uuid, text, text, text, text, text, text, boolean\)/i);
+  assert.match(migration, /grant execute on function public\.reserve_manc50_checkout\(uuid, text, integer, text\)\s+to service_role/i);
+  assert.match(lookup, /auth\.getUser\(token\)/);
+  assert.match(lookup, /from\('manc50_eligible_schools'\)/);
+  assert.match(lookup, /eq\('eligible_for_manc50', true\)/);
+  assert.match(verify, /eligible_school_count/);
+  assert.match(verify, /self_declared_reservation_rpc_removed/);
+});
+
+test('paid checkout creates one auditable order and physical fulfilment record', async () => {
+  const migration = await read('../migrations/20261001_manc50_authoritative_identity_and_fulfilment.sql');
+  const webhook = await read('../supabase/functions/manc50-webhook/index.ts');
+  assert.match(migration, /create table if not exists public\.manc50_orders/i);
+  assert.match(migration, /create table if not exists public\.manc50_fulfilments/i);
+  assert.match(migration, /amount_total integer not null check \(amount_total = 500\)/i);
+  assert.match(migration, /insert into public\.manc50_orders/i);
+  assert.match(migration, /insert into public\.manc50_fulfilments/i);
+  assert.match(migration, /create or replace function public\.update_manc50_fulfilment/i);
+  assert.match(migration, /Carrier and tracking reference are required for dispatch/i);
+  assert.match(migration, /Invalid fulfilment transition from % to %/i);
+  assert.match(migration, /v_current\.status = 'pending' and p_status in \('preparing', 'issue', 'cancelled', 'refunded'\)/i);
+  assert.match(migration, /create or replace function public\.get_manc50_fulfilment_queue\(\)/i);
+  assert.match(migration, /fulfilment\.dispatch_due_at < now\(\) as is_overdue/i);
+  assert.match(migration, /revoke all on function public\.get_manc50_fulfilment_queue\(\)[\s\S]*from public, anon, authenticated/i);
+  assert.match(webhook, /session\.amount_total !== 500/);
+  assert.match(webhook, /p_amount_total:\s*session\.amount_total/);
+  assert.match(webhook, /p_currency:\s*session\.currency/);
 });
 
 test('webhook finalizes reserved checkout and retains legacy paid-session support', async () => {
@@ -83,6 +109,7 @@ test('webhook finalizes reserved checkout and retains legacy paid-session suppor
   assert.match(source, /metadata\?\.reservation_id/);
   assert.match(source, /finalize_manc50_checkout/);
   assert.match(source, /create_manc50_entitlement/);
+  assert.match(source, /Invalid MANC50 amount or currency/);
 });
 
 test('measurement verifies the signed-in account and cannot use another entitlement', async () => {
@@ -130,7 +157,9 @@ test('pilot entry screens expose labels and the published support contact', asyn
   const buy = await read('../app/manc50-buy.tsx');
   const activate = await read('../app/manc50-activate.tsx');
   const privacy = await read('../app/privacy.tsx');
-  assert.match(buy, /accessibilityLabel="School or setting name"/);
+  assert.match(buy, /accessibilityLabel="School postcode"/);
+  assert.match(buy, /accessibilityRole="radio"/);
+  assert.match(buy, /accessibilityLiveRegion="polite"/);
   assert.match(activate, /accessibilityLabel="Older activation token, optional"/);
   assert.match(privacy, /info@manypetals\.co\.uk/);
   assert.doesNotMatch(privacy, /manypetalslearning\.co\.uk/);

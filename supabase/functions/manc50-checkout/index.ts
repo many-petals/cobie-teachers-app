@@ -6,14 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-const allowedSettingTypes = new Set([
-  'Special school',
-  'SEND provision',
-  'Mainstream primary',
-  'Nursery / early years',
-  'Other eligible setting',
-]);
-
 function required(name: string): string {
   const value = Deno.env.get(name);
   if (!value) throw new Error(`Missing ${name}`);
@@ -36,14 +28,6 @@ function errorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') return error.message;
   return String(error);
-}
-
-function canonicalSchoolKey(schoolName: string, postcode: string): string {
-  return `${schoolName}-${postcode.replace(/\s/g, '')}`
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 64);
 }
 
 async function stripePost(path: string, params: Record<string, string>, idempotencyKey: string) {
@@ -76,34 +60,22 @@ Deno.serve(async (request) => {
     if (!user.email_confirmed_at) return json({ error: 'Confirm your email address before starting checkout.' }, 403);
 
     const body = await request.json();
-    const schoolName = String(body.school_name ?? '').trim();
-    const postcode = String(body.postcode ?? '').trim().toUpperCase().replace(/\s+/g, ' ');
-    const settingType = String(body.setting_type ?? '').trim();
-    const servesAgesThreeToSeven = body.serves_ages_3_7 === true;
+    const schoolUrn = Number(body.school_urn);
     const contactEmail = user.email.trim().toLowerCase();
     const successUrl = required('MANC50_SUCCESS_URL');
     const cancelUrl = required('MANC50_CANCEL_URL');
     const checkoutAttemptId = String(body.checkout_attempt_id ?? '').trim();
 
-    if (!schoolName || !successUrl || !cancelUrl) throw new Error('Missing checkout details');
-    if (!/^(GIR0AA|[A-Z]{1,2}[0-9][A-Z0-9]?[0-9][A-Z]{2})$/.test(postcode.replace(/\s/g, ''))) {
-      return json({ error: 'Enter a valid UK school or setting postcode.' }, 400);
+    if (!Number.isInteger(schoolUrn) || schoolUrn < 100000 || schoolUrn > 999999) {
+      return json({ error: 'Choose an eligible school from the postcode search.' }, 400);
     }
-    if (!allowedSettingTypes.has(settingType)) return json({ error: 'Choose an eligible setting type.' }, 400);
-    if (!servesAgesThreeToSeven) return json({ error: 'MANC50 is currently for settings serving children aged 3-7.' }, 400);
     if (!/^[a-zA-Z0-9_-]{8,80}$/.test(checkoutAttemptId)) throw new Error('Invalid checkout_attempt_id');
-    const schoolKey = canonicalSchoolKey(schoolName, postcode);
-    if (!/^[a-z0-9][a-z0-9-]{2,63}$/.test(schoolKey)) throw new Error('Invalid school identity');
 
     const { data: reservation, error: reservationError } = await serviceClient.rpc('reserve_manc50_checkout', {
       p_user_id: user.id,
       p_checkout_attempt_id: checkoutAttemptId,
-      p_school_key: schoolKey,
-      p_school_name: schoolName,
+      p_dfe_urn: schoolUrn,
       p_contact_email: contactEmail,
-      p_postcode: postcode,
-      p_setting_type: settingType,
-      p_serves_ages_3_7: servesAgesThreeToSeven,
     });
     if (reservationError || !reservation?.id) throw reservationError ?? new Error('Checkout reservation failed');
     if (reservation.checkout_url) return json({ checkout_url: reservation.checkout_url });
@@ -113,16 +85,16 @@ Deno.serve(async (request) => {
       mode: 'payment',
       'line_items[0][price]': required('MANC50_STRIPE_PRICE_ID'),
       'line_items[0][quantity]': '1',
-      'client_reference_id': schoolKey,
+      customer_email: contactEmail,
+      client_reference_id: reservation.school_key,
       'metadata[cohort]': 'MANC50',
       'metadata[reservation_id]': reservation.id,
       'metadata[user_id]': user.id,
-      'metadata[school_key]': schoolKey,
-      'metadata[school_name]': schoolName,
+      'metadata[dfe_urn]': String(reservation.dfe_urn),
+      'metadata[school_key]': reservation.school_key,
+      'metadata[school_name]': reservation.school_name,
       'metadata[contact_email]': contactEmail,
-      'metadata[postcode]': postcode,
-      'metadata[setting_type]': settingType,
-      'metadata[serves_ages_3_7]': 'true',
+      'metadata[delivery_postcode]': reservation.delivery_postcode,
       expires_at: String(Math.floor(Date.now() / 1000) + 35 * 60),
       success_url: successUrl,
       cancel_url: cancelUrl,
@@ -140,6 +112,7 @@ Deno.serve(async (request) => {
   } catch (error) {
     console.error('MANC50 checkout failed', error);
     const message = errorMessage(error);
+    if (/not eligible|eligible school/i.test(message)) return json({ error: 'That school is not currently eligible for MANC50.' }, 400);
     if (/pilot cap reached/i.test(message)) return json({ error: 'The 50-school pilot is currently full.' }, 409);
     if (/already has a MANC50 place/i.test(message)) return json({ error: 'This account or school already has a MANC50 place.' }, 409);
     if (/checkout is already in progress/i.test(message)) return json({ error: 'A checkout is already in progress for this account or school.' }, 409);
