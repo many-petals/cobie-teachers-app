@@ -49,8 +49,9 @@ interface AuthContextType {
   setShowAuthModal: (show: boolean) => void;
   showProfileModal: boolean;
   setShowProfileModal: (show: boolean) => void;
-  signUp: (email: string, password: string, name: string, school: string, role: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, name: string, school: string, role: string) => Promise<{ error: string | null; requiresEmailConfirmation?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  resendConfirmation: (email: string) => Promise<{ error: string | null }>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   clearUserData: () => Promise<{ error: string | null }>;
@@ -94,6 +95,10 @@ function getTeacherProfileFromMetadata(user: any): Pick<TeacherProfile, 'name' |
 function getFriendlyAuthError(message: string): string {
   const normalised = message.toLowerCase();
 
+  if (normalised.includes('email not confirmed')) {
+    return 'Confirm your email before signing in. Open the confirmation email from Cobie, click the link, then return here. Check your junk or spam folder if it is not in your inbox.';
+  }
+
   if (normalised.includes('email rate limit') || (normalised.includes('email') && normalised.includes('rate limit'))) {
     return 'The account email service has reached its sending limit. Please wait before trying again. For the school pilot, Many Petals must enable a dedicated email sender before inviting teachers.';
   }
@@ -107,6 +112,14 @@ function getFriendlyAuthError(message: string): string {
   }
 
   return message;
+}
+
+function authEmailRedirectTo(): string | undefined {
+  if (typeof window !== 'undefined' && typeof window.location?.origin === 'string') {
+    return window.location.origin;
+  }
+
+  return 'education-resources-support://';
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -402,6 +415,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email,
         password,
         options: {
+          emailRedirectTo: authEmailRedirectTo(),
           data: {
             name,
             school,
@@ -417,7 +431,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await loadAndMergeUserData(data.session.user);
       }
 
-      return { error: null };
+      return { error: null, requiresEmailConfirmation: !data.session };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendConfirmation = async (email: string) => {
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email.trim(),
+        options: {
+          emailRedirectTo: authEmailRedirectTo(),
+        },
+      });
+
+      return { error: error ? getFriendlyAuthError(error.message) : null };
     } finally {
       setLoading(false);
     }
@@ -708,6 +740,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setShowProfileModal,
         signUp,
         signIn,
+        resendConfirmation,
         resetPassword,
         signOut,
         clearUserData,

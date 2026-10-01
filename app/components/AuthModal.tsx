@@ -30,7 +30,7 @@ function isValidEmail(email: string) {
 }
 
 export default function AuthModal() {
-  const { showAuthModal, setShowAuthModal, signIn, signUp, resetPassword } = useAuth();
+  const { showAuthModal, setShowAuthModal, signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -41,6 +41,7 @@ export default function AuthModal() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [canResendConfirmation, setCanResendConfirmation] = useState(false);
 
   const resetForm = () => {
     setEmail('');
@@ -51,6 +52,7 @@ export default function AuthModal() {
     setError('');
     setSuccess('');
     setShowPassword(false);
+    setCanResendConfirmation(false);
   };
 
   const switchMode = (nextMode: AuthMode) => {
@@ -58,6 +60,7 @@ export default function AuthModal() {
     setError('');
     setSuccess('');
     setPassword('');
+    setCanResendConfirmation(false);
     if (nextMode !== 'signup') {
       setName('');
       setSchool('');
@@ -108,6 +111,7 @@ export default function AuthModal() {
       const result = await signIn(trimmedEmail, password);
       if (result.error) {
         setError(result.error);
+        setCanResendConfirmation(result.error.toLowerCase().includes('confirm your email'));
       } else {
         handleClose();
       }
@@ -115,14 +119,17 @@ export default function AuthModal() {
       const result = await signUp(trimmedEmail, password, name.trim(), school.trim(), role);
       if (result.error) {
         setError(result.error);
-      } else {
-        setSuccess('Account created. Please now sign in with your new account.');
+      } else if (result.requiresEmailConfirmation) {
+        setSuccess('Account created. We sent you a confirmation email. Open it and click the confirmation link before signing in. Check your junk or spam folder if needed.');
         setEmail(trimmedEmail);
         setPassword('');
         setName('');
         setSchool('');
         setRole('EYFS Teacher');
         setMode('login');
+        setCanResendConfirmation(true);
+      } else {
+        handleClose();
       }
     } else {
       const result = await resetPassword(trimmedEmail);
@@ -133,6 +140,26 @@ export default function AuthModal() {
       }
     }
 
+    setLoading(false);
+  };
+
+  const handleResendConfirmation = async () => {
+    const trimmedEmail = email.trim();
+    setError('');
+    setSuccess('');
+
+    if (!isValidEmail(trimmedEmail)) {
+      setError('Enter the email address used to create the account first.');
+      return;
+    }
+
+    setLoading(true);
+    const result = await resendConfirmation(trimmedEmail);
+    if (result.error) {
+      setError(result.error);
+    } else {
+      setSuccess('Confirmation email resent. Open it and click the link before signing in. Check your junk or spam folder too.');
+    }
     setLoading(false);
   };
 
@@ -316,14 +343,28 @@ export default function AuthModal() {
             </TouchableOpacity>
 
             {mode === 'login' ? (
-              <TouchableOpacity
-                style={styles.forgotPasswordButton}
-                onPress={() => switchMode('forgot-password')}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="help-circle-outline" size={16} color={COLORS.primary} />
-                <Text style={styles.forgotPasswordText}>Forgot your password? Reset it here</Text>
-              </TouchableOpacity>
+              <>
+                {canResendConfirmation ? (
+                  <TouchableOpacity
+                    style={styles.forgotPasswordButton}
+                    onPress={handleResendConfirmation}
+                    disabled={loading}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                  >
+                    <Ionicons name="mail-unread-outline" size={16} color={COLORS.primary} />
+                    <Text style={styles.forgotPasswordText}>Resend confirmation email</Text>
+                  </TouchableOpacity>
+                ) : null}
+                <TouchableOpacity
+                  style={styles.forgotPasswordButton}
+                  onPress={() => switchMode('forgot-password')}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="help-circle-outline" size={16} color={COLORS.primary} />
+                  <Text style={styles.forgotPasswordText}>Forgot your password? Reset it here</Text>
+                </TouchableOpacity>
+              </>
             ) : null}
 
             {mode === 'forgot-password' ? (

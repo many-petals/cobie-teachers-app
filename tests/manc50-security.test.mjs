@@ -27,6 +27,18 @@ test('activation lets a teacher sign in before requiring the token', async () =>
   assert.doesNotMatch(source, /disabled=\{[^}]*!token\.trim\(\)/);
 });
 
+test('new accounts are told to confirm email and can request a replacement link', async () => {
+  const authContext = await read('../app/context/AuthContext.tsx');
+  const authModal = await read('../app/components/AuthModal.tsx');
+  assert.match(authContext, /emailRedirectTo:\s*authEmailRedirectTo\(\)/);
+  assert.match(authContext, /requiresEmailConfirmation:\s*!data\.session/);
+  assert.match(authContext, /supabase\.auth\.resend\(\{[\s\S]*type:\s*'signup'/);
+  assert.match(authContext, /Confirm your email before signing in/);
+  assert.match(authModal, /Account created\. We sent you a confirmation email/);
+  assert.match(authModal, /Resend confirmation email/);
+  assert.match(authModal, /Check your junk or spam folder/);
+});
+
 test('new checkout is authenticated, account-bound and capacity-reserved before Stripe', async () => {
   const checkout = await read('../supabase/functions/manc50-checkout/index.ts');
   const buyScreen = await read('../app/manc50-buy.tsx');
