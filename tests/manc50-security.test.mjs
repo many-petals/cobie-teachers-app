@@ -54,6 +54,7 @@ test('new checkout is authenticated, account-bound and capacity-reserved before 
   assert.match(checkout, /customer_email:\s*contactEmail/);
   assert.match(buyScreen, /Sign in to continue/);
   assert.match(buyScreen, /School postcode/);
+  assert.match(buyScreen, /eligible Greater Manchester school/);
   assert.match(buyScreen, /manc50-schools/);
   assert.match(buyScreen, /school_urn:\s*selectedSchool\.dfe_urn/);
   assert.match(buyScreen, /DfE URN/);
@@ -80,10 +81,20 @@ test('release controls prevent overselling and make paid access recoverable by a
 test('eligibility is resolved from the approved Edubase master by DfE URN', async () => {
   const migration = await read('../migrations/20261001_manc50_authoritative_identity_and_fulfilment.sql');
   const verify = await read('../migrations/20261001_manc50_authoritative_identity_and_fulfilment_verify.sql');
+  const correction = await read('../migrations/20261001_manc50_priority_140_correction.sql');
+  const correctionVerify = await read('../migrations/20261001_manc50_priority_140_correction_verify.sql');
   const lookup = await read('../supabase/functions/manc50-schools/index.ts');
   const seededUrns = [...migration.matchAll(/\((\d{6}), 'dfe-urn-\1'/g)].map((match) => match[1]);
+  const correctedUrns = [...correction.matchAll(/\((\d{6}), 'dfe-urn-\1'/g)].map((match) => match[1]);
   assert.equal(seededUrns.length, 140);
   assert.equal(new Set(seededUrns).size, 140);
+  assert.equal(correctedUrns.length, 140);
+  assert.equal(new Set(correctedUrns).size, 140);
+  assert.ok(correctedUrns.includes('106322'));
+  assert.match(correction, /update public\.manc50_eligible_schools[\s\S]*eligible_for_manc50 = false/i);
+  assert.match(correction, /\(106322, 'dfe-urn-106322', 'Kings Road Primary School'[\s\S]*'M16 0GR'[\s\S]*'M160GR'/i);
+  assert.match(correctionVerify, /priority_140_exact_urn_set/);
+  assert.match(correctionVerify, /kings_road_primary_lookup/);
   assert.match(migration, /create table if not exists public\.manc50_eligible_schools/i);
   assert.match(migration, /where dfe_urn = p_dfe_urn\s+and eligible_for_manc50 is true/i);
   assert.match(migration, /v_source\.school_key/);

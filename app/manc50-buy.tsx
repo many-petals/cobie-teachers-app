@@ -114,7 +114,7 @@ export default function Manc50BuyScreen() {
         <View style={styles.card}>
           <Text style={styles.kicker}>MANC50 PILOT</Text>
           <Text style={styles.title}>Bring Cobie into your school</Text>
-          <Text style={styles.body}>A three-month starter access period for one eligible Manchester school serving children aged 3–7. Sign in first so payment, delivery, activation and recovery stay linked to the lead teacher account.</Text>
+          <Text style={styles.body}>A three-month starter access period for one eligible Greater Manchester school serving children aged 3–7. Sign in first so payment, delivery, activation and recovery stay linked to the lead teacher account.</Text>
 
           <Text style={styles.label}>School postcode</Text>
           <TextInput
