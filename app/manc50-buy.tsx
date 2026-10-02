@@ -61,19 +61,24 @@ export default function Manc50BuyScreen() {
     setMessage('');
     setSchools([]);
     setSelectedSchool(null);
-    const { data, error } = await supabase.functions.invoke('manc50-schools', {
-      body: { postcode: lookupPostcode },
-    });
-    setSearching(false);
+    try {
+      const { data, error } = await supabase.functions.invoke('manc50-schools', {
+        body: { postcode: lookupPostcode },
+      });
 
-    const matches = Array.isArray(data?.schools) ? data.schools as EligibleSchool[] : [];
-    if (error || !matches.length) {
-      setMessage(data?.error ?? 'No eligible MANC50 school was found at that postcode. Check the postcode or contact info@manypetals.co.uk.');
-      return;
+      const matches = Array.isArray(data?.schools) ? data.schools as EligibleSchool[] : [];
+      if (error || !matches.length) {
+        setMessage(data?.error ?? 'No eligible MANC50 school was found at that postcode. Check the postcode or contact info@manypetals.co.uk.');
+        return;
+      }
+      setSchools(matches);
+      if (matches.length === 1) setSelectedSchool(matches[0]);
+      setMessage(matches.length === 1 ? 'Eligible school found. Check the school and delivery address below.' : 'Choose the correct eligible school below.');
+    } catch {
+      setMessage('We could not check that postcode just now. Check your connection and try again.');
+    } finally {
+      setSearching(false);
     }
-    setSchools(matches);
-    if (matches.length === 1) setSelectedSchool(matches[0]);
-    setMessage(matches.length === 1 ? 'Eligible school found. Check the school and delivery address below.' : 'Choose the correct eligible school below.');
   };
 
   const beginCheckout = async () => {
@@ -89,22 +94,27 @@ export default function Manc50BuyScreen() {
 
     setLoading(true);
     setMessage('');
-    const { data, error } = await supabase.functions.invoke('manc50-checkout', {
-      body: {
-        checkout_attempt_id: checkoutAttemptId(),
-        school_urn: selectedSchool.dfe_urn,
-      },
-    });
-    setLoading(false);
-    if (error || !data?.checkout_url) {
-      setMessage(data?.error ?? 'Checkout is not available yet. Please try again later.');
-      return;
-    }
-    setMessage('Your secure checkout is ready. After payment, return to Cobie while signed in to activate access.');
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      window.location.assign(data.checkout_url);
-    } else {
-      await Linking.openURL(data.checkout_url);
+    try {
+      const { data, error } = await supabase.functions.invoke('manc50-checkout', {
+        body: {
+          checkout_attempt_id: checkoutAttemptId(),
+          school_urn: selectedSchool.dfe_urn,
+        },
+      });
+      if (error || !data?.checkout_url) {
+        setMessage(data?.error ?? 'Checkout is not available yet. Please try again later.');
+        return;
+      }
+      setMessage('Your secure checkout is ready. After payment, return to Cobie while signed in to activate access.');
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        window.location.assign(data.checkout_url);
+      } else {
+        await Linking.openURL(data.checkout_url);
+      }
+    } catch {
+      setMessage('We could not start secure checkout. Check your connection and try again. If it continues, contact info@manypetals.co.uk.');
+    } finally {
+      setLoading(false);
     }
   };
 

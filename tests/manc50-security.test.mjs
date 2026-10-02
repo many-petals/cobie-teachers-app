@@ -56,6 +56,8 @@ test('new checkout is authenticated, account-bound and capacity-reserved before 
   assert.match(buyScreen, /School postcode/);
   assert.match(buyScreen, /eligible Greater Manchester school/);
   assert.match(buyScreen, /manc50-schools/);
+  assert.match(buyScreen, /We could not start secure checkout/);
+  assert.match(buyScreen, /finally \{\s*setLoading\(false\)/);
   assert.match(buyScreen, /school_urn:\s*selectedSchool\.dfe_urn/);
   assert.match(buyScreen, /DfE URN/);
   assert.match(buyScreen, /ScrollView/);
