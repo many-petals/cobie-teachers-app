@@ -1,17 +1,17 @@
 # MANC50 Project 1 release gate
 
-Last audited: 1 October 2026
+Last audited: 2 October 2026
 
 Broad acquisition is **not approved** until every required gate below is proven in the live system and the small-school validation is complete.
 
 | Gate | Current evidence | Status | Required proof before rollout |
 | --- | --- | --- | --- |
-| £5 payment | Live Stripe checkout and paid test records exist. The safer account-bound checkout is committed in `7146b7c`. | In progress | Deploy backend functions and app; complete a fresh end-to-end payment test or a controlled equivalent without creating an unfulfilled charge. |
+| £5 payment | Live Stripe checkout and paid test records exist. The safer account-bound checkout is committed in `7146b7c`; production now includes client-side recovery if a checkout request cannot complete (`92536b9`). | In progress | Complete a fresh account-bound end-to-end checkout through to the Stripe-hosted page, then a controlled payment/fulfilment/activation test without leaving an unfulfilled charge. |
 | Entitlement creation | Five live entitlements exist; webhook signature verification and idempotency are implemented. | In progress | Prove one new reserved checkout converts exactly once, including webhook replay. |
 | Account-bound activation | Live database account-binding migration and release-controls migration applied. Release controls passed 9/9 checks. | In progress | Deploy the updated activation function; activate with the confirmed lead-teacher account; verify account binding in SQL. |
 | Access enforcement | Billing API grants pilot access only to the matching signed-in user and an unexpired activated entitlement. Offline tests pass. | In progress | Verify allowed access, refresh, sign-out denial, second-account denial and sign-in restoration in production. |
 | 50-school cap | Database now reserves capacity before payment under an advisory lock and counts paid plus active reservations. Live database checks show 5 paid, 0 reservations, no cap breach. | In progress | Deploy checkout/webhook functions; exercise reservation, expiry/retry and friendly full-cap response without charging a 51st school. |
-| Eligibility and SEND priority | The authoritative identity controls are live. A production postcode test exposed that the first seed used a Manchester-local-authority list instead of the signed-off Greater Manchester Priority 140. The corrective migration now uses the exact 140-school shortlist: 44 specialist settings, 95 other SEND-priority settings and one local age-fit setting (Kings Road Primary School, rank 140). Checkout resolves a postcode to canonical Edubase records and submits only the selected URN. | In progress | Apply and verify `20261001_manc50_priority_140_correction.sql`; prove Kings Road (`M16 0GR`) resolves in production, then re-run approved, unlisted and malformed URN checks server-side. |
+| Eligibility and SEND priority | The authoritative identity controls are live. The correction has been applied and verified in production: the exact 140-school Greater Manchester Priority cohort has 44 specialist settings, 95 other SEND-priority settings and one local age-fit setting. Kings Road Primary School (`M16 0GR`, URN `106322`, rank 140) now resolves in the live postcode lookup. Checkout submits only the selected canonical URN. | In progress | Re-run approved, unlisted and malformed URN checks server-side, and preserve their live results with the release evidence. |
 | Analytics and active use | `activated`, one-time `first_value` and per-lesson/day `qualifying_use` events are implemented; service-only metrics include seven-day active schools. | In progress | Deploy, complete a lesson, verify one first-value event, a qualifying-use event, idempotency and live metrics. |
 | Security | RLS and account ownership checks are active. Reservation data is inaccessible to browser roles; release-control functions are service-role only. A non-breaking dependency refresh reduced the npm audit from 183 findings (including 3 critical and 59 high) to 20 findings (0 critical, 2 high); the two remaining high findings are transitive Expo build-tool dependencies whose automated fix requires a breaking framework upgrade. | In progress | Re-run the full security verification after all migrations/functions deploy; test cross-account denial and malformed/unsigned webhook requests. Complete a separately tested Expo SDK/toolchain upgrade before treating the residual build-time audit findings as closed. |
 | Privacy | Notice distinguishes pseudonymisation, school approval and provider uncertainty. Contact is aligned to the published `info@manypetals.co.uk`. | In progress | Confirm the mailbox is monitored; document hosting location, subprocessors, DPA, retention, backup/restore and account-deletion operations before real pupil data. |
@@ -26,6 +26,8 @@ Broad acquisition is **not approved** until every required gate below is proven 
 - `npm test`: 44/44 passing after the exact Priority 140 cohort correction, authoritative DfE identity, verified-price order creation and physical fulfilment controls were added.
 - `npx tsc --noEmit`: passing after the same changes.
 - `npm run build`: 72 static routes exported successfully, including `/manc50-feedback`.
+- Production web deployment `92536b9` is Ready on Vercel; the public bundle contains the current Greater Manchester copy and explicit checkout/lookup error recovery.
+- Live cohort correction verification: 140 approved schools, exact URN-set checksum `44371b5d6c049229cbc888696b39ce03`, tier counts `44/95/1`, and Kings Road (`106322`, `M16 0GR`) eligible.
 - Non-forced dependency remediation: npm audit reduced from 183 findings to 20 (0 critical, 2 high, 18 moderate); the full automated test, type-check and production-build suite still passes. No breaking `npm audit fix --force` changes were accepted.
 - Live release-controls SQL verification: 9 checks, 9 pass, 0 fail.
 
