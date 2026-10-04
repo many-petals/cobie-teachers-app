@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Linking } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from './context/AuthContext';
 import { LESSONS } from './data/lessons';
@@ -11,6 +11,7 @@ export default function UpgradeScreen() {
   const { user, loading, setShowAuthModal, hasFullAccess, billingLoading, billingError, billingStatus, refreshBilling } = useAuth();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const billingUnavailable = Boolean(error || billingError);
 
   useEffect(() => {
     if (!user || checkout !== 'success') return;
@@ -41,13 +42,20 @@ export default function UpgradeScreen() {
         <Text style={styles.message}>We have not confirmed access yet. If you completed checkout, use Check access again before starting another subscription.</Text>
       ) : null}
       {checkout === 'cancelled' ? <Text style={styles.message}>Checkout was cancelled. You can continue using the free preview.</Text> : null}
-      {error || billingError ? <Text accessibilityRole="alert" style={styles.error}>{error || billingError}</Text> : null}
-      {!hasFullAccess ? (
+      {billingUnavailable ? <Text accessibilityRole="alert" style={styles.error}>{error || billingError}</Text> : null}
+      {billingUnavailable ? (
+        <>
+          <Text style={styles.message}>Secure checkout cannot be started right now. Please do not try a new purchase. You can still use the free preview while we restore billing.</Text>
+          <TouchableOpacity accessibilityRole="button" onPress={() => Linking.openURL('mailto:info@manypetals.co.uk?subject=Cobie%20Teacher%20Pack%20billing%20support')}>
+            <Text style={styles.link}>Contact Many Petals support</Text>
+          </TouchableOpacity>
+        </>
+      ) : !hasFullAccess ? (
         <TouchableOpacity accessibilityRole="button" disabled={busy || loading || billingLoading} style={styles.button} onPress={() => void handleBilling('checkout')}>
           <Text style={styles.buttonText}>{busy ? 'Opening secure checkout…' : user ? 'Continue to secure checkout' : 'Sign in to upgrade'}</Text>
         </TouchableOpacity>
       ) : null}
-      {!hasFullAccess ? <Text style={styles.message}>New subscribers receive a 14-day trial. Stripe shows the price, first payment date and subscription terms before you confirm. Returning subscribers may not be eligible for another trial.</Text> : null}
+      {!hasFullAccess && !billingUnavailable ? <Text style={styles.message}>New subscribers receive a 14-day trial. Stripe shows the price, first payment date and subscription terms before you confirm. Returning subscribers may not be eligible for another trial.</Text> : null}
       {billingStatus?.canManageBilling ? (
         <TouchableOpacity accessibilityRole="button" disabled={busy} style={styles.button} onPress={() => void handleBilling('portal')}>
           <Text style={styles.buttonText}>Manage billing or cancel</Text>
