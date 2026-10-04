@@ -48,6 +48,8 @@ test('new checkout is authenticated, account-bound and capacity-reserved before 
   assert.match(checkout, /manc50-checkout-\$\{reservation\.id\}/);
   assert.match(checkout, /expires_at:\s*String\(Math\.floor\(Date\.now\(\) \/ 1000\) \+ 35 \* 60\)/);
   assert.match(checkout, /typeof error\.message === 'string'/);
+  assert.match(checkout, /checkoutFailureMessage/);
+  assert.match(checkout, /MANC50 £5 Stripe price is not connected to the live Stripe account yet/);
   assert.match(checkout, /p_dfe_urn:\s*schoolUrn/);
   assert.match(checkout, /client_reference_id:\s*reservation\.school_key/);
   assert.match(checkout, /metadata\[dfe_urn\]/);
@@ -57,6 +59,8 @@ test('new checkout is authenticated, account-bound and capacity-reserved before 
   assert.match(buyScreen, /eligible Greater Manchester school/);
   assert.match(buyScreen, /manc50-schools/);
   assert.match(buyScreen, /We could not start secure checkout/);
+  assert.match(buyScreen, /edgeFunctionMessage/);
+  assert.match(buyScreen, /await edgeFunctionMessage\(error/);
   assert.match(buyScreen, /finally \{\s*setLoading\(false\)/);
   assert.match(buyScreen, /school_urn:\s*selectedSchool\.dfe_urn/);
   assert.match(buyScreen, /DfE URN/);

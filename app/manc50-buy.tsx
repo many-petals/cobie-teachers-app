@@ -28,6 +28,34 @@ function schoolAddress(school: EligibleSchool): string {
   return [school.address_line_1, school.locality, school.town, school.postcode].filter(Boolean).join(', ');
 }
 
+async function edgeFunctionMessage(error: unknown, fallback: string): Promise<string> {
+  if (!error || typeof error !== 'object') return fallback;
+
+  const candidate = error as {
+    message?: unknown;
+    context?: {
+      json?: () => Promise<unknown>;
+      clone?: () => { json?: () => Promise<unknown> };
+    };
+  };
+  const context = candidate.context;
+
+  if (context?.json) {
+    try {
+      const readableContext = context.clone?.() ?? context;
+      const payload = await readableContext.json?.();
+      if (payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string') {
+        return payload.error;
+      }
+    } catch {
+      // The network error's response body is optional. Use the safe fallback below.
+    }
+  }
+
+  const message = typeof candidate.message === 'string' ? candidate.message : '';
+  return message && !/non-2xx|failed to send a request|fetch/i.test(message) ? message : fallback;
+}
+
 export default function Manc50BuyScreen() {
   const router = useRouter();
   const { user, loading: authLoading, setShowAuthModal } = useAuth();
@@ -68,7 +96,7 @@ export default function Manc50BuyScreen() {
 
       const matches = Array.isArray(data?.schools) ? data.schools as EligibleSchool[] : [];
       if (error || !matches.length) {
-        setMessage(data?.error ?? 'No eligible MANC50 school was found at that postcode. Check the postcode or contact info@manypetals.co.uk.');
+        setMessage(data?.error ?? await edgeFunctionMessage(error, 'No eligible MANC50 school was found at that postcode. Check the postcode or contact info@manypetals.co.uk.'));
         return;
       }
       setSchools(matches);
@@ -102,7 +130,7 @@ export default function Manc50BuyScreen() {
         },
       });
       if (error || !data?.checkout_url) {
-        setMessage(data?.error ?? 'Checkout is not available yet. Please try again later.');
+        setMessage(data?.error ?? await edgeFunctionMessage(error, 'Checkout is not available yet. Please try again later.'));
         return;
       }
       setMessage('Your secure checkout is ready. After payment, return to Cobie while signed in to activate access.');

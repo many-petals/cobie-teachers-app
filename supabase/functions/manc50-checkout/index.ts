@@ -30,6 +30,20 @@ function errorMessage(error: unknown): string {
   return String(error);
 }
 
+function checkoutFailureMessage(error: unknown): string {
+  const message = errorMessage(error);
+  if (/no such price|similar object exists.*test mode|test mode.*live mode/i.test(message)) {
+    return 'The MANC50 £5 Stripe price is not connected to the live Stripe account yet.';
+  }
+  if (/invalid api key|api key.*invalid|authentication.*stripe/i.test(message)) {
+    return 'The MANC50 live Stripe payment key needs updating.';
+  }
+  if (/missing (stripe_secret_key|manc50_stripe_price_id|manc50_success_url|manc50_cancel_url)/i.test(message)) {
+    return 'The MANC50 live payment settings are incomplete.';
+  }
+  return 'Checkout is temporarily unavailable.';
+}
+
 async function stripePost(path: string, params: Record<string, string>, idempotencyKey: string) {
   const body = new URLSearchParams(params);
   const response = await fetch(`https://api.stripe.com/v1/${path}`, {
@@ -116,6 +130,6 @@ Deno.serve(async (request) => {
     if (/pilot cap reached/i.test(message)) return json({ error: 'The 50-school pilot is currently full.' }, 409);
     if (/already has a MANC50 place/i.test(message)) return json({ error: 'This account or school already has a MANC50 place.' }, 409);
     if (/checkout is already in progress/i.test(message)) return json({ error: 'A checkout is already in progress for this account or school.' }, 409);
-    return json({ error: 'Checkout is temporarily unavailable.' }, 503);
+    return json({ error: checkoutFailureMessage(error) }, 503);
   }
 });
