@@ -30,7 +30,7 @@ function errorMessage(error: unknown): string {
   return String(error);
 }
 
-function checkoutFailureMessage(error: unknown): string {
+function checkoutFailureMessage(error: unknown, stage = 'checkout'): string {
   const message = errorMessage(error);
   if (/no such price|similar object exists.*test mode|test mode.*live mode/i.test(message)) {
     return 'The MANC50 £5 Stripe price is not connected to the live Stripe account yet.';
@@ -41,6 +41,9 @@ function checkoutFailureMessage(error: unknown): string {
   if (/missing (stripe_secret_key|manc50_stripe_price_id|manc50_success_url|manc50_cancel_url)/i.test(message)) {
     return 'The MANC50 live payment settings are incomplete.';
   }
+  if (stage === 'reservation') return 'The MANC50 school reservation could not be completed.';
+  if (stage === 'stripe_session') return 'The live Stripe payment session could not be created.';
+  if (stage === 'reservation_attachment') return 'The payment session was created but could not be linked safely.';
   return 'Checkout is temporarily unavailable.';
 }
 
@@ -67,7 +70,9 @@ Deno.serve(async (request) => {
   const token = bearerToken(request);
   if (!token) return json({ error: 'Sign in before starting checkout.' }, 401);
 
+  let checkoutStage = 'initialisation';
   try {
+    checkoutStage = 'authentication';
     const serviceClient = createClient(required('SUPABASE_URL'), required('SUPABASE_SERVICE_ROLE_KEY'));
     const { data: { user }, error: userError } = await serviceClient.auth.getUser(token);
     if (userError || !user?.id || !user.email) return json({ error: 'Please sign in again.' }, 401);
@@ -85,6 +90,7 @@ Deno.serve(async (request) => {
     }
     if (!/^[a-zA-Z0-9_-]{8,80}$/.test(checkoutAttemptId)) throw new Error('Invalid checkout_attempt_id');
 
+    checkoutStage = 'reservation';
     const { data: reservation, error: reservationError } = await serviceClient.rpc('reserve_manc50_checkout', {
       p_user_id: user.id,
       p_checkout_attempt_id: checkoutAttemptId,
@@ -94,6 +100,7 @@ Deno.serve(async (request) => {
     if (reservationError || !reservation?.id) throw reservationError ?? new Error('Checkout reservation failed');
     if (reservation.checkout_url) return json({ checkout_url: reservation.checkout_url });
 
+    checkoutStage = 'stripe_session';
     const idempotencyKey = `manc50-checkout-${reservation.id}`;
     const session = await stripePost('checkout/sessions', {
       mode: 'payment',
@@ -114,6 +121,7 @@ Deno.serve(async (request) => {
       cancel_url: cancelUrl,
     }, idempotencyKey);
 
+    checkoutStage = 'reservation_attachment';
     const { error: attachError } = await serviceClient.rpc('attach_manc50_checkout_session', {
       p_reservation_id: reservation.id,
       p_user_id: user.id,
@@ -124,12 +132,12 @@ Deno.serve(async (request) => {
 
     return json({ checkout_url: session.url });
   } catch (error) {
-    console.error('MANC50 checkout failed', error);
+    console.error('MANC50 checkout failed', JSON.stringify({ stage: checkoutStage, message: errorMessage(error) }));
     const message = errorMessage(error);
     if (/not eligible|eligible school/i.test(message)) return json({ error: 'That school is not currently eligible for MANC50.' }, 400);
     if (/pilot cap reached/i.test(message)) return json({ error: 'The 50-school pilot is currently full.' }, 409);
     if (/already has a MANC50 place/i.test(message)) return json({ error: 'This account or school already has a MANC50 place.' }, 409);
     if (/checkout is already in progress/i.test(message)) return json({ error: 'A checkout is already in progress for this account or school.' }, 409);
-    return json({ error: checkoutFailureMessage(error) }, 503);
+    return json({ error: checkoutFailureMessage(error, checkoutStage) }, 503);
   }
 });
