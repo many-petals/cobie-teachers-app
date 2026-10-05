@@ -12,6 +12,14 @@ test('billing has no email allow-list and queries user-bound active entitlements
   assert.match(source, /expires_at:\s*`gt\./);
 });
 
+test('billing client maps unexpected failures to a safe no-payment message', async () => {
+  const source = await read('../lib/billing.ts');
+  assert.match(source, /const BILLING_UNAVAILABLE_MESSAGE = 'Billing is temporarily unavailable\. No payment has been taken\./);
+  assert.match(source, /await supabase\.auth\.getSession\(\)/);
+  assert.match(source, /throw new Error\(BILLING_UNAVAILABLE_MESSAGE\)/);
+  assert.doesNotMatch(source, /throw new Error\(result\.error/);
+});
+
 test('activation verifies the signed-in account and binds its user id', async () => {
   const source = await read('../supabase/functions/manc50-activate/index.ts');
   assert.match(source, /auth\.getUser\(token\)/);

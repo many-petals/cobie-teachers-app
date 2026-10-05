@@ -8,28 +8,35 @@ export interface BillingStatus {
   pilotExpiresAt?: string;
 }
 
+const BILLING_UNAVAILABLE_MESSAGE = 'Billing is temporarily unavailable. No payment has been taken. Please contact support before trying again.';
+
 async function billingRequest(action: 'status' | 'checkout' | 'portal') {
   if (typeof window === 'undefined') throw new Error('Please use the web app to manage your subscription.');
-  const { data: { session }, error } = await supabase.auth.getSession();
-  if (error || !session) throw new Error('Please sign in to continue.');
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20000);
+  let timeout: ReturnType<typeof setTimeout> | undefined;
   try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error || !session) throw new Error('Please sign in to continue.');
+    const controller = new AbortController();
+    timeout = setTimeout(() => controller.abort(), 20000);
     const response = await fetch(`/api/billing?action=${action}`, {
       method: action === 'status' ? 'GET' : 'POST',
       headers: { Authorization: `Bearer ${session.access_token}` },
       cache: 'no-store', signal: controller.signal,
     });
     if (!response.headers.get('content-type')?.includes('application/json')) {
-      throw new Error('Billing is not available yet. Please try again later.');
+      throw new Error(BILLING_UNAVAILABLE_MESSAGE);
     }
     const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'We could not check your subscription. Please try again.');
+    if (!response.ok) {
+      throw new Error(response.status === 401 ? 'Please sign in again.' : BILLING_UNAVAILABLE_MESSAGE);
+    }
     return result;
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') throw new Error('The billing check timed out. Please try again.');
-    throw error;
-  } finally { clearTimeout(timeout); }
+    if (error instanceof Error && /^Please sign in/.test(error.message)) throw error;
+    throw new Error(BILLING_UNAVAILABLE_MESSAGE);
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
 }
 
 export async function getBillingStatus(): Promise<BillingStatus> {
