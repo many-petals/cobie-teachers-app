@@ -58,18 +58,21 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
       && subscription.items?.data.some(item => item.price?.id === priceId);
   }
   async function activePilotEntitlement(authUrl, serviceKey, userId) {
-    const query = new URLSearchParams({
+    const base = {
       select: 'id,expires_at',
-      or: `(purchased_by_user_id.eq.${userId},activated_by_user_id.eq.${userId})`,
       status: 'eq.activated',
       expires_at: `gt.${new Date().toISOString()}`,
       order: 'expires_at.desc',
       limit: '1',
-    });
-    const entitlements = await request(`${authUrl}/rest/v1/manc50_entitlements?${query}`, {
-      headers: { Authorization: `Bearer ${serviceKey}`, apikey: serviceKey },
-    });
-    return Array.isArray(entitlements) ? entitlements[0] ?? null : null;
+    };
+    const query = field => new URLSearchParams({ ...base, [field]: `eq.${userId}` });
+    const options = { headers: { Authorization: `Bearer ${serviceKey}`, apikey: serviceKey } };
+    const [purchased, activated] = await Promise.all([
+      request(`${authUrl}/rest/v1/manc50_entitlements?${query('purchased_by_user_id')}`, options),
+      request(`${authUrl}/rest/v1/manc50_entitlements?${query('activated_by_user_id')}`, options),
+    ]);
+    return [...(Array.isArray(purchased) ? purchased : []), ...(Array.isArray(activated) ? activated : [])]
+      .sort((a, b) => new Date(b.expires_at).getTime() - new Date(a.expires_at).getTime())[0] ?? null;
   }
 
   return async function handler(req, res) {

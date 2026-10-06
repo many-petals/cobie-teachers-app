@@ -60,10 +60,12 @@ test('pilot access is bound to the authenticated user without a Stripe dependenc
   const result = await call({ environment: { ...env, STRIPE_SECRET_KEY: '' }, routes: {
     'GET /rest/v1/manc50_entitlements': (options, parsed) => {
       assert.equal(options.headers.apikey, env.SUPABASE_SERVICE_ROLE_KEY);
-      assert.equal(parsed.searchParams.get('or'), `(purchased_by_user_id.eq.${user.id},activated_by_user_id.eq.${user.id})`);
+      assert.equal(parsed.searchParams.get('purchased_by_user_id') || parsed.searchParams.get('activated_by_user_id'), `eq.${user.id}`);
       assert.equal(parsed.searchParams.get('status'), 'eq.activated');
       assert.match(parsed.searchParams.get('expires_at'), /^gt\./);
-      return [{ id: 'entitlement-1', expires_at: '2026-12-15T00:00:00Z' }];
+      return parsed.searchParams.has('purchased_by_user_id')
+        ? [{ id: 'entitlement-1', expires_at: '2026-12-15T00:00:00Z' }]
+        : [];
     },
   } });
   assert.equal(result.data.hasFullAccess, true);
@@ -88,7 +90,7 @@ test('active pilot access cannot create a second checkout', async () => {
 test('free account cannot grant itself access through editable user metadata', async () => {
   const result = await call({ authenticatedUser: { ...user, user_metadata: { hasFullAccess: true, cobie_stripe_customer_test: customer.id } } });
   assert.equal(result.data.hasFullAccess, false);
-  assert.equal(result.calls.length, 2);
+  assert.equal(result.calls.length, 3);
   assert.equal(result.headers['Cache-Control'], 'private, no-store');
 });
 for (const status of ['active', 'trialing', 'past_due', 'unpaid', 'canceled', 'incomplete', 'incomplete_expired', 'paused']) {
@@ -112,7 +114,7 @@ test('wrong product and paused collection do not grant access', async () => {
 test('a mapping to another teacher is rejected', async () => {
   const result = await call({ authenticatedUser: mappedUser, routes: { 'GET /v1/customers/cus_teacher': { ...customer, metadata: { ...customer.metadata, user_id: 'teacher-2' } } } });
   assert.equal(result.code, 403);
-  assert.equal(result.calls.length, 3);
+  assert.equal(result.calls.length, 4);
 });
 test('checkout rejects cross-origin POSTs and GET mutation attempts', async () => {
   const crossOrigin = await call({ action: 'checkout', headers: { origin: 'https://evil.example' } });
