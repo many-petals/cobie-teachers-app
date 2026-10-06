@@ -16,6 +16,7 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
     try { response = await fetcher(url, { ...options, signal: AbortSignal.timeout(10000) }); }
     catch { throw new BillingError(503, 'We could not check your account. Please try again.'); }
     if (!response.ok) {
+      console.error('billing_upstream_failure', { status: response.status, endpoint: new URL(url).pathname });
       throw new BillingError(response.status === 401 && url.includes('/auth/v1/user') ? 401 : 503,
         response.status === 401 && url.includes('/auth/v1/user')
           ? 'Please sign in again.' : 'Billing is temporarily unavailable. No payment has been taken. Please contact support before trying again.');
@@ -153,6 +154,7 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
       }, 'POST', `${APP}-checkout-${key}`);
       return res.status(200).json({ url: session.url });
     } catch (error) {
+      console.error('billing_failure', { name: error?.name, message: error?.message, status: error?.status });
       // Do not expose provider responses, credentials, tokens or pupil/account data.
       return res.status(error instanceof BillingError ? error.status : 503).json({
         error: error instanceof BillingError ? error.message : 'Billing is temporarily unavailable. No payment has been taken. Please contact support before trying again.',
