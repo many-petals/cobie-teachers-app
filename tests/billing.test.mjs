@@ -60,7 +60,7 @@ test('pilot access is bound to the authenticated user without a Stripe dependenc
   const result = await call({ environment: { ...env, STRIPE_SECRET_KEY: '' }, routes: {
     'GET /rest/v1/manc50_entitlements': (options, parsed) => {
       assert.equal(options.headers.apikey, env.SUPABASE_SERVICE_ROLE_KEY);
-      assert.equal(parsed.searchParams.get('activated_by_user_id'), `eq.${user.id}`);
+      assert.equal(parsed.searchParams.get('or'), `(purchased_by_user_id.eq.${user.id},activated_by_user_id.eq.${user.id})`);
       assert.equal(parsed.searchParams.get('status'), 'eq.activated');
       assert.match(parsed.searchParams.get('expires_at'), /^gt\./);
       return [{ id: 'entitlement-1', expires_at: '2026-12-15T00:00:00Z' }];

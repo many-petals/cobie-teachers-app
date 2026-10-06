@@ -60,7 +60,7 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
   async function activePilotEntitlement(authUrl, serviceKey, userId) {
     const query = new URLSearchParams({
       select: 'id,expires_at',
-      activated_by_user_id: `eq.${userId}`,
+      or: `(purchased_by_user_id.eq.${userId},activated_by_user_id.eq.${userId})`,
       status: 'eq.activated',
       expires_at: `gt.${new Date().toISOString()}`,
       order: 'expires_at.desc',
