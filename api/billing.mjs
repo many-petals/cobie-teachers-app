@@ -21,7 +21,16 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
         response.status === 401 && url.includes('/auth/v1/user')
           ? 'Please sign in again.' : 'Billing is temporarily unavailable. No payment has been taken. Please contact support before trying again.');
     }
-    return response.json();
+    try {
+      return await response.json();
+    } catch (error) {
+      console.error('billing_response_parse_failure', {
+        endpoint: new URL(url).pathname,
+        status: response.status,
+        name: error?.name,
+      });
+      throw new BillingError(503, 'We could not read the billing service response. Please try again.');
+    }
   }
   async function stripe(path, params = {}, method = 'GET', idempotencyKey) {
     const form = new URLSearchParams(params);
@@ -79,6 +88,7 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
   return async function handler(req, res) {
     res.setHeader('Cache-Control', 'private, no-store');
     res.setHeader('Vary', 'Authorization');
+    let stage = 'start';
     try {
       const action = new URL(req.url, 'https://local.invalid').searchParams.get('action') || 'status';
       if (!['status', 'checkout', 'portal'].includes(action)) throw new BillingError(404, 'Unknown billing action.');
@@ -89,11 +99,13 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
       if (req.method === 'POST' && req.headers.origin !== appUrl()) throw new BillingError(403, 'Please open billing from the app.');
       const token = req.headers.authorization;
       if (typeof token !== 'string' || !/^Bearer \S+$/.test(token)) throw new BillingError(401, 'Please sign in to continue.');
+      stage = 'supabase-user';
       const authUrl = required('SUPABASE_URL').replace(/\/$/, '');
       const user = await request(`${authUrl}/auth/v1/user`, {
         headers: { Authorization: token, apikey: required('SUPABASE_ANON_KEY') },
       });
       if (!user.id || !user.email || !user.email_confirmed_at) throw new BillingError(403, 'Please confirm your email address before upgrading.');
+      stage = 'pilot-entitlement';
       const serviceKey = required('SUPABASE_SERVICE_ROLE_KEY');
       const pilot = await activePilotEntitlement(authUrl, serviceKey, user.id);
       if (action === 'status' && pilot) return res.status(200).json({
@@ -101,6 +113,7 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
         pilotEntitlementId: pilot.id, pilotExpiresAt: pilot.expires_at,
       });
       if (action === 'checkout' && pilot) throw new BillingError(409, 'You already have pilot access.');
+      stage = 'stripe-configuration';
       const priceId = required('STRIPE_PRICE_ID');
       const mode = required('STRIPE_SECRET_KEY').includes('_test_') ? 'test' : 'live';
       const mappingKey = `cobie_stripe_customer_${mode}`;
@@ -154,7 +167,7 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
       }, 'POST', `${APP}-checkout-${key}`);
       return res.status(200).json({ url: session.url });
     } catch (error) {
-      console.error('billing_failure', { name: error?.name, message: error?.message, status: error?.status });
+      console.error('billing_failure', { stage, name: error?.name, message: error?.message, status: error?.status });
       // Do not expose provider responses, credentials, tokens or pupil/account data.
       return res.status(error instanceof BillingError ? error.status : 503).json({
         error: error instanceof BillingError ? error.message : 'Billing is temporarily unavailable. No payment has been taken. Please contact support before trying again.',
