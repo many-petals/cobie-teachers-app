@@ -77,12 +77,21 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
     };
     const query = field => new URLSearchParams({ ...base, [field]: `eq.${userId}` });
     const options = { headers: { Authorization: `Bearer ${serviceKey}`, apikey: serviceKey } };
-    const [purchased, activated] = await Promise.all([
-      request(`${authUrl}/rest/v1/manc50_entitlements?${query('purchased_by_user_id')}`, options),
-      request(`${authUrl}/rest/v1/manc50_entitlements?${query('activated_by_user_id')}`, options),
-    ]);
-    return [...(Array.isArray(purchased) ? purchased : []), ...(Array.isArray(activated) ? activated : [])]
-      .sort((a, b) => new Date(b.expires_at).getTime() - new Date(a.expires_at).getTime())[0] ?? null;
+    try {
+      const [purchased, activated] = await Promise.all([
+        request(`${authUrl}/rest/v1/manc50_entitlements?${query('purchased_by_user_id')}`, options),
+        request(`${authUrl}/rest/v1/manc50_entitlements?${query('activated_by_user_id')}`, options),
+      ]);
+      return [...(Array.isArray(purchased) ? purchased : []), ...(Array.isArray(activated) ? activated : [])]
+        .sort((a, b) => new Date(b.expires_at).getTime() - new Date(a.expires_at).getTime())[0] ?? null;
+    } catch (error) {
+      console.error('billing_pilot_lookup_failure', {
+        name: error?.name,
+        message: error?.message,
+        status: error?.status,
+      });
+      throw error;
+    }
   }
 
   return async function handler(req, res) {
