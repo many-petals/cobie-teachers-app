@@ -182,7 +182,14 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
       }, 'POST', `${APP}-checkout-${key}`);
       return res.status(200).json({ url: session.url });
     } catch (error) {
-      console.error('billing_failure', { stage, name: error?.name, message: error?.message, status: error?.status });
+      console.error('billing_failure', {
+        stage,
+        name: error?.name,
+        message: error?.message,
+        status: error?.status,
+        upstreamStatus: error?.upstreamStatus,
+        endpoint: error?.endpoint,
+      });
       // Do not expose provider responses, credentials, tokens or pupil/account data.
       return res.status(error instanceof BillingError ? error.status : 503).json({
         error: error instanceof BillingError ? error.message : 'Billing is temporarily unavailable. No payment has been taken. Please contact support before trying again.',
