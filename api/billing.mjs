@@ -16,10 +16,14 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
     try { response = await fetcher(url, { ...options, signal: AbortSignal.timeout(10000) }); }
     catch { throw new BillingError(503, 'We could not check your account. Please try again.'); }
     if (!response.ok) {
-      console.error('billing_upstream_failure', { status: response.status, endpoint: new URL(url).pathname });
-      throw new BillingError(response.status === 401 && url.includes('/auth/v1/user') ? 401 : 503,
+      const endpoint = new URL(url).pathname;
+      console.error('billing_upstream_failure', { status: response.status, endpoint });
+      const failure = new BillingError(response.status === 401 && url.includes('/auth/v1/user') ? 401 : 503,
         response.status === 401 && url.includes('/auth/v1/user')
           ? 'Please sign in again.' : 'Billing is temporarily unavailable. No payment has been taken. Please contact support before trying again.');
+      failure.upstreamStatus = response.status;
+      failure.endpoint = endpoint;
+      throw failure;
     }
     try {
       return await response.json();
@@ -89,6 +93,8 @@ export function createBillingHandler({ env = process.env, fetcher = fetch } = {}
         name: error?.name,
         message: error?.message,
         status: error?.status,
+        upstreamStatus: error?.upstreamStatus,
+        endpoint: error?.endpoint,
       });
       throw error;
     }
