@@ -34,6 +34,10 @@ create unique index if not exists manc50_one_open_reservation_per_school
 alter table public.manc50_entitlements
   add column if not exists purchased_by_user_id uuid references auth.users(id) on delete set null;
 
+-- The billing API reads this table with the Supabase service role.
+-- Keep the grant explicit so fresh environments reproduce the live fix.
+grant all on table public.manc50_entitlements to service_role;
+
 comment on column public.manc50_entitlements.purchased_by_user_id is
   'Verified teacher account that initiated and paid for this MANC50 place.';
 
