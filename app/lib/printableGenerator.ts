@@ -882,16 +882,17 @@ function downloadAsFile(html: string, filename: string): boolean {
   }
 }
 
-// Try all methods in order
+// Prefer a real file download. In embedded browsers, window.open can return a
+// window-like object without creating a visible tab, which would leave the
+// teacher with a misleading success message and no printable to open.
 function openHTML(html: string, filename: string): { success: boolean; method: string } {
-  // Try document.write first
-  if (openViaDocumentWrite(html)) return { success: true, method: 'tab' };
-  // Try Blob URL
-  if (openViaBlobURL(html)) return { success: true, method: 'tab' };
-  // Try data URI
-  if (openViaDataURI(html)) return { success: true, method: 'tab' };
-  // Fall back to file download
   if (downloadAsFile(html, filename)) return { success: true, method: 'file' };
+
+  // Keep the browser-tab methods as a fallback for environments where file
+  // downloads are blocked but pop-ups are supported.
+  if (openViaDocumentWrite(html)) return { success: true, method: 'tab' };
+  if (openViaBlobURL(html)) return { success: true, method: 'tab' };
+  if (openViaDataURI(html)) return { success: true, method: 'tab' };
   return { success: false, method: 'none' };
 }
 
