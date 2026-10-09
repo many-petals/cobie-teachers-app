@@ -26,11 +26,13 @@ function getPrintableVariant(printable: Printable, variantId?: string): Printabl
 function getStyles(primaryColor: string, bgColor: string, borderColor: string, headerBg: string): string {
   return `
     <style>
-      @page { size: A4; margin: 15mm; }
+      /* The page frame owns the A4 dimensions; do not add a second browser
+         margin around it or the 210mm frame will overflow the print area. */
+      @page { size: A4; margin: 0; }
       @media print {
         html, body { margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         .no-print { display: none !important; }
-        .page { box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; min-height: auto !important; page-break-after: always; }
+        .page { width: 210mm !important; max-width: 210mm !important; min-height: 297mm !important; box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; page-break-after: always; }
         .page:last-child { page-break-after: auto; }
       }
       * { box-sizing: border-box; margin: 0; padding: 0; }
