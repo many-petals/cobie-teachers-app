@@ -11,6 +11,7 @@ export interface Activity {
   ageRange: string;
   duration: string;
   materials: string[];
+  printableIds?: Array<string | undefined>;
   instructions: string[];
   senAdaptations: string[];
   assessment: string[];
@@ -34,6 +35,7 @@ export const ACTIVITIES: Activity[] = [
       'Small trays or mats',
       'Optional: sand, moss, fabric scraps',
     ],
+    printableIds: [undefined, undefined, 'p-14'],
     instructions: [
       'Show the page where the garden hushes for Cobie. Invite children to build their own "Quiet Garden" on a tray.',
       'Encourage slow movements and gentle placing of materials. Ask: "What makes your garden feel calm?"',
@@ -65,6 +67,7 @@ export const ACTIVITIES: Activity[] = [
       'Mirror (optional)',
       'Feeling word labels',
     ],
+    printableIds: ['p-1', undefined, undefined],
     instructions: [
       'Spread emotion cards face up. Name each emotion together.',
       'Children match emotion words to faces. Use mirror to practice making each face.',
@@ -95,6 +98,7 @@ export const ACTIVITIES: Activity[] = [
     materials: [
       '"Cobie Breathing" visual (included in printables)',
     ],
+    printableIds: ['p-3'],
     instructions: [
       'Show the Cobie breathing visual. Model: "Breathe in as the cactus grows tall... breathe out as it softens."',
       'Repeat 3-5 times. Ask: "How does your body feel now?"',
@@ -125,6 +129,7 @@ export const ACTIVITIES: Activity[] = [
       'Soft instruments',
       'Voice volume cards (whisper / quiet / talking)',
     ],
+    printableIds: [undefined, 'p-11'],
     instructions: [
       'Demonstrate whisper, quiet, and talking voices. Children practice each one.',
       'Play a "quiet orchestra" using soft instruments. End with a whisper circle: "I feel calm when..."',
@@ -156,6 +161,7 @@ export const ACTIVITIES: Activity[] = [
       'Colouring materials',
       'Character templates (from printables)',
     ],
+    printableIds: [undefined, undefined, 'p-7'],
     instructions: [
       'Discuss: "What makes Cobie a good friend?" List ideas together.',
       'Children create a collage showing what friendship means to them.',
@@ -188,6 +194,7 @@ export const ACTIVITIES: Activity[] = [
       'Clipboard and pencil (optional)',
       'Sensory checklist (from printables)',
     ],
+    printableIds: [undefined, undefined, 'p-13'],
     instructions: [
       'Walk slowly together. Stop at intervals to notice: What can you see? Hear? Feel?',
       'Encourage quiet observation. Use the sensory checklist to record findings.',
@@ -220,6 +227,7 @@ export const ACTIVITIES: Activity[] = [
       'Emotion face cards',
       'Clothespin or marker',
     ],
+    printableIds: ['p-4', 'p-1', undefined],
     instructions: [
       'Introduce the thermometer: "Feelings can be small, medium, or big."',
       'Show scenarios and ask children to place the marker on the thermometer.',
@@ -252,6 +260,7 @@ export const ACTIVITIES: Activity[] = [
       'Colouring materials',
       'Kindness jar or display board',
     ],
+    printableIds: ['p-6', undefined, undefined],
     instructions: [
       'Read examples of kindness from the story.',
       'Children draw or write a kind thing they noticed or did.',

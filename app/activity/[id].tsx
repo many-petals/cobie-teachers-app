@@ -135,7 +135,12 @@ export default function ActivityDetailScreen() {
             <Text style={styles.sectionTitle}>Materials</Text>
           </View>
           {activity.materials.map((mat, i) => (
-            <MaterialCheck key={i} label={mat} />
+            <MaterialCheck
+              key={i}
+              label={mat}
+              printableId={activity.printableIds?.[i]}
+              onOpenPrintable={(printableId) => router.push({ pathname: '/printables', params: { printableId } } as any)}
+            />
           ))}
         </View>
 
@@ -203,13 +208,41 @@ export default function ActivityDetailScreen() {
   );
 }
 
-function MaterialCheck({ label }: { label: string }) {
+function MaterialCheck({
+  label,
+  printableId,
+  onOpenPrintable,
+}: {
+  label: string;
+  printableId?: string;
+  onOpenPrintable: (printableId: string) => void;
+}) {
   const [checked, setChecked] = useState(false);
   return (
-    <TouchableOpacity style={styles.materialItem} onPress={() => setChecked(!checked)} activeOpacity={0.7}>
+    <View style={styles.materialItem}>
+      <TouchableOpacity
+        style={styles.materialCheckButton}
+        onPress={() => setChecked(!checked)}
+        activeOpacity={0.7}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked }}
+      >
       <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={22} color={checked ? COLORS.secondary : COLORS.mediumGray} />
       <Text style={[styles.materialText, checked && styles.materialTextChecked]}>{label}</Text>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      {printableId && (
+        <TouchableOpacity
+          style={styles.openPrintableButton}
+          onPress={() => onOpenPrintable(printableId)}
+          activeOpacity={0.7}
+          accessibilityRole="link"
+          accessibilityLabel={`Open printable for ${label}`}
+        >
+          <Ionicons name="print-outline" size={15} color={COLORS.primary} />
+          <Text style={styles.openPrintableText}>Open printable</Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }
 
@@ -249,7 +282,10 @@ const styles = StyleSheet.create({
   stepNumber: { width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   stepNumberText: { fontSize: FONT_SIZES.sm, fontWeight: '700', color: COLORS.white },
   instructionText: { flex: 1, fontSize: FONT_SIZES.md, color: COLORS.text, lineHeight: 24 },
-  materialItem: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, paddingVertical: SPACING.sm, paddingHorizontal: SPACING.md, backgroundColor: COLORS.white, borderRadius: RADIUS.md, marginBottom: SPACING.xs },
+  materialItem: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, paddingVertical: SPACING.sm, paddingHorizontal: SPACING.md, backgroundColor: COLORS.white, borderRadius: RADIUS.md, marginBottom: SPACING.xs },
+  materialCheckButton: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
+  openPrintableButton: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 6, paddingHorizontal: 4 },
+  openPrintableText: { fontSize: FONT_SIZES.xs, fontWeight: '700', color: COLORS.primary },
   materialText: { flex: 1, fontSize: FONT_SIZES.md, color: COLORS.text },
   materialTextChecked: { textDecorationLine: 'line-through', color: COLORS.textMuted },
   senSection: { backgroundColor: COLORS.bgPurple, padding: SPACING.lg, borderRadius: RADIUS.lg },

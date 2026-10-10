@@ -17,6 +17,7 @@ import BrandedScreenHeader from '../components/BrandedScreenHeader';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { downloadPrintable, downloadAllPrintables } from '../lib/printableGenerator';
+import { useLocalSearchParams } from 'expo-router';
 
 const CATEGORY_FILTERS = [
   { label: 'All', value: 'all' },
@@ -35,9 +36,11 @@ const AGE_FILTERS = [
 ];
 
 export default function PrintablesScreen() {
+  const { printableId } = useLocalSearchParams<{ printableId?: string }>();
   const { toggleFavourite, isFavourite } = useAuth();
   const { showToast, showConfirm } = useToast();
-  const [search, setSearch] = useState('');
+  const linkedPrintable = PRINTABLES.find((printable) => printable.id === printableId);
+  const [search, setSearch] = useState(linkedPrintable?.title ?? '');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [ageFilter, setAgeFilter] = useState('all');
   const [downloading, setDownloading] = useState<string | null>(null);
