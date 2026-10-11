@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -135,6 +136,7 @@ export default function TrackerScreen() {
   const [parentProgressSummaries, setParentProgressSummaries] = useState<ParentProgressSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [workflowMinimized, setWorkflowMinimized] = useState(false);
 
   // Modal states
   const [showAddPupil, setShowAddPupil] = useState(false);
@@ -152,6 +154,33 @@ export default function TrackerScreen() {
     setCurrentTerm(getCurrentTerm());
     setCurrentYear(getCurrentAcademicYear());
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    const key = user?.id ? `@cobie_tracker_workflow_minimized_${user.id}` : null;
+
+    if (!key) {
+      setWorkflowMinimized(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    AsyncStorage.getItem(key).then(value => {
+      if (active) setWorkflowMinimized(value === 'true');
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [user?.id]);
+
+  const minimizeWorkflow = useCallback(() => {
+    setWorkflowMinimized(true);
+    if (user?.id) {
+      void AsyncStorage.setItem(`@cobie_tracker_workflow_minimized_${user.id}`, 'true');
+    }
+  }, [user?.id]);
 
 
   // Load data when user is available
@@ -691,11 +720,34 @@ export default function TrackerScreen() {
         </View>
 
         {/* Workflow Card */}
+        {workflowMinimized ? (
+          <TouchableOpacity
+            style={styles.workflowRestore}
+            onPress={() => setWorkflowMinimized(false)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Show tracker steps"
+          >
+            <Ionicons name="sparkles" size={16} color={COLORS.primary} />
+            <Text style={styles.workflowRestoreText}>Show tracker steps</Text>
+            <Ionicons name="chevron-down" size={16} color={COLORS.primary} />
+          </TouchableOpacity>
+        ) : (
         <View style={styles.workflowCard}>
           <View style={styles.workflowHeader}>
             <Ionicons name="sparkles" size={20} color={COLORS.primary} />
             <View style={styles.workflowHeaderCopy}>
-              <Text style={styles.workflowTitle}>Track progress in three simple steps</Text>
+              <View style={styles.workflowTitleRow}>
+                <Text style={styles.workflowTitle}>Track progress in three simple steps</Text>
+                <TouchableOpacity
+                  onPress={minimizeWorkflow}
+                  style={styles.workflowMinimizeButton}
+                  accessibilityRole="button"
+                  accessibilityLabel="Minimise tracker steps"
+                >
+                  <Ionicons name="chevron-up" size={18} color={COLORS.primary} />
+                </TouchableOpacity>
+              </View>
               <Text style={styles.workflowText}>
                 Use pupil codes, record quick observations, then create a parent-ready progress summary when you are ready to share.
               </Text>
@@ -719,6 +771,7 @@ export default function TrackerScreen() {
             ))}
           </View>
         </View>
+        )}
 
         {/* Filter */}
         <View style={styles.filterRow}>
@@ -1208,7 +1261,13 @@ const styles = StyleSheet.create({
   workflowHeaderCopy: {
     flex: 1,
   },
+  workflowTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.xs,
+  },
   workflowTitle: {
+    flex: 1,
     fontSize: FONT_SIZES.lg,
     fontWeight: '800',
     color: COLORS.text,
@@ -1218,6 +1277,27 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     color: COLORS.textLight,
     lineHeight: 20,
+  },
+  workflowMinimizeButton: {
+    padding: 2,
+    marginTop: -2,
+  },
+  workflowRestore: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    backgroundColor: COLORS.bgLight,
+    borderRadius: RADIUS.lg,
+  },
+  workflowRestoreText: {
+    flex: 1,
+    color: COLORS.primary,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
   },
   workflowSteps: {
     flexDirection: 'row',
