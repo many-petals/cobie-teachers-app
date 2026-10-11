@@ -577,7 +577,8 @@ export default function HomeScreen() {
                       accessibilityRole="button"
                       accessibilityLabel="Minimise Cobie workflow"
                     >
-                      <Ionicons name="chevron-up" size={18} color={COLORS.primary} />
+                      <Ionicons name="chevron-up" size={16} color={COLORS.primary} />
+                      <Text style={styles.flowMinimizeText}>Hide</Text>
                     </TouchableOpacity>
                   </View>
                   <Text style={styles.sectionTitle}>Lesson, printable, tracker, and parent letter - already done for you</Text>
@@ -1382,7 +1383,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   flowMinimizeButton: {
-    padding: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    borderWidth: 1,
+    borderColor: '#C9DDC1',
+    borderRadius: RADIUS.round,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    backgroundColor: COLORS.white,
+  },
+  flowMinimizeText: {
+    color: COLORS.primary,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
   },
   flowRestore: {
     flexDirection: 'row',
