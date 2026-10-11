@@ -28,6 +28,7 @@ import BrandedScreenHeader from '../components/BrandedScreenHeader';
 import AddPupilModal from '../components/AddPupilModal';
 import QuickAssess from '../components/QuickAssess';
 import ProgressView from '../components/ProgressView';
+import { FREE_PUPIL_LIMIT } from '../lib/access';
 import EmotionLogModal from '../components/EmotionLogModal';
 import RequireAuth from '../components/RequireAuth';
 import {
@@ -122,7 +123,7 @@ const getFriendlyTrackerError = (err: any, fallback: string) => {
 };
 
 export default function TrackerScreen() {
-  const { user, profile, clearUserData } = useAuth();
+  const { user, profile, clearUserData, hasFullAccess } = useAuth();
   const { showToast, showConfirm } = useToast();
   const { senMode } = useSEN();
   const [mounted, setMounted] = useState(false);
@@ -204,6 +205,13 @@ export default function TrackerScreen() {
   ): Promise<{ success: boolean; error?: string }> => {
     if (!user) {
       return { success: false, error: 'Please sign in again before adding a pupil.' };
+    }
+
+    if (!hasFullAccess && pupils.length >= FREE_PUPIL_LIMIT) {
+      return {
+        success: false,
+        error: `The free plan includes up to ${FREE_PUPIL_LIMIT} pupils. Upgrade to track more pupils.`,
+      };
     }
 
     try {

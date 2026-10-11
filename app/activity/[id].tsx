@@ -14,12 +14,13 @@ import { ACTIVITIES } from '../data/activities';
 import { useSEN } from '../context/SENContext';
 import { useAuth } from '../context/AuthContext';
 import DifferentiationWizard from '../components/DifferentiationWizard';
+import { isFreeActivityIndex } from '../lib/access';
 
 export default function ActivityDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { senMode } = useSEN();
-  const { toggleFavourite, isFavourite } = useAuth();
+  const { toggleFavourite, isFavourite, hasFullAccess } = useAuth();
   const [showSEN, setShowSEN] = useState(senMode);
   const [showDiffWizard, setShowDiffWizard] = useState(false);
 
@@ -31,6 +32,25 @@ export default function ActivityDetailScreen() {
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle" size={48} color={COLORS.error} />
           <Text style={styles.errorText}>Activity not found</Text>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={styles.backBtnText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const locked = !hasFullAccess && !isFreeActivityIndex(ACTIVITIES.findIndex(item => item.id === activity.id));
+
+  if (locked) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.errorContainer}>
+          <Ionicons name="lock-closed" size={48} color={COLORS.mediumGray} />
+          <Text style={styles.errorText}>This activity is part of full access.</Text>
+          <TouchableOpacity onPress={() => router.push('/upgrade')} style={styles.backBtn}>
+            <Text style={styles.backBtnText}>View upgrade options</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Text style={styles.backBtnText}>Go Back</Text>
           </TouchableOpacity>

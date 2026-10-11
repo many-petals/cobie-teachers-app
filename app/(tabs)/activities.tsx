@@ -17,6 +17,7 @@ import SENBanner from '../components/SENBanner';
 import BrandedScreenHeader from '../components/BrandedScreenHeader';
 import { useSEN } from '../context/SENContext';
 import { useAuth } from '../context/AuthContext';
+import { FREE_ACTIVITY_LIMIT, isFreeActivityIndex } from '../lib/access';
 
 const SKILL_FILTERS = [
   { label: 'All', value: 'all' },
@@ -31,7 +32,7 @@ const SKILL_FILTERS = [
 export default function ActivitiesScreen() {
   const router = useRouter();
   const { senMode } = useSEN();
-  const { toggleFavourite, isFavourite } = useAuth();
+  const { toggleFavourite, isFavourite, hasFullAccess } = useAuth();
   const [search, setSearch] = useState('');
   const [skillFilter, setSkillFilter] = useState('all');
   const skillTypeCount = useMemo(
@@ -117,12 +118,14 @@ export default function ActivitiesScreen() {
           </View>
         ) : (
           filtered.map((activity) => {
+            const activityIndex = ACTIVITIES.findIndex(item => item.id === activity.id);
+            const locked = !hasFullAccess && !isFreeActivityIndex(activityIndex);
             const favourited = isFavourite('activity', activity.id);
             return (
               <TouchableOpacity
                 key={activity.id}
                 style={[styles.activityCard, { borderLeftColor: activity.color }]}
-                onPress={() => router.push(`/activity/${activity.id}` as any)}
+                onPress={() => router.push(locked ? '/upgrade' : `/activity/${activity.id}` as any)}
                 activeOpacity={0.7}
               >
                 <View style={styles.cardTop}>
@@ -135,6 +138,7 @@ export default function ActivitiesScreen() {
                     </Text>
                     <Text style={styles.activityType}>{activity.type}</Text>
                   </View>
+                  {locked ? <Ionicons name="lock-closed" size={18} color={COLORS.mediumGray} /> : null}
                   <TouchableOpacity
                     onPress={(e) => {
                       e.stopPropagation?.();
@@ -154,6 +158,10 @@ export default function ActivitiesScreen() {
                 <Text style={styles.purpose} numberOfLines={senMode ? 3 : 2}>
                   {activity.purpose}
                 </Text>
+
+                {locked ? (
+                  <Text style={styles.lockedText}>Unlock with full access</Text>
+                ) : null}
 
                 <View style={styles.cardMeta}>
                   <View style={styles.metaItem}>
@@ -301,6 +309,7 @@ const styles = StyleSheet.create({
   activityType: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, marginTop: 2 },
   favBtn: { padding: 6 },
   purpose: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20, marginTop: SPACING.md },
+  lockedText: { fontSize: FONT_SIZES.xs, color: COLORS.primary, fontWeight: '700', marginTop: SPACING.sm },
   cardMeta: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, marginTop: SPACING.md, flexWrap: 'wrap' },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   metaText: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },

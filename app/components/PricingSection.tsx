@@ -14,6 +14,7 @@ import { LESSONS } from '../data/lessons';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { FREE_ACTIVITY_LIMIT, FREE_PUPIL_LIMIT } from '../lib/access';
 
 const PLANS = [
   {
@@ -28,9 +29,11 @@ const PLANS = [
       { label: 'Lesson 1 full player access', included: true },
       { label: '3 sample printables', included: true },
       { label: 'Emotion cards tool', included: true },
+      { label: `${FREE_ACTIVITY_LIMIT} optional activities`, included: true },
+      { label: `Track up to ${FREE_PUPIL_LIMIT} pupils`, included: true },
       { label: `Full lesson player (all ${LESSONS.length})`, included: false },
       { label: 'All 18 printable resources', included: false },
-      { label: 'Pupil progress tracker', included: false },
+      { label: 'Full pupil progress tracker', included: false },
       { label: 'Calm Corner builder', included: false },
       { label: 'Observation checklists', included: false },
     ],
