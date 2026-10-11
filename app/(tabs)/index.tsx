@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -361,6 +362,7 @@ export default function HomeScreen() {
   const [showProfile, setShowProfile] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [bookSectionY, setBookSectionY] = useState(0);
+  const [flowMinimized, setFlowMinimized] = useState(false);
   // Track client-side mount to prevent hydration mismatch from auth state
   const [mounted, setMounted] = useState(false);
   const isCompactHero = width < 1160;
@@ -376,6 +378,24 @@ export default function HomeScreen() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    const key = `@cobie_home_flow_minimized_${user?.id ?? 'guest'}`;
+
+    AsyncStorage.getItem(key).then(value => {
+      if (active) setFlowMinimized(value === 'true');
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [user?.id]);
+
+  const minimizeFlow = () => {
+    setFlowMinimized(true);
+    void AsyncStorage.setItem(`@cobie_home_flow_minimized_${user?.id ?? 'guest'}`, 'true');
+  };
 
   const handleHeaderLinkPress = async (link: HeaderLinkConfig) => {
     if (link.route) {
@@ -534,24 +554,50 @@ export default function HomeScreen() {
 
         <View style={styles.section}>
           <View style={styles.flowBand}>
-            <View style={styles.flowIntro}>
-              <Text style={styles.sectionEyebrow}>Built into every companion app</Text>
-              <Text style={styles.sectionTitle}>Lesson, printable, tracker, and parent letter - already done for you</Text>
-              <Text style={styles.sectionSubtitle}>
-                Teachers do not need to build extra templates, spreadsheets, or letters. Each book app gives one clear route: teach the story, print the resource, track progress, then share the next step.
-              </Text>
-            </View>
-            <View style={styles.flowGrid}>
-              {TEACHER_FLOW.map((item) => (
-                <View key={item.title} style={[styles.flowCard, { width: flowCardWidth }]}>
-                  <View style={styles.flowCardIcon}>
-                    <Ionicons name={item.icon as any} size={20} color={COLORS.primary} />
+            {flowMinimized ? (
+              <TouchableOpacity
+                style={styles.flowRestore}
+                onPress={() => setFlowMinimized(false)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="Show Cobie workflow"
+              >
+                <Ionicons name="sparkles" size={16} color={COLORS.primary} />
+                <Text style={styles.flowRestoreText}>Show Cobie workflow</Text>
+                <Ionicons name="chevron-down" size={16} color={COLORS.primary} />
+              </TouchableOpacity>
+            ) : (
+              <>
+                <View style={styles.flowIntro}>
+                  <View style={styles.flowTitleRow}>
+                    <Text style={styles.sectionEyebrow}>Built into every companion app</Text>
+                    <TouchableOpacity
+                      onPress={minimizeFlow}
+                      style={styles.flowMinimizeButton}
+                      accessibilityRole="button"
+                      accessibilityLabel="Minimise Cobie workflow"
+                    >
+                      <Ionicons name="chevron-up" size={18} color={COLORS.primary} />
+                    </TouchableOpacity>
                   </View>
-                  <Text style={styles.flowCardTitle}>{item.title}</Text>
-                  <Text style={styles.flowCardText}>{item.text}</Text>
+                  <Text style={styles.sectionTitle}>Lesson, printable, tracker, and parent letter - already done for you</Text>
+                  <Text style={styles.sectionSubtitle}>
+                    Teachers do not need to build extra templates, spreadsheets, or letters. Each book app gives one clear route: teach the story, print the resource, track progress, then share the next step.
+                  </Text>
                 </View>
-              ))}
-            </View>
+                <View style={styles.flowGrid}>
+                  {TEACHER_FLOW.map((item) => (
+                    <View key={item.title} style={[styles.flowCard, { width: flowCardWidth }]}>
+                      <View style={styles.flowCardIcon}>
+                        <Ionicons name={item.icon as any} size={20} color={COLORS.primary} />
+                      </View>
+                      <Text style={styles.flowCardTitle}>{item.title}</Text>
+                      <Text style={styles.flowCardText}>{item.text}</Text>
+                    </View>
+                  ))}
+                </View>
+              </>
+            )}
           </View>
         </View>
 
@@ -1329,6 +1375,29 @@ const styles = StyleSheet.create({
   },
   flowIntro: {
     maxWidth: 720,
+  },
+  flowTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  flowMinimizeButton: {
+    padding: 2,
+  },
+  flowRestore: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.lg,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+  flowRestoreText: {
+    flex: 1,
+    color: COLORS.primary,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
   },
   flowGrid: {
     flexDirection: 'row',

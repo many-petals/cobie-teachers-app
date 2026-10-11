@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -20,8 +21,36 @@ import { useAuth } from '../context/AuthContext';
 export default function LessonsScreen() {
   const router = useRouter();
   const { senMode } = useSEN();
-  const { toggleFavourite, isFavourite, isLessonCompleted, hasFullAccess } = useAuth();
+  const { user, toggleFavourite, isFavourite, isLessonCompleted, hasFullAccess } = useAuth();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [overviewMinimized, setOverviewMinimized] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const key = user?.id ? `@cobie_lessons_overview_minimized_${user.id}` : null;
+
+    if (!key) {
+      setOverviewMinimized(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    AsyncStorage.getItem(key).then(value => {
+      if (active) setOverviewMinimized(value === 'true');
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [user?.id]);
+
+  const minimizeOverview = useCallback(() => {
+    setOverviewMinimized(true);
+    if (user?.id) {
+      void AsyncStorage.setItem(`@cobie_lessons_overview_minimized_${user.id}`, 'true');
+    }
+  }, [user?.id]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -34,8 +63,31 @@ export default function LessonsScreen() {
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={true}>
         <View style={styles.section}>
+          {overviewMinimized ? (
+            <TouchableOpacity
+              style={styles.overviewRestore}
+              onPress={() => setOverviewMinimized(false)}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Show lesson guidance"
+            >
+              <Ionicons name="book" size={16} color={COLORS.primary} />
+              <Text style={styles.overviewRestoreText}>Show lesson guidance</Text>
+              <Ionicons name="chevron-down" size={16} color={COLORS.primary} />
+            </TouchableOpacity>
+          ) : (
           <View style={styles.overviewCard}>
+            <View style={styles.overviewTitleRow}>
             <Text style={styles.sectionEyebrow}>Teach in sequence</Text>
+              <TouchableOpacity
+                onPress={minimizeOverview}
+                style={styles.overviewMinimizeButton}
+                accessibilityRole="button"
+                accessibilityLabel="Minimise lesson guidance"
+              >
+                <Ionicons name="chevron-up" size={18} color={COLORS.primary} />
+              </TouchableOpacity>
+            </View>
             <Text style={styles.sectionTitle}>Open one lesson, follow the steps, then use the linked printables</Text>
             <Text style={styles.sectionSubtitle}>
               Each Cobie lesson is built to reduce prep time while keeping objectives, materials, differentiation, and classroom follow-up in one clear flow.
@@ -56,6 +108,7 @@ export default function LessonsScreen() {
               </View>
             </View>
           </View>
+          )}
         </View>
 
         {(
@@ -276,6 +329,30 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E3EDDA',
     ...SHADOWS.small,
+  },
+  overviewTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  overviewMinimizeButton: {
+    padding: 2,
+    marginTop: -4,
+  },
+  overviewRestore: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    backgroundColor: COLORS.bgLight,
+    borderRadius: RADIUS.lg,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+  overviewRestoreText: {
+    flex: 1,
+    color: COLORS.primary,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '700',
   },
   sectionEyebrow: {
     fontSize: FONT_SIZES.xs,
