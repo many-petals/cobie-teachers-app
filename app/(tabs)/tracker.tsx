@@ -417,13 +417,16 @@ export default function TrackerScreen() {
 
     const progressAreas = areas.map(area => {
       const areaAssessments = latestAssessments.filter(a => a.area_id === area.id && area.milestones.some(m => m.id === a.milestone_id));
+      const observations = areaAssessments.map(a => {
+        const indicator = area.milestones.find(m => m.id === a.milestone_id);
+        return indicator ? indicator.shortLabel + ': ' + (getObservationLabel(a)?.label ?? 'No observation') : '';
+      }).filter(Boolean);
+
       return {
         areaId: area.id,
         area: area.title,
-        description: areaAssessments.map(a => {
-          const indicator = area.milestones.find(m => m.id === a.milestone_id);
-          return indicator ? indicator.shortLabel + ': ' + (getObservationLabel(a)?.label ?? 'No observation') : '';
-        }).filter(Boolean).join('; ') || 'No observations recorded in this area.',
+        observations,
+        description: observations.join('; ') || 'No observations recorded in this area.',
         rating: 0, // Compatibility with existing report shape; no aggregate attainment score.
         ratingLabel: areaAssessments.length + ' of ' + area.milestones.length + ' observations recorded',
       };
@@ -466,9 +469,10 @@ export default function TrackerScreen() {
       ageGroup: pupil.age_group,
       classYear: pupil.age_group,
       reportPeriod,
-      progressAreas: progressAreas.map(({ area, description, rating, ratingLabel }) => ({
+      progressAreas: progressAreas.map(({ area, description, observations, rating, ratingLabel }) => ({
         area,
         description,
+        observations,
         rating,
         ratingLabel,
       })),

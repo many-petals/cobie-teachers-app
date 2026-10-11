@@ -4,6 +4,7 @@ import { ParentLetter } from '../data/parentLetters';
 export interface ProgressReportAreaData {
   area: string;
   description: string;
+  observations?: string[];
   rating: number;
   ratingLabel: string;
 }
@@ -62,6 +63,20 @@ function renderBulletList(items: string[], emptyText: string): string {
   return `
     <ul>
       ${items.map(item => `<li>${escapeHTML(item)}</li>`).join('')}
+    </ul>
+  `;
+}
+
+function renderAreaObservations(item: ProgressReportAreaData): string {
+  const observations = item.observations?.filter(Boolean) ?? [];
+
+  if (observations.length === 0) {
+    return `<p style="font-size:9pt; color:#888; margin:2px 0 6px;">${escapeHTML(item.description || 'No observations recorded in this area.')}</p>`;
+  }
+
+  return `
+    <ul style="font-size:9pt; color:#666; margin:2px 0 6px; padding-left:5mm;">
+      ${observations.map(observation => `<li style="margin:1mm 0;">${escapeHTML(observation)}</li>`).join('')}
     </ul>
   `;
 }
@@ -554,7 +569,7 @@ function getLetterContent(
               ${report.progressAreas.map(item => `
                 <div class="progress-item">
                   <h4>${escapeHTML(item.area)}</h4>
-                  <p style="font-size:9pt; color:#888; margin:2px 0 6px;">${escapeHTML(item.description)}</p>
+                  ${renderAreaObservations(item)}
                   <p style="font-size:9pt; color:${primaryColor}; font-weight:700; margin-top:6px;">${escapeHTML(item.ratingLabel)}</p>
                 </div>
               `).join('')}
