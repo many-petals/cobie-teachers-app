@@ -125,8 +125,9 @@ function getLetterStyles(primaryColor: string): string {
       @media print {
         html, body { margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         .no-print { display: none !important; }
-        .page { box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; min-height: auto !important; page-break-after: always; }
-        .page:last-child { page-break-after: auto; }
+        /* This document is one flowing A4 report. Forcing a break after the
+           wrapper can create a trailing blank sheet on mobile print engines. */
+        .page { box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; min-height: auto !important; page-break-after: auto !important; break-after: auto !important; }
       }
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #e8e8e8; padding: 20px; color: #333; }
@@ -765,7 +766,7 @@ function generateLetterHTML(
   <div class="toolbar no-print">
     <h3>${letter.title}</h3>
     <div class="toolbar-buttons">
-      <button onclick="window.print()" class="primary">Print / Save as PDF</button>
+      <button onclick="window.print()" class="primary">Print / Save as PDF (A4)</button>
       <button onclick="window.close()">Close</button>
     </div>
   </div>
