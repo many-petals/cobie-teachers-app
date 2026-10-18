@@ -446,12 +446,12 @@ export default function HomeScreen() {
             <View style={styles.heroWashRight} />
             <View style={[styles.heroInner, showDesktopHero && styles.heroInnerDesktop]}>
               <View style={[styles.heroContent, isCompactHero && styles.heroContentCompact]}>
-                <Text style={styles.heroEyebrow}>Little Petals teacher companion apps</Text>
+                <Text style={styles.heroEyebrow}>Many Petals companion resource</Text>
                 <Text style={[styles.heroTitle, isCompactHero && styles.heroTitleCompact, isTightHero && styles.heroTitleTight]}>
-                  Choose the book. Teach the lesson. Share the next step.
+                  Help children feel at home with Cobie the Cactus.
                 </Text>
                 <Text style={[styles.heroSubtitle, isTightHero && styles.heroSubtitleTight]}>
-                  Story-led emotional literacy packs for EYFS &amp; KS1 teachers who need ready-to-teach lessons, A4 printables, tracker tools, and parent support.
+                  Ready-to-teach emotional literacy for EYFS &amp; KS1, inspired by <Text style={styles.heroSubtitleEmphasis}>Cobie the Cactus: Happy As He Is.</Text>
                 </Text>
 
                 <View style={styles.heroButtons}>
@@ -461,29 +461,29 @@ export default function HomeScreen() {
                     activeOpacity={0.7}
                   >
                     <Ionicons name="book-outline" size={20} color={COLORS.white} />
-                    <Text style={styles.heroButtonText}>Continue Cobie app</Text>
+                    <Text style={styles.heroButtonText}>Start teaching</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.heroButtonSecondary}
                     onPress={scrollToBookSection}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.heroButtonSecondaryText}>View all apps</Text>
+                    <Text style={styles.heroButtonSecondaryText}>Explore resources</Text>
                   </TouchableOpacity>
                 </View>
 
                 <View style={styles.heroStatsRow}>
                   <View style={styles.heroStat}>
-                    <Text style={styles.heroStatNumber}>6</Text>
-                    <Text style={styles.heroStatLabel}>book companions</Text>
-                  </View>
-                  <View style={styles.heroStat}>
-                    <Text style={styles.heroStatNumber}>EYFS + KS1</Text>
-                    <Text style={styles.heroStatLabel}>classroom-ready</Text>
+                    <Text style={styles.heroStatNumber}>8</Text>
+                    <Text style={styles.heroStatLabel}>core lessons</Text>
                   </View>
                   <View style={styles.heroStat}>
                     <Text style={styles.heroStatNumber}>A4</Text>
                     <Text style={styles.heroStatLabel}>printables included</Text>
+                  </View>
+                  <View style={styles.heroStat}>
+                    <Text style={styles.heroStatNumber}>EYFS + KS1</Text>
+                    <Text style={styles.heroStatLabel}>classroom-friendly</Text>
                   </View>
                 </View>
               </View>
@@ -505,7 +505,7 @@ export default function HomeScreen() {
                     </View>
                     {showDesktopHero ? (
                       <View style={styles.heroVisualBubble}>
-                        <Text style={styles.heroVisualBubbleText}>Cobie app live now</Text>
+                        <Text style={styles.heroVisualBubbleText}>You are okay as you are.</Text>
                       </View>
                     ) : null}
                   </View>
@@ -983,6 +983,10 @@ const styles = StyleSheet.create({
     color: '#55665E',
     marginTop: SPACING.sm,
     lineHeight: 28,
+  },
+  heroSubtitleEmphasis: {
+    fontStyle: 'italic',
+    fontWeight: '600',
   },
   heroSubtitleTight: {
     fontSize: FONT_SIZES.md,
