@@ -8,13 +8,13 @@ import {
   SafeAreaView,
   Linking,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS } from '../data/theme';
 import { LESSONS, LessonMaterial } from '../data/lessons';
 import { PRINTABLES } from '../data/printables';
-import Timer from '../components/Timer';
 import { useSEN } from '../context/SENContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -110,6 +110,10 @@ if (isLocked) {
     setLessonDone(true);
   };
 
+  const handlePrintLesson = () => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') window.print();
+  };
+
   // If lesson is done, show completion screen
   if (lessonDone) {
     return (
@@ -199,6 +203,57 @@ if (isLocked) {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={true}>
+        <View style={[styles.overviewHeader, { backgroundColor: lesson.color + '15' }]}>
+          <View style={styles.overviewHeaderText}>
+            <Text style={styles.overviewKicker}>LESSON {lesson.number} · {lesson.ageRange}</Text>
+            <Text style={styles.overviewTitle}>{lesson.title}</Text>
+            <Text style={styles.overviewSubtitle}>{lesson.theme}</Text>
+            <Text style={styles.overviewDuration}>Flexible guide: {lesson.duration}. Follow the children’s pace; there is no countdown.</Text>
+          </View>
+          <TouchableOpacity style={styles.printLessonButton} onPress={handlePrintLesson} activeOpacity={0.7}>
+            <Ionicons name="print-outline" size={17} color={COLORS.primary} />
+            <Text style={styles.printLessonButtonText}>Print lesson</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.overviewSection}>
+          <Text style={styles.sectionLabel}>Aims and objectives</Text>
+          {lesson.objectives.map((objective, i) => (
+            <View key={i} style={styles.overviewBullet}>
+              <Ionicons name="checkmark-circle" size={16} color={COLORS.secondary} />
+              <Text style={styles.overviewBulletText}>{objective}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.overviewSection}>
+          <Text style={styles.sectionLabel}>Story connection</Text>
+          <View style={styles.instructionCard}>
+            <Text style={styles.instructionText}>{lesson.steps[0]?.instruction}</Text>
+          </View>
+          <Text style={styles.storyReferenceNote}>Use the matching Cobie book page or spread when reading this story moment. Page references are kept with verified story evidence rather than guessed.</Text>
+        </View>
+
+        <View style={styles.overviewSection}>
+          <Text style={styles.sectionLabel}>Materials needed</Text>
+          {lesson.materials.map((material, i) => (
+            <View key={i} style={styles.overviewBullet}>
+              <Ionicons name="ellipse" size={8} color={COLORS.accentOrange} />
+              <Text style={styles.overviewBulletText}>{material}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.overviewSection}>
+          <Text style={styles.sectionLabel}>Expected outcomes</Text>
+          {lesson.assessmentOpportunities.map((outcome, i) => (
+            <View key={i} style={styles.overviewBullet}>
+              <Ionicons name="eye-outline" size={16} color={COLORS.primary} />
+              <Text style={styles.overviewBulletText}>{outcome}</Text>
+            </View>
+          ))}
+        </View>
+
         {/* Step Title */}
         <View style={[styles.stepHeader, { backgroundColor: lesson.color + '15' }]}>
           <View style={[styles.stepNumberBadge, { backgroundColor: lesson.color }]}>
@@ -206,14 +261,6 @@ if (isLocked) {
           </View>
           <Text style={styles.stepTitle}>{step.title}</Text>
         </View>
-
-        {/* Timer */}
-        {step.duration ? (
-          <View style={styles.timerSection}>
-            <Text style={styles.timerLabel}>Activity Timer ({step.duration} min)</Text>
-            <Timer initialMinutes={step.duration} />
-          </View>
-        ) : null}
 
         {/* Instructions */}
         <View style={styles.instructionSection}>
@@ -432,12 +479,22 @@ const styles = StyleSheet.create({
   stepDots: { flexDirection: 'row', justifyContent: 'center', gap: SPACING.sm, paddingVertical: SPACING.md, backgroundColor: COLORS.white },
   dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: COLORS.lightGray },
   content: { flex: 1, padding: SPACING.lg },
+  overviewHeader: { borderRadius: RADIUS.xl, padding: SPACING.lg, marginBottom: SPACING.lg },
+  overviewHeaderText: { marginBottom: SPACING.md },
+  overviewKicker: { fontSize: FONT_SIZES.xs, fontWeight: '800', color: COLORS.primary, letterSpacing: 0.7, marginBottom: SPACING.xs },
+  overviewTitle: { fontSize: FONT_SIZES.xl, fontWeight: '800', color: COLORS.text, lineHeight: 28 },
+  overviewSubtitle: { fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20, marginTop: SPACING.xs },
+  overviewDuration: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, lineHeight: 18, marginTop: SPACING.sm },
+  printLessonButton: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: SPACING.xs, backgroundColor: COLORS.white, borderWidth: 1, borderColor: COLORS.primary + '35', borderRadius: RADIUS.round, paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm },
+  printLessonButtonText: { color: COLORS.primary, fontSize: FONT_SIZES.sm, fontWeight: '700' },
+  overviewSection: { marginBottom: SPACING.lg },
+  overviewBullet: { flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.sm, marginBottom: SPACING.xs },
+  overviewBulletText: { flex: 1, fontSize: FONT_SIZES.sm, color: COLORS.textLight, lineHeight: 20 },
+  storyReferenceNote: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, lineHeight: 18, marginTop: SPACING.sm, fontStyle: 'italic' },
   stepHeader: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, padding: SPACING.lg, borderRadius: RADIUS.xl, marginBottom: SPACING.lg },
   stepNumberBadge: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
   stepNumberText: { fontSize: FONT_SIZES.lg, fontWeight: '800', color: COLORS.white },
   stepTitle: { flex: 1, fontSize: FONT_SIZES.xl, fontWeight: '700', color: COLORS.text },
-  timerSection: { marginBottom: SPACING.lg },
-  timerLabel: { fontSize: FONT_SIZES.sm, fontWeight: '600', color: COLORS.textMuted, marginBottom: SPACING.sm },
   instructionSection: { marginBottom: SPACING.lg },
   sectionLabel: { fontSize: FONT_SIZES.sm, fontWeight: '700', color: COLORS.text, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: SPACING.sm },
   instructionCard: { backgroundColor: COLORS.white, borderRadius: RADIUS.lg, padding: SPACING.lg, ...SHADOWS.small },
