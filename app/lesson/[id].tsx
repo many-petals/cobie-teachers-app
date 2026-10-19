@@ -249,10 +249,12 @@ if (isLocked) {
 
         <View style={styles.overviewSection}>
           <Text style={styles.sectionLabel}>Materials needed</Text>
-          {lesson.materials.map((material, i) => (
+          {lesson.materialsDetailed.map((material, i) => (
             <View key={i} style={styles.overviewBullet}>
               <Ionicons name="ellipse" size={8} color={COLORS.accentOrange} />
-              <Text style={styles.overviewBulletText}>{material}</Text>
+              <Text style={styles.overviewBulletText}>{material.label}{material.printableId ? ' ' : ''}
+                {material.printableId ? <Text accessibilityRole="link" onPress={() => router.push({ pathname: '/printables', params: { printableId: material.printableId } } as any)}>— Open printable</Text> : null}
+              </Text>
             </View>
           ))}
         </View>
@@ -328,7 +330,7 @@ if (isLocked) {
                 onPrintResource={(printableId) => {
                   router.back();
                   setTimeout(() => {
-                    router.push('/printables' as any);
+                    router.push({ pathname: '/printables', params: { printableId } } as any);
                   }, 300);
                 }}
               />
@@ -447,94 +449,24 @@ function MaterialCheckItem({ material, onPrintResource }: {
   material: LessonMaterial;
   onPrintResource: (id: string) => void;
 }) {
-  const [status, setStatus] = useState<'unchecked' | 'have-it' | 'printing'>('unchecked');
-  const { showToast } = useToast();
-  const hasPrintable = !!material.printableId;
-  const printable = hasPrintable ? PRINTABLES.find(p => p.id === material.printableId) : null;
-
-  const handleHaveIt = () => {
-    setStatus(status === 'have-it' ? 'unchecked' : 'have-it');
-  };
-
-  const handlePrintResource = () => {
-    if (!material.printableId) return;
-    setStatus('printing');
-    showToast(
-      'Opening Printables',
-      `Navigating to "${material.printableLabel}" in Printables section.`,
-      'info'
-    );
-    onPrintResource(material.printableId);
-  };
-
-  if (!hasPrintable) {
-    // Simple checkbox for non-printable materials
-    return (
-      <TouchableOpacity
-        style={styles.materialItem}
-        onPress={() => setStatus(status === 'have-it' ? 'unchecked' : 'have-it')}
-        activeOpacity={0.7}
-      >
-        <Ionicons
-          name={status === 'have-it' ? 'checkbox' : 'square-outline'}
-          size={22}
-          color={status === 'have-it' ? COLORS.secondary : COLORS.mediumGray}
-        />
-        <Text style={[styles.materialText, status === 'have-it' && styles.materialTextChecked]}>
-          {material.label}
-        </Text>
-      </TouchableOpacity>
-    );
-  }
-
-  // Enhanced material item with printable link
+  const [checked, setChecked] = useState(false);
   return (
-    <View style={styles.materialItemEnhanced}>
-      <View style={styles.materialTopRow}>
-        <View style={[styles.printableBadge, { backgroundColor: printable?.color ? printable.color + '15' : COLORS.bgLight }]}>
-          <Ionicons name={printable?.icon as any || 'document'} size={16} color={printable?.color || COLORS.primary} />
-        </View>
-        <View style={styles.materialLabelWrap}>
-          <Text style={[styles.materialText, status !== 'unchecked' && styles.materialTextChecked]}>
-            {material.label}
-          </Text>
-          <Text style={styles.materialPrintableNote}>
-            Available in app as printable resource
-          </Text>
-        </View>
-      </View>
-      <View style={styles.materialActions}>
-        <TouchableOpacity
-          style={[
-            styles.materialActionBtn,
-            status === 'have-it' && styles.materialActionBtnActive,
-          ]}
-          onPress={handleHaveIt}
-          activeOpacity={0.7}
-        >
-          <Ionicons
-            name={status === 'have-it' ? 'checkmark-circle' : 'checkmark-circle-outline'}
-            size={16}
-            color={status === 'have-it' ? COLORS.white : COLORS.secondary}
-          />
-          <Text style={[
-            styles.materialActionText,
-            status === 'have-it' && styles.materialActionTextActive,
-          ]}>
-            Already have it
-          </Text>
+    <View style={styles.materialItem}>
+      <TouchableOpacity
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked }}
+        accessibilityLabel={material.label}
+        onPress={() => setChecked(!checked)}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}
+      >
+        <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={22} color={checked ? COLORS.secondary : COLORS.mediumGray} />
+        <Text style={styles.materialText}>{material.label}</Text>
+      </TouchableOpacity>
+      {material.printableId ? (
+        <TouchableOpacity accessibilityRole="link" accessibilityLabel={`Open ${material.label} printable`} onPress={() => onPrintResource(material.printableId!)}>
+          <Text style={{ color: COLORS.primary, fontWeight: '600' }}>Printable</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.materialActionBtn, styles.materialPrintBtn]}
-          onPress={handlePrintResource}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="print-outline" size={16} color={COLORS.primary} />
-          <Text style={[styles.materialActionText, { color: COLORS.primary }]}>
-            Print Resource
-          </Text>
-        </TouchableOpacity>
-      </View>
+      ) : null}
     </View>
   );
 }

@@ -226,17 +226,15 @@ export default function LessonsScreen() {
                       const printable = hasPrintable ? PRINTABLES.find(p => p.id === mat.printableId) : null;
                       return (
                         <View key={i} style={[styles.materialRow, hasPrintable && styles.materialRowPrintable]}>
-                          <Ionicons
-                            name={hasPrintable ? (printable?.icon as any || 'document') : 'cube-outline'}
-                            size={16}
-                            color={hasPrintable ? (printable?.color || COLORS.primary) : COLORS.accentOrange}
-                          />
+                          <Text style={styles.bulletText}>•</Text>
                           <View style={styles.materialContent}>
                             <Text style={styles.bulletText}>{mat.label}</Text>
                             {hasPrintable ? (
                               <TouchableOpacity
                                 style={styles.printLink}
-                                onPress={() => router.push('/printables' as any)}
+                                accessibilityRole="link"
+                                accessibilityLabel={`Open ${mat.label} in Printables`}
+                                onPress={() => router.push({ pathname: '/printables', params: { printableId: mat.printableId } } as any)}
                                 activeOpacity={0.7}
                               >
                                 <Ionicons name="print-outline" size={12} color={COLORS.primary} />
