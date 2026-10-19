@@ -111,11 +111,11 @@ export default function LessonsScreen() {
           )}
         </View>
 
-        {(
+        {!hasFullAccess && (
           <View style={styles.section}>
             <View style={styles.upgradeBanner}>
-              <Text style={styles.sectionEyebrow}>{hasFullAccess ? 'Your subscription' : 'Upgrade when ready'}</Text>
-              <Text style={styles.upgradeTitle}>{hasFullAccess ? 'Your full lesson library is unlocked' : `Unlock all ${LESSONS.length} emotional literacy lessons`}</Text>
+              <Text style={styles.sectionEyebrow}>Upgrade when ready</Text>
+              <Text style={styles.upgradeTitle}>{`Unlock all ${LESSONS.length} emotional literacy lessons`}</Text>
               <Text style={styles.upgradeText}>
                 Get the full lesson library, SEN differentiation support, and the matching printable classroom resources.
               </Text>
@@ -124,7 +124,7 @@ export default function LessonsScreen() {
                 onPress={() => router.push('/upgrade')}
                 activeOpacity={0.7}
               >
-                <Text style={styles.upgradeButtonText}>{hasFullAccess ? 'Manage access and billing' : 'View upgrade options'}</Text>
+                <Text style={styles.upgradeButtonText}>View upgrade options</Text>
               </TouchableOpacity>
             </View>
           </View>
