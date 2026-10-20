@@ -409,6 +409,8 @@ function PrintLessonDocument({ lesson }: { lesson: NonNullable<typeof LESSONS[nu
           {lesson.assessmentOpportunities.map((outcome, index) => <Text key={index} style={styles.printBullet}>• {outcome}</Text>)}
         </PrintSection>
 
+        <View style={styles.printPageBreak} />
+
         <PrintSection title="Lesson steps">
           {lesson.steps.map((step, index) => (
             <View key={index} style={styles.printStep}>
@@ -474,23 +476,24 @@ function MaterialCheckItem({ material, onPrintResource }: {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.bgLight },
   printSafeArea: { flex: 1, backgroundColor: COLORS.white },
-  printDocument: { padding: 32, maxWidth: 820, alignSelf: 'center', width: '100%', backgroundColor: COLORS.white },
+  printDocument: { padding: 42, maxWidth: 760, alignSelf: 'center', width: '100%', backgroundColor: COLORS.white },
   printBrandRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 2, borderBottomColor: COLORS.primary, paddingBottom: 10, marginBottom: 22 },
   printBrand: { fontSize: 12, fontWeight: '800', letterSpacing: 1.2, color: COLORS.primary },
   printPack: { fontSize: 11, color: COLORS.textMuted },
   printKicker: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8, color: COLORS.primary, marginBottom: 6 },
-  printTitle: { fontSize: 25, lineHeight: 31, fontWeight: '800', color: COLORS.text, marginBottom: 5 },
-  printTheme: { fontSize: 14, lineHeight: 20, color: COLORS.textLight, marginBottom: 5 },
-  printDuration: { fontSize: 11, lineHeight: 17, color: COLORS.textMuted, fontStyle: 'italic', marginBottom: 18 },
+  printTitle: { fontSize: 28, lineHeight: 34, fontWeight: '800', color: COLORS.text, marginBottom: 7 },
+  printTheme: { fontSize: 15, lineHeight: 22, color: COLORS.textLight, marginBottom: 6 },
+  printDuration: { fontSize: 12, lineHeight: 18, color: COLORS.textMuted, fontStyle: 'italic', marginBottom: 22 },
   printSection: { marginBottom: 18, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: COLORS.lightGray },
   printSectionTitle: { fontSize: 13, fontWeight: '800', color: COLORS.primary, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 8 },
   printSubheading: { fontSize: 11, fontWeight: '800', color: COLORS.text, marginBottom: 4 },
-  printBody: { fontSize: 12, lineHeight: 18, color: COLORS.text, marginBottom: 6 },
-  printBullet: { fontSize: 12, lineHeight: 18, color: COLORS.text, marginBottom: 3 },
-  printNote: { fontSize: 10, lineHeight: 15, color: COLORS.textMuted, fontStyle: 'italic', marginTop: 5 },
-  printStep: { marginBottom: 14, paddingLeft: 10, borderLeftWidth: 3, borderLeftColor: COLORS.secondary },
-  printStepTitle: { fontSize: 14, lineHeight: 19, fontWeight: '800', color: COLORS.text, marginBottom: 5 },
-  printTipBlock: { marginTop: 5, padding: 8, backgroundColor: COLORS.bgWarm, borderRadius: 6 },
+  printBody: { fontSize: 14, lineHeight: 21, color: COLORS.text, marginBottom: 7 },
+  printBullet: { fontSize: 14, lineHeight: 21, color: COLORS.text, marginBottom: 4 },
+  printNote: { fontSize: 11, lineHeight: 17, color: COLORS.textMuted, fontStyle: 'italic', marginTop: 6 },
+  printPageBreak: { height: 1, breakBefore: 'page', pageBreakBefore: 'always' } as any,
+  printStep: { marginBottom: 17, paddingLeft: 12, borderLeftWidth: 3, borderLeftColor: COLORS.secondary },
+  printStepTitle: { fontSize: 16, lineHeight: 22, fontWeight: '800', color: COLORS.text, marginBottom: 6 },
+  printTipBlock: { marginTop: 6, padding: 10, backgroundColor: COLORS.bgWarm, borderRadius: 6 },
   printFooter: { paddingTop: 12, borderTopWidth: 1, borderTopColor: COLORS.lightGray },
   printFooterText: { fontSize: 9, lineHeight: 13, color: COLORS.textMuted },
   errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: SPACING.md },
