@@ -31,7 +31,6 @@ export default function LessonPlayerScreen() {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [lessonDone, setLessonDone] = useState(false);
   const [showDiffWizard, setShowDiffWizard] = useState(false);
-  const [printMode, setPrintMode] = useState(false);
 
 
   const lesson = LESSONS.find((l) => l.id === id);
@@ -113,14 +112,17 @@ if (isLocked) {
 
   const handlePrintLesson = () => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') return;
-    // Render the complete handout before opening the browser print dialog. The
-    // lesson player remains step-by-step on screen, but teachers need every
-    // step in the printed pack.
-    setPrintMode(true);
-    setTimeout(() => {
-      window.print();
-      setPrintMode(false);
-    }, 100);
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      showToast('Print blocked', 'Please allow pop-ups, then tap Print lesson again.', 'error');
+      return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(buildLessonPrintHtml(lesson));
+    printWindow.document.close();
+    // The document also has a visible print button if a mobile browser blocks
+    // the automatic dialog. Opening the tab happens directly in the tap handler.
+    printWindow.setTimeout(() => printWindow.print(), 400);
   };
 
   // If lesson is done, show completion screen
@@ -150,10 +152,6 @@ if (isLocked) {
   }
 
   const progress = ((currentStep + 1) / lesson.steps.length) * 100;
-
-  if (printMode) {
-    return <PrintLessonDocument lesson={lesson} />;
-  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -379,72 +377,67 @@ if (isLocked) {
   );
 }
 
-function PrintLessonDocument({ lesson }: { lesson: NonNullable<typeof LESSONS[number]> }) {
-  return (
-    <SafeAreaView style={styles.printSafeArea}>
-      <ScrollView contentContainerStyle={styles.printDocument}>
-        <View style={styles.printBrandRow}>
-          <Text style={styles.printBrand}>MANY PETALS LEARNING</Text>
-          <Text style={styles.printPack}>Cobie Teacher Pack</Text>
-        </View>
-        <Text style={styles.printKicker}>LESSON {lesson.number} · {lesson.ageRange}</Text>
-        <Text style={styles.printTitle}>{lesson.title}</Text>
-        <Text style={styles.printTheme}>{lesson.theme}</Text>
-        <Text style={styles.printDuration}>Flexible guide: {lesson.duration}. Follow the children’s pace; there is no countdown.</Text>
+function buildLessonPrintHtml(lesson: NonNullable<typeof LESSONS[number]>): string {
+  const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[character] || character);
+  const paragraph = (value: string) => `<p>${escapeHtml(value).replace(/\n/g, '<br>')}</p>`;
+  const bullets = (items: string[]) => `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
+  const section = (title: string, body: string) => `<section><h2>${title}</h2>${body}</section>`;
+  const steps = lesson.steps.map((step, index) => `
+    <div class="step">
+      <h3>${index + 1}. ${escapeHtml(step.title)}</h3>
+      ${paragraph(step.instruction)}
+      ${step.tips?.length ? `<div class="tips"><strong>Teaching tips</strong>${bullets(step.tips)}</div>` : ''}
+    </div>`).join('');
 
-        <PrintSection title="Aims and objectives">
-          {lesson.objectives.map((objective, index) => <Text key={index} style={styles.printBullet}>• {objective}</Text>)}
-        </PrintSection>
-
-        <PrintSection title="Story connection">
-          <Text style={styles.printBody}>{lesson.steps[0]?.instruction}</Text>
-          <Text style={styles.printNote}>Use the matching Cobie book page or spread when reading this story moment. Page references are kept with verified story evidence rather than guessed.</Text>
-        </PrintSection>
-
-        <PrintSection title="Materials needed">
-          {lesson.materials.map((material, index) => <Text key={index} style={styles.printBullet}>• {material}</Text>)}
-        </PrintSection>
-
-        <PrintSection title="Expected outcomes">
-          {lesson.assessmentOpportunities.map((outcome, index) => <Text key={index} style={styles.printBullet}>• {outcome}</Text>)}
-        </PrintSection>
-
-        <View style={styles.printPageBreak} />
-
-        <PrintSection title="Lesson steps">
-          {lesson.steps.map((step, index) => (
-            <View key={index} style={styles.printStep}>
-              <Text style={styles.printStepTitle}>{index + 1}. {step.title}</Text>
-              <Text style={styles.printBody}>{step.instruction}</Text>
-              {step.tips?.length ? (
-                <View style={styles.printTipBlock}>
-                  <Text style={styles.printSubheading}>Teaching tips</Text>
-                  {step.tips.map((tip, tipIndex) => <Text key={tipIndex} style={styles.printBullet}>• {tip}</Text>)}
-                </View>
-              ) : null}
-            </View>
-          ))}
-        </PrintSection>
-
-        <PrintSection title="SEN adaptations">
-          {lesson.senDifferentiation.map((item, index) => <Text key={index} style={styles.printBullet}>• {item}</Text>)}
-        </PrintSection>
-
-        <View style={styles.printFooter}>
-          <Text style={styles.printFooterText}>© 2026 Many Petals Learning. Classroom and educational use only. Not for resale or redistribution.</Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-function PrintSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <View style={styles.printSection}>
-      <Text style={styles.printSectionTitle}>{title}</Text>
-      {children}
-    </View>
-  );
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson ${lesson.number}: ${escapeHtml(lesson.title)} — Many Petals Learning</title>
+<style>
+  @page { size: A4; margin: 16mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { color: #20354b; background: #f1f3f4; font: 11pt/1.4 Arial, Helvetica, sans-serif; }
+  main { width: 100%; max-width: 210mm; margin: 24px auto; padding: 16mm; background: white; }
+  .controls { max-width: 210mm; margin: 18px auto 0; text-align: right; }
+  button { border: 0; border-radius: 8px; background: #166b86; color: white; font: bold 15px Arial, sans-serif; padding: 12px 18px; cursor: pointer; }
+  header { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; padding-bottom: 7mm; border-bottom: 2px solid #166b86; }
+  header strong { color: #166b86; font-size: 10pt; letter-spacing: .08em; }
+  header span { color: #526270; font-size: 9pt; }
+  .kicker { color: #166b86; font-weight: bold; font-size: 9pt; letter-spacing: .06em; margin: 7mm 0 2mm; }
+  h1 { font-size: 21pt; line-height: 1.16; margin: 0 0 3mm; }
+  h2 { color: #166b86; font-size: 11pt; text-transform: uppercase; letter-spacing: .04em; margin: 0 0 3mm; }
+  h3 { font-size: 13pt; margin: 0 0 2mm; }
+  p { margin: 0 0 3mm; }
+  .theme { font-size: 11pt; }
+  .duration, .note { color: #51616d; font-size: 9.5pt; }
+  section { margin-top: 7mm; padding-bottom: 4mm; border-bottom: 1px solid #d7e0e4; }
+  ul { margin: 0; padding-left: 6mm; }
+  li { margin: 0 0 2mm; }
+  .page-break { break-before: page; page-break-before: always; }
+  .step { border-left: 3px solid #77b98b; padding-left: 5mm; margin: 0 0 6mm; break-inside: avoid; page-break-inside: avoid; }
+  .tips { background: #f3f7ed; padding: 3mm 4mm; margin-top: 2mm; font-size: 10pt; }
+  .tips ul { margin-top: 2mm; }
+  footer { margin-top: 8mm; padding-top: 3mm; border-top: 1px solid #d7e0e4; color: #526270; font-size: 8pt; }
+  @media print { body { background: white; } main { max-width: none; margin: 0; padding: 0; } .controls { display: none; } }
+</style></head><body>
+<div class="controls"><button type="button" onclick="window.print()">Print / Save as PDF</button></div>
+<main>
+  <header><strong>MANY PETALS LEARNING</strong><span>Cobie Teacher Pack</span></header>
+  <p class="kicker">LESSON ${lesson.number} · ${escapeHtml(lesson.ageRange)}</p>
+  <h1>${escapeHtml(lesson.title)}</h1>
+  <p class="theme">${escapeHtml(lesson.theme)}</p>
+  <p class="duration">Flexible guide: ${escapeHtml(lesson.duration)}. Follow the children’s pace; there is no countdown.</p>
+  ${section('Aims and objectives', bullets(lesson.objectives))}
+  ${section('Story connection', paragraph(lesson.steps[0]?.instruction || '') + '<p class="note">Use the matching Cobie book page or spread when reading this story moment. Page references are kept with verified story evidence rather than guessed.</p>')}
+  ${section('Materials needed', bullets(lesson.materialsDetailed.map((material) => `${material.label}${material.printableId ? ' (classroom printable)' : ''}`)))}
+  ${section('Expected outcomes', bullets(lesson.assessmentOpportunities))}
+  <div class="page-break"></div>
+  ${section('Lesson steps', steps)}
+  ${section('SEN adaptations', bullets(lesson.senDifferentiation))}
+  <footer>© 2026 Many Petals Learning. Classroom and educational use only. Not for resale or redistribution.</footer>
+</main></body></html>`;
 }
 
 function MaterialCheckItem({ material, onPrintResource }: {
@@ -475,27 +468,6 @@ function MaterialCheckItem({ material, onPrintResource }: {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.bgLight },
-  printSafeArea: { flex: 1, backgroundColor: COLORS.white },
-  printDocument: { padding: 42, maxWidth: 760, alignSelf: 'center', width: '100%', backgroundColor: COLORS.white },
-  printBrandRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 2, borderBottomColor: COLORS.primary, paddingBottom: 10, marginBottom: 22 },
-  printBrand: { fontSize: 12, fontWeight: '800', letterSpacing: 1.2, color: COLORS.primary },
-  printPack: { fontSize: 11, color: COLORS.textMuted },
-  printKicker: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8, color: COLORS.primary, marginBottom: 6 },
-  printTitle: { fontSize: 28, lineHeight: 34, fontWeight: '800', color: COLORS.text, marginBottom: 7 },
-  printTheme: { fontSize: 15, lineHeight: 22, color: COLORS.textLight, marginBottom: 6 },
-  printDuration: { fontSize: 12, lineHeight: 18, color: COLORS.textMuted, fontStyle: 'italic', marginBottom: 22 },
-  printSection: { marginBottom: 18, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: COLORS.lightGray },
-  printSectionTitle: { fontSize: 13, fontWeight: '800', color: COLORS.primary, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 8 },
-  printSubheading: { fontSize: 11, fontWeight: '800', color: COLORS.text, marginBottom: 4 },
-  printBody: { fontSize: 14, lineHeight: 21, color: COLORS.text, marginBottom: 7 },
-  printBullet: { fontSize: 14, lineHeight: 21, color: COLORS.text, marginBottom: 4 },
-  printNote: { fontSize: 11, lineHeight: 17, color: COLORS.textMuted, fontStyle: 'italic', marginTop: 6 },
-  printPageBreak: { height: 1, breakBefore: 'page', pageBreakBefore: 'always' } as any,
-  printStep: { marginBottom: 17, paddingLeft: 12, borderLeftWidth: 3, borderLeftColor: COLORS.secondary },
-  printStepTitle: { fontSize: 16, lineHeight: 22, fontWeight: '800', color: COLORS.text, marginBottom: 6 },
-  printTipBlock: { marginTop: 6, padding: 10, backgroundColor: COLORS.bgWarm, borderRadius: 6 },
-  printFooter: { paddingTop: 12, borderTopWidth: 1, borderTopColor: COLORS.lightGray },
-  printFooterText: { fontSize: 9, lineHeight: 13, color: COLORS.textMuted },
   errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: SPACING.md },
   errorText: { fontSize: FONT_SIZES.lg, color: COLORS.textLight },
   backButton: { paddingHorizontal: SPACING.xl, paddingVertical: SPACING.md, backgroundColor: COLORS.primary, borderRadius: RADIUS.round },
