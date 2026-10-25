@@ -112,17 +112,12 @@ if (isLocked) {
 
   const handlePrintLesson = () => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') return;
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      showToast('Print blocked', 'Please allow pop-ups, then tap Print lesson again.', 'error');
-      return;
-    }
-    printWindow.document.open();
-    printWindow.document.write(buildLessonPrintHtml(lesson));
-    printWindow.document.close();
-    // The document also has a visible print button if a mobile browser blocks
-    // the automatic dialog. Opening the tab happens directly in the tap handler.
-    printWindow.setTimeout(() => printWindow.print(), 400);
+    // Replace this tab with a standalone document so mobile and in-app
+    // browsers can show the full handout without relying on a pop-up.
+    window.document.open();
+    window.document.write(buildLessonPrintHtml(lesson));
+    window.document.close();
+    window.setTimeout(() => window.print(), 400);
   };
 
   // If lesson is done, show completion screen
@@ -402,6 +397,7 @@ function buildLessonPrintHtml(lesson: NonNullable<typeof LESSONS[number]>): stri
   main { width: 100%; max-width: 210mm; margin: 24px auto; padding: 16mm; background: white; }
   .controls { max-width: 210mm; margin: 18px auto 0; text-align: right; }
   button { border: 0; border-radius: 8px; background: #166b86; color: white; font: bold 15px Arial, sans-serif; padding: 12px 18px; cursor: pointer; }
+  button.secondary { margin-right: 10px; background: white; color: #166b86; border: 1px solid #166b86; }
   header { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; padding-bottom: 7mm; border-bottom: 2px solid #166b86; }
   header strong { color: #166b86; font-size: 10pt; letter-spacing: .08em; }
   header span { color: #526270; font-size: 9pt; }
@@ -422,7 +418,7 @@ function buildLessonPrintHtml(lesson: NonNullable<typeof LESSONS[number]>): stri
   footer { margin-top: 8mm; padding-top: 3mm; border-top: 1px solid #d7e0e4; color: #526270; font-size: 8pt; }
   @media print { body { background: white; } main { max-width: none; margin: 0; padding: 0; } .controls { display: none; } }
 </style></head><body>
-<div class="controls"><button type="button" onclick="window.print()">Print / Save as PDF</button></div>
+<div class="controls"><button class="secondary" type="button" onclick="window.location.reload()">Back to lesson</button><button type="button" onclick="window.print()">Print / Save as PDF</button></div>
 <main>
   <header><strong>MANY PETALS LEARNING</strong><span>Cobie Teacher Pack</span></header>
   <p class="kicker">LESSON ${lesson.number} · ${escapeHtml(lesson.ageRange)}</p>
