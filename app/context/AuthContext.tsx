@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/app/lib/supabase';
 import * as LocalStorage from '@/app/lib/storage';
 import { getBillingStatus, BillingStatus } from '@/lib/billing';
@@ -369,9 +370,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     syncSession();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    // Supabase must finish its auth notification before another client call.
+    // Keep database work outside that callback to avoid holding its auth lock.
+    const pendingAuthChanges = new Set<ReturnType<typeof setTimeout>>();
+    const handleAuthChange = async (session: Session | null) => {
       if (!active) {
         return;
       }
@@ -395,10 +397,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (active) {
         setLoading(false);
       }
+    };
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return;
+      const task = setTimeout(() => {
+        pendingAuthChanges.delete(task);
+        void handleAuthChange(session).catch((err) => {
+          console.warn('Auth change handling failed:', err);
+          if (active) setLoading(false);
+        });
+      }, 0);
+      pendingAuthChanges.add(task);
     });
 
     return () => {
       active = false;
+      pendingAuthChanges.forEach(clearTimeout);
+      pendingAuthChanges.clear();
       subscription.unsubscribe();
     };
   }, [loadAndMergeUserData, resetAuthState]);
