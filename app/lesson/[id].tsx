@@ -380,6 +380,10 @@ function buildLessonPrintHtml(lesson: NonNullable<typeof LESSONS[number]>): stri
   })[character] || character);
   const paragraph = (value: string) => `<p>${escapeHtml(value).replace(/\n/g, '<br>')}</p>`;
   const bullets = (items: string[]) => `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
+  const printableOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://cobie-teachers-app.vercel.app';
+  const materials = `<ul class="material-checklist">${lesson.materialsDetailed.map((material) => `
+    <li><label><input type="checkbox"><span>${escapeHtml(material.label)}</span></label>${material.printableId ? `<a href="${escapeHtml(printableOrigin)}/printables?printableId=${encodeURIComponent(material.printableId)}" aria-label="Open ${escapeHtml(material.label)} printable">Printable</a>` : ''}</li>
+  `).join('')}</ul>`;
   const section = (title: string, body: string) => `<section><h2>${title}</h2>${body}</section>`;
   const steps = lesson.steps.map((step, index) => `
     <div class="step">
@@ -395,7 +399,7 @@ function buildLessonPrintHtml(lesson: NonNullable<typeof LESSONS[number]>): stri
   @page { size: A4; margin: 16mm; }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
-  body { color: #20354b; background: #f1f3f4; font: 11pt/1.4 Arial, Helvetica, sans-serif; }
+  body { color: #20354b; background: #f1f3f4; font: 11pt/1.3 Arial, Helvetica, sans-serif; }
   main { width: 100%; max-width: 210mm; margin: 24px auto; padding: 16mm; background: white; }
   .controls { max-width: 210mm; margin: 18px auto 0; text-align: right; }
   button { border: 0; border-radius: 8px; background: #166b86; color: white; font: bold 15px Arial, sans-serif; padding: 12px 18px; cursor: pointer; }
@@ -410,14 +414,22 @@ function buildLessonPrintHtml(lesson: NonNullable<typeof LESSONS[number]>): stri
   p { margin: 0 0 3mm; }
   .theme { font-size: 11pt; }
   .duration, .note { color: #51616d; font-size: 9.5pt; }
-  section { margin-top: 7mm; padding-bottom: 4mm; border-bottom: 1px solid #d7e0e4; }
+  section { margin-top: 5mm; padding-bottom: 3mm; border-bottom: 1px solid #d7e0e4; }
   ul { margin: 0; padding-left: 6mm; }
-  li { margin: 0 0 2mm; }
+  li { margin: 0 0 1.3mm; }
+  .material-checklist { list-style: none; padding: 0; }
+  .material-checklist li { display: flex; gap: 3mm; justify-content: space-between; break-inside: avoid; }
+  .material-checklist label { display: flex; gap: 2mm; align-items: baseline; }
+  .material-checklist input { width: 3mm; height: 3mm; margin: 0; flex-shrink: 0; }
+  .material-checklist a { color: #166b86; white-space: nowrap; }
+  h2, h3 { break-after: avoid; }
+  .support-section { break-inside: avoid; page-break-inside: avoid; }
   .page-break { break-before: page; page-break-before: always; }
-  .step { border-left: 3px solid #77b98b; padding-left: 5mm; margin: 0 0 6mm; break-inside: avoid; page-break-inside: avoid; }
-  .tips { background: #f3f7ed; padding: 3mm 4mm; margin-top: 2mm; font-size: 10pt; }
-  .tips ul { margin-top: 2mm; }
-  footer { margin-top: 8mm; padding-top: 3mm; border-top: 1px solid #d7e0e4; color: #526270; font-size: 8pt; }
+  .step { border-left: 3px solid #77b98b; padding-left: 5mm; margin: 0 0 2mm; break-inside: avoid; page-break-inside: avoid; }
+  .tips { background: #f3f7ed; padding: 1.5mm 3mm; margin-top: 1.5mm; font-size: 10pt; }
+  .tips ul { margin-top: 1mm; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 6mm; }
+  .tips li { margin-bottom: 0; }
+  footer { margin-top: 4mm; padding-top: 3mm; border-top: 1px solid #d7e0e4; color: #526270; font-size: 8pt; }
   @media print { body { background: white; } main { max-width: none; margin: 0; padding: 0; } .controls { display: none; } }
 </style></head><body>
 <div class="controls"><button class="secondary" type="button" onclick="window.location.reload()">Back to lesson</button><button type="button" onclick="window.print()">Print / Save as PDF</button></div>
@@ -429,12 +441,14 @@ function buildLessonPrintHtml(lesson: NonNullable<typeof LESSONS[number]>): stri
   <p class="duration">Flexible guide: ${escapeHtml(lesson.duration)}. Follow the children’s pace; there is no countdown.</p>
   ${section('Aims and objectives', bullets(lesson.objectives))}
   ${section('Story connection', paragraph(lesson.steps[0]?.instruction || '') + `<p class="note">${escapeHtml(BOOK_PAGE_NOTE)}</p>`)}
-  ${section('Materials needed', bullets(lesson.materialsDetailed.map((material) => `${material.label}${material.printableId ? ' (classroom printable)' : ''}`)))}
+  ${section('Materials needed', materials)}
   ${section('Expected outcomes', bullets(lesson.assessmentOpportunities))}
   <div class="page-break"></div>
   ${section('Lesson steps', steps)}
-  ${section('SEN adaptations', bullets(lesson.senDifferentiation))}
-  <footer>© 2026 Many Petals Learning. Classroom and educational use only. Not for resale or redistribution.</footer>
+  <div class="support-section">
+    ${section('SEN adaptations', bullets(lesson.senDifferentiation))}
+    <footer>© 2026 Many Petals Learning. Classroom and educational use only. Not for resale or redistribution.</footer>
+  </div>
 </main></body></html>`;
 }
 
