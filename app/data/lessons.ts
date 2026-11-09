@@ -65,7 +65,7 @@ export const LESSONS: Lesson[] = [
     steps: [
       {
         title: 'Story Connection',
-        instruction: 'Read the page where Cobie covers his ears.\nAsk: "How does Cobie feel?"\nAsk: "How can we tell?"',
+        instruction: 'Open book p. 11, where Cobie hugs himself and covers his ears.\nAsk: "How might Cobie feel? What can we see in the picture?"',
         tips: ['Pause and point to the image', 'Model: "Cobie might feel overwhelmed"'],
         duration: 5,
       },
@@ -138,7 +138,7 @@ export const LESSONS: Lesson[] = [
     steps: [
       {
         title: 'Story Connection',
-        instruction: 'Return to the part where Tilly sits quietly near Cobie. What does Tilly do that seems to help?',
+        instruction: 'Open book pp. 16–17, where Tilly sits near Cobie without touching or talking.\nAsk: "What does Tilly do that seems to help? What could we try in our calm space?"',
         tips: ['Point to the illustration', 'Model answers such as: "It looks quiet", "It feels safe"'],
         duration: 5,
       },
@@ -202,7 +202,7 @@ export const LESSONS: Lesson[] = [
     steps: [
       {
         title: 'Story Connection',
-        instruction: 'Read the page where Cobie sorts pebbles. Ask: "What is Cobie doing? Why might this help him feel calm?"',
+        instruction: 'Open book pp. 20–21, where Cobie arranges his colourful pebbles.\nAsk: "What is Cobie doing? Why might this help him feel calm?"',
         tips: ['Model: "Sorting can help our brains feel organised"', 'Point to colours and groups'],
         duration: 5,
       },
@@ -266,7 +266,7 @@ export const LESSONS: Lesson[] = [
     steps: [
       {
         title: 'Character Cards',
-        instruction: 'Show character cards.\nAsk: "How does each friend like to play?"',
+        instruction: 'Open book pp. 18–19, where Tilly suggests slow, quiet play and the others follow Cobie’s lead.\nShow the character cards. Ask: "How does each friend like to play?"',
         duration: 5,
       },
       {
@@ -319,7 +319,7 @@ export const LESSONS: Lesson[] = [
     steps: [
       {
         title: 'Story Connection',
-        instruction: 'Read the page where Cobie is showing a strong feeling.\nAsk: "How does Cobie feel? What clues can you see?"',
+        instruction: 'Open book p. 11, where Cobie covers his ears and squeezes his eyes shut.\nAsk: "How might Cobie feel? What clues can you see?"',
         duration: 5,
       },
       {
@@ -371,7 +371,7 @@ export const LESSONS: Lesson[] = [
     steps: [
       {
         title: 'Story Connection',
-        instruction: 'Think about the moments when everything feels too much for Cobie. What might help our bodies feel calmer?\nIntroduce the breathing visual as a classroom strategy inspired by the story.',
+        instruction: 'Open book pp. 13–14, where the dancing feels too loud, bright and fast for Cobie and he curls up when a friend comes close.\nAsk: "What could help when things feel too much?" Introduce the breathing visual as a classroom strategy; it does not appear in the story.',
         duration: 5,
       },
       {
@@ -423,7 +423,7 @@ export const LESSONS: Lesson[] = [
     steps: [
       {
         title: 'Story Connection',
-        instruction: 'Return to a moment when Cobie seems unsure or overwhelmed. What clues can we notice?\nIntroduce the Worry Box as a follow-up classroom activity inspired by the story.',
+        instruction: 'Open book pp. 10–11, where Cobie looks unsure what to say, then covers his ears as the noise feels too much.\nAsk: "What clues show Cobie may need help? Who could he ask?" Introduce the Worry Box as a separate classroom activity for children’s own worries; it does not appear in the story.',
         duration: 5,
       },
       {
@@ -475,7 +475,7 @@ export const LESSONS: Lesson[] = [
     steps: [
       {
         title: 'Story Connection',
-        instruction: 'Read the page where Cobie is helped by friends (e.g. kind words, staying close).\nAsk: "What kind things did they do?"',
+        instruction: 'Open book pp. 16–18, where Tilly sits nearby without touching, hums softly and suggests quiet play.\nAsk: "What kind things did Tilly do?"',
         duration: 5,
       },
       {

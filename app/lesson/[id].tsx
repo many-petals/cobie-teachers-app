@@ -20,6 +20,8 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import DifferentiationWizard from '../components/DifferentiationWizard';
 
+const BOOK_PAGE_NOTE = '2026 print edition: count the title page as p. 1. The book has no printed page numbers, so use the scene description to find the spread.';
+
 export default function LessonPlayerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -237,7 +239,7 @@ if (isLocked) {
           <View style={styles.instructionCard}>
             <Text style={styles.instructionText}>{lesson.steps[0]?.instruction}</Text>
           </View>
-          <Text style={styles.storyReferenceNote}>Use the matching Cobie book page or spread when reading this story moment. Page references are kept with verified story evidence rather than guessed.</Text>
+          <Text style={styles.storyReferenceNote}>{BOOK_PAGE_NOTE}</Text>
         </View>
 
         <View style={styles.overviewSection}>
@@ -426,7 +428,7 @@ function buildLessonPrintHtml(lesson: NonNullable<typeof LESSONS[number]>): stri
   <p class="theme">${escapeHtml(lesson.theme)}</p>
   <p class="duration">Flexible guide: ${escapeHtml(lesson.duration)}. Follow the children’s pace; there is no countdown.</p>
   ${section('Aims and objectives', bullets(lesson.objectives))}
-  ${section('Story connection', paragraph(lesson.steps[0]?.instruction || '') + '<p class="note">Use the matching Cobie book page or spread when reading this story moment. Page references are kept with verified story evidence rather than guessed.</p>')}
+  ${section('Story connection', paragraph(lesson.steps[0]?.instruction || '') + `<p class="note">${escapeHtml(BOOK_PAGE_NOTE)}</p>`)}
   ${section('Materials needed', bullets(lesson.materialsDetailed.map((material) => `${material.label}${material.printableId ? ' (classroom printable)' : ''}`)))}
   ${section('Expected outcomes', bullets(lesson.assessmentOpportunities))}
   <div class="page-break"></div>
